@@ -1,0 +1,135 @@
+---
+title: "Edge labels"
+author: "Audrey Luo"
+output: html_document
+---
+ 
+ 
+# make df's for atlas-specific Edge names 
+```{r}
+
+# function for creating df of edge names: remove self-connecting edges
+# @param nrows_var A numeric var of rows in parcel_labels
+# @param atlas_edges An empty vector to be populated by edge names
+# @param parcel_labels A df of parcel labels  
+make_edges <- function(nrows_var, atlas_edges, parcel_labels) {
+    for(i in c(1:nrows_var)){
+      for(j in (c((i+1):nrows_var))) {
+      x<-paste0(parcel_labels$orig_parcelname[i], "_to_", parcel_labels$orig_parcelname[j])
+      atlas_edges <- append(atlas_edges, x) 
+      print(paste(i, j))
+      }
+    }
+  return(atlas_edges)
+}
+ 
+
+# function for removing last 2 entries in edges_df
+# @param edge_df A df of edge names
+rm_last_2 <- function(edge_df) {
+  b <- length(edge_df)
+  a <- b-1
+  edge_df <- edge_df[-c(a:b)] 
+  return(edge_df)
+}
+
+  
+
+# schaefer200x7 ---------------------------------------------------------------------------------------------------------------- 
+schaefer200x7.parcel.labels <- read.csv("/cbica/projects/network_replication/atlases/parcellations/schaefer200x7_regionlist_final.csv")
+names(schaefer200x7.parcel.labels)[1] <- "orig_parcelname"
+rows_schaefer200x7 <- nrow(schaefer200x7.parcel.labels)
+schaefer200x7_edges <- c()
+schaefer200x7_edges <- make_edges(rows_schaefer200x7, schaefer200x7_edges, schaefer200x7.parcel.labels)
+schaefer200x7_edges <- rm_last_2(schaefer200x7_edges)
+#write.csv(schaefer200x7_edges, "/cbica/projects/network_replication/atlases/edge/schaefer200x7_edge.csv")
+
+  
+
+# schaefer200x17 ---------------------------------------------------------------------------------------------------------------- 
+schaefer200x17.parcel.labels <- read.csv("/cbica/projects/network_replication/atlases/parcellations/schaefer200x17_regionlist_final.csv")
+names(schaefer200x17.parcel.labels)[1] <- "orig_parcelname"
+rows_schaefer200x17 <- nrow(schaefer200x17.parcel.labels)
+schaefer200x17_edges <- c()
+schaefer200x17_edges <- make_edges(rows_schaefer200x17, schaefer200x17_edges, schaefer200x17.parcel.labels)
+schaefer200x17_edges <- rm_last_2(schaefer200x17_edges)
+write.csv(schaefer200x17_edges, "/cbica/projects/network_replication/atlases/edge/schaefer200x17_edge.csv")
+
+
+```
+ 
+# calculate absolute SA difference for each edge 
+```{r}
+ 
+# function for creating df of calculate absolute SA difference for each edge 
+# @param parcel_labels_masked A df of parcel labels  
+# @param SA_axis_df A df of SA axis rank 
+
+calc_SAdiff <- function(parcel_labels, SA_axis_df) {
+    
+    parcel1.SA.vec <- c()
+    parcel2.SA.vec <- c()
+    parcel1.id.vec <- c()
+    parcel2.id.vec <- c()
+    edge_name.vec <- c()
+    SA.dif.vec <- c()
+    rows <- nrow(parcel_labels)
+ 
+    for(i in c(1:rows)){
+      for(j in (c((i+1):rows))) {
+      parcel1 <- SA_axis_df$SA.axis_rank[i]
+      parcel2 <- SA_axis_df$SA.axis_rank[j]
+      parcel_id1 <- SA_axis_df$parcel_id[i]
+      parcel_id2 <- SA_axis_df$parcel_id[j]
+      
+      difference <- abs(parcel1-parcel2)
+      
+      parcel1.SA.vec <- append(parcel1.SA.vec, parcel1) 
+      parcel2.SA.vec <- append(parcel2.SA.vec, parcel2) 
+      
+      parcel1.id.vec <- append(parcel1.id.vec, parcel_id1) 
+      parcel2.id.vec <- append(parcel2.id.vec, parcel_id2) 
+      
+      SA.dif.vec <- append(SA.dif.vec, difference) 
+      edge_name <- paste0(parcel_labels$orig_parcelname[i], "_to_", parcel_labels$orig_parcelname[j])
+      edge_name.vec <- append(edge_name.vec, edge_name)
+      print(paste(i, j))
+      }
+    }
+    b <- length(parcel1.SA.vec)
+    a <- b-1
+   
+    SA.diff_df <- data.frame(
+    edge_name   = edge_name.vec[-c(a:b)],
+    parcel1_SA  = parcel1.SA.vec[-c(a:b)],
+    parcel2_SA  = parcel2.SA.vec[-c(a:b)],
+    parcel1_id  = parcel1.id.vec[-c(a:b)],
+    parcel2_id  = parcel2.id.vec[-c(a:b)],
+    SA_diff     = SA.dif.vec[-c(a:b)],
+    stringsAsFactors = FALSE
+  )
+ 
+  return(SA.diff_df)
+}
+
+ 
+ 
+ 
+# schaefer200x7 ---------------------------------------------------------------------------------------------------------------- 
+schaefer200x7_SAaxis <- read.csv("/cbica/projects/network_replication/SAaxis/schaefer200x7_SAaxis.csv")
+SA.diff_schaefer200x7 <- calc_SAdiff(schaefer200x7.parcel.labels, schaefer200x7_SAaxis)
+#write.csv(SA.diff_schaefer200x7, "/cbica/projects/network_replication/atlases/edge/SA.diff_schaefer200x7.csv", row.names=FALSE)
+
+# schaefer200x17 --------------------------------------------------------------------------------------------------------------- 
+schaefer200x17_SAaxis <- read.csv("/cbica/projects/network_replication/SAaxis/schaefer200x17_SAaxis.csv")
+schaefer200x17_SAaxis$label <- gsub("17Networks", "Networks", schaefer200x17_SAaxis$label)
+schaefer200x17_SAaxis <- schaefer200x17_SAaxis %>% rename(parcel_id = X)
+SA.diff_schaefer200x17 <- calc_SAdiff(schaefer200x17.parcel.labels, schaefer200x17_SAaxis)
+write.csv(SA.diff_schaefer200x17, "/cbica/projects/network_replication/atlases/edge/SA.diff_schaefer200x17.csv", row.names=FALSE)
+ 
+```
+
+
+
+
+ 

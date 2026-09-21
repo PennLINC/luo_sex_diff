@@ -1,0 +1,14 @@
+{
+	"dataset": "HBN",
+	"demographics": "/cbica/projects/network_replication/covariate_analyses/sex_diff/input/HBN/sample_info/HBN_demographics_finalsample.csv",
+	"subject_list": "/cbica/projects/network_replication/input/HBN/sample_selection/HBN_final_subjectlist.txt",
+	"covariate_input_root": "/cbica/projects/network_replication/covariate_analyses/sex_diff/input/HBN",
+	"covariate_output_root": "/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HBN",
+	"GBC_dir": "/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HBN/GBC/",
+	"BNC_dir": "/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HBN/BNC/",
+	"WNC_dir": "/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HBN/WNC/",
+	"edge_dir": "/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HBN/edge/",
+	"networkpair_dir": "/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HBN/networkpair/",
+	"conn_matrices_dir": "/cbica/projects/network_replication/manuscript/input/HBN/connMatricesData/connectivity_matrices"
+
+}

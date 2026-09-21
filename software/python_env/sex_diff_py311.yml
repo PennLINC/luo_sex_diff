@@ -1,0 +1,29 @@
+name: sex_diff_py311
+channels:
+  - defaults
+dependencies:
+  - pip
+  - python=3.11
+  - numpy
+  - pandas
+  - pywavelets
+  - statsmodels
+  - ipykernel
+  - seaborn
+  - ipython
+  - pillow
+  - scikit-learn
+  - jupyter_client
+  - h5py
+  - networkx
+  - xarray
+  - scikit-image
+  - scipy
+  - matplotlib
+  - nibabel
+  - nilearn
+  - simpleitk
+  - nipype
+  - dipy
+  - pybids
+prefix: /cbica/projects/network_replication/miniconda3/envs/sex_diff_py311
