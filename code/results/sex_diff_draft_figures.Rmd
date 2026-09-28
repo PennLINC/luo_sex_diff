@@ -2387,7 +2387,7 @@ annotate_figure(between_dispersion_figure,
 Interestingly, the overall male/female PC1 distributions and mean cortical PC1 maps look quite similar. so the dispersion sex effects above don’t seem to reflect a simple overall difference in PC1... and i think the key is that dispersion is looking within subjects (i.e. in a given subject, how spread out are their 200 parcel loadings around that subject’s own PC1 median?). So even though females and males have a very similar average PC1 spatial organization, within individuals, females tend to have parcels/networks that are more spread out along PC1. And looking at average PC1 loadings ends up obscuring these within-individual difference between males/females
 
 ```{r distribution of PC1, fig.height = 7, fig.width = 15}
-
+sex_colors <- c(Female = "#C53121", Male = "#0B8CACFF")
 
 root <- "/cbica/projects/network_replication/covariate_analyses/sex_diff"
 datasets <- c("PNC", "NKI", "HCPD", "HBN", "all_datasets")
