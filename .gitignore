@@ -1,0 +1,147 @@
+# ============================================================
+
+# R / RStudio
+
+# ============================================================
+
+# R history and workspace files
+
+.Rhistory
+.Rapp.history
+.RData
+.RDataTmp
+.Ruserdata
+.RDataTmp1
+.RDataTmp2
+.RDataTmp3
+
+# R environment variables (may contain secrets)
+
+.Renviron
+
+# RStudio project-specific files
+
+.Rproj.user/
+
+# Example code generated during package build
+
+*-Ex.R
+
+# R CMD build/check output
+
+/*.tar.gz
+/*.Rcheck/
+
+# ============================================================
+
+# R Markdown / knitr
+
+# ============================================================
+
+# knitr / R Markdown caches
+
+*_cache/
+cache/
+
+# Intermediate R Markdown files
+
+*.utf8.md
+*.knit.md
+
+# Generated figure directories
+
+*_files/
+
+# RStudio Connect
+
+rsconnect/
+
+# pkgdown generated site
+
+docs/
+
+# Translation temporary files
+
+po/*~
+
+# ============================================================
+
+# Jupyter / Python
+
+# ============================================================
+
+# Jupyter checkpoints
+
+.ipynb_checkpoints/
+preliminary_analyses/
+
+# Python cache
+
+**pycache**/
+*.py[cod]
+
+# Virtual environments
+
+.venv/
+venv/
+env/
+
+# ============================================================
+
+# Logs and temporary files
+
+# ============================================================
+
+# Log directories
+
+logs/
+log/
+
+# Log files
+
+*.log
+
+# Temporary / backup files
+
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# ============================================================
+
+# macOS metadata / resource-fork files
+
+# ============================================================
+
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ 
+
+# Linux/editor temporary files
+
+.directory
+
+# ============================================================
+
+# IDE / editor files
+
+# ============================================================
+
+# VS Code
+
+.vscode/
+
+ 
+output/
+cache/
+input/
+noahs_ark/
+r-packages-for-cubic_0.1.1.tar
+r_packages/
+delete_after_prereplication/
