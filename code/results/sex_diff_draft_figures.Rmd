@@ -23,28 +23,17 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-# EE4684
-# install pacman if not already installed
-if (!require("pacman")) {
-  install.packages("pacman")
-}
-
-# not sure why, but cifti tools needs to be called this way in order for commands to work (and not part of pacman) - *shrug*
-library(ciftiTools)
-#ciftiTools.setOption('wb_path', '/Applications/workbench/')
-library(cifti)
-
-# use pacman to load/install required packages
-pacman::p_load(
-  cowplot, data.table, dplyr, effsize, ggdist, ggplot2, ggrepel, ggpubr, ggseg, ggsegSchaefer, 
-  glue, grid, gridExtra, gratia, knitr, kableExtra, mgcv, RColorBrewer, paletteer, pammtools, patchwork, reshape2, scales, 
-  stringr, rjson, tidyr
-)
-
-
 library(tidyverse)
 library(cowplot)
 library(ggpubr)
+library(ggseg)
+library(ggsegSchaefer)
+library(effsize)
+library(ggdist)
+library(knitr)
+library(kableExtra)
+library(paletteer)
+library(scales)
  
 source("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/results/sex_diff_draft_figures.R")
 source("/cbica/projects/network_replication/software/perm.sphere.p.R")

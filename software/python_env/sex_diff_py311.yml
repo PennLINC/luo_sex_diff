@@ -1,5 +1,6 @@
 name: sex_diff_py311
 channels:
+  - conda-forge
   - defaults
 dependencies:
   - pip
@@ -26,4 +27,8 @@ dependencies:
   - nipype
   - dipy
   - pybids
-prefix: /cbica/projects/network_replication/miniconda3/envs/sex_diff_py311
+  - pip:
+      - brainspace
+      - rdata
+      - nimare
+      - neuromaps

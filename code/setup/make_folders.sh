@@ -1,16 +1,15 @@
+#!/usr/bin/env bash
 
+# Create directory structure needed for sex-differences replication.
 
+ROOT="/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff"
 
-mkdir -p /cbica/projects/network_replication/covariate_analyses/sex_diff/input/PNC/sample_info/
-mkdir -p /cbica/projects/network_replication/covariate_analyses/sex_diff/input/HCPD/sample_info/
-mkdir -p /cbica/projects/network_replication/covariate_analyses/sex_diff/input/NKI/sample_info/
-mkdir -p /cbica/projects/network_replication/covariate_analyses/sex_diff/input/HBN/sample_info/
-mkdir -p /cbica/projects/network_replication/covariate_analyses/sex_diff/input/all_datasets/sample_info/
-mkdir -p /cbica/projects/network_replication/covariate_analyses/sex_diff/output/
+mkdir -p \
+    "$ROOT/input/PNC/sample_info" \
+    "$ROOT/input/HCPD/sample_info" \
+    "$ROOT/input/NKI/sample_info" \
+    "$ROOT/input/HBN/sample_info" \
+    "$ROOT/input/all_datasets/sample_info" \
+    "$ROOT/output"
 
-chmod a+w /cbica/projects/network_replication/covariate_analyses/sex_diff/input/PNC/sample_info/
-chmod a+w /cbica/projects/network_replication/covariate_analyses/sex_diff/input/HCPD/sample_info/
-chmod a+w /cbica/projects/network_replication/covariate_analyses/sex_diff/input/NKI/sample_info/
-chmod a+w /cbica/projects/network_replication/covariate_analyses/sex_diff/input/HBN/sample_info/
-chmod a+w /cbica/projects/network_replication/covariate_analyses/sex_diff/input/all_datasets/sample_info/
-chmod a+w /cbica/projects/network_replication/covariate_analyses/sex_diff/output/
+echo "Folder setup complete."
