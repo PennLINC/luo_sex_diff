@@ -12,7 +12,7 @@ library(tidyr)
 args <- commandArgs(trailingOnly = TRUE) 
 dataset = args[1]
 metric = args[2]
-atlas = args[3] # i.e. schaefer200x7
+atlas = args[3] # i.e. schaefer200x17
 print(paste("Processing", dataset, metric))
 
 ################## 

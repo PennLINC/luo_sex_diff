@@ -11,7 +11,7 @@ library(tidyr)
 ################## 
 args <- commandArgs(trailingOnly = TRUE) 
 metric = args[1]
-atlas = args[2] # i.e. schaefer200x7
+atlas = args[2] # i.e. schaefer200x17
 print(paste("Processing", metric, atlas))
 print(paste("Harmonizing across datasets for", metric, atlas))
 

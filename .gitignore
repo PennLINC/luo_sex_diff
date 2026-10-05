@@ -73,7 +73,6 @@ po/*~
 # Jupyter checkpoints
 
 .ipynb_checkpoints/
-preliminary_analyses/
 
 # Python cache
 
@@ -138,14 +137,15 @@ log/
 .vscode/
 
  
-output/
-old_output/
+# Other folders
 cache/
+delete_after_prereplication/
 input/
+mean_matrices/
 noahs_ark/
+old_output/
+output/
+preliminary_analyses/
 r-packages-for-cubic_0.1.1.tar
 r_packages/
-delete_after_prereplication/
-mean_matrices/
 rotate_parcellation/
-
