@@ -139,9 +139,13 @@ log/
 
  
 output/
+old_output/
 cache/
 input/
 noahs_ark/
 r-packages-for-cubic_0.1.1.tar
 r_packages/
 delete_after_prereplication/
+mean_matrices/
+rotate_parcellation/
+

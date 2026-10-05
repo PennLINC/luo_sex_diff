@@ -6,11 +6,11 @@ library(rjson)
 library(RESI)
 library(stringr)
 library(tidyr)
-source("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/compute_effect_size/resiPEse_Th1_functions.R")
+source("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/compute_effect_size/resiPEse_Th1_functions.R")
 
 
-# This script fits developmental regionwise GAMs on functional connectivity data 
-# fyi: GAMs are fit for 1 specified metric (i.e. GBC)
+# This script fits developmental edge-, region-, and network-level GAMs on functional connectivity data 
+# fyi: GAMs are fit for 1 specified metric (i.e. FC_strength)
 # then it computes an effect size using RESI (with the resiPEse_Th1 and t2S methods)!
  
 ################## 
@@ -28,14 +28,14 @@ print(paste("metric:", metric))
 # Set directories  
 ################## 
 if (dataset != "all_datasets") {
-  config_data <- fromJSON(file=sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", dataset)) 
+  config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", dataset)) 
   outputs_root <- config_data$covariate_output_root
 } else if (dataset == "all_datasets") {
-  PNC_config_data <- fromJSON(file=sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "PNC"))
-  HCPD_config_data <- fromJSON(file=sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HCPD"))
-  NKI_config_data <- fromJSON(file=sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "NKI"))
-  HBN_config_data <- fromJSON(file=sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HBN"))
-  outputs_root <- "/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets"
+  PNC_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "PNC"))
+  HCPD_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HCPD"))
+  NKI_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "NKI"))
+  HBN_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HBN"))
+  outputs_root <- "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/output/all_datasets"
   
 }
 
@@ -121,20 +121,20 @@ fit_and_t2S <- function(region) {
 # Load files  
 ###################
 # load atlas labels for the relevant metric
-if (metric %in% c("GBC", "BNC", "WNC")) {
+if (metric %in% c("FC_strength", "BNC", "WNC")) {
   # load parcel labels
-  parcel.labels <- read.csv(sprintf("/cbica/projects/network_replication/atlases/parcellations/%1$s_regionlist_final.csv", atlas))
+  parcel.labels <- read.csv(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/%1$s_regionlist_final.csv", atlas))
   parcel.labels <- parcel.labels$label
   
 } else if (metric == "edge") {
   # load edge labels 
-  parcel.labels <- read.csv(sprintf("/cbica/projects/network_replication/atlases/edge/%1$s_edge.csv", atlas))
-  parcel.labels <- parcel.labels[,2] 
+  parcel.labels <- read.csv(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/edge/%1$s_edge.csv", atlas))
+  parcel.labels <- parcel.labels[,1] 
   parcel.labels <- gsub("[0-9]+Networks", "Networks", parcel.labels)
   
 } else { # network pairs
   # load network-pair labels
-  parcel.labels <- read.csv(sprintf("/cbica/projects/network_replication/atlases/parcellations/%1$s_netpair_labels_noduplicates.csv", atlas))
+  parcel.labels <- read.csv(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/%1$s_netpair_labels_noduplicates.csv", atlas))
   parcel.labels <- parcel.labels[,1]
 }
 
@@ -156,7 +156,7 @@ if (dataset != "all_datasets") {
 covbat_datasets <- c("HCPD", "HBN", "all_datasets")
 csv_datasets <- c("PNC", "NKI")
 
-if (metric %in% c("GBC", "BNC", "WNC")) {
+if (metric %in% c("FC_strength", "BNC", "WNC")) {
   filename <- sprintf("%s_subxparcel_matrix_%s", metric, atlas)
   filepath <- sprintf("%s/%s%s.csv", metric_outputs_dir, filename, if (dataset %in% covbat_datasets) "_covbat" else "")
   data <- read.csv(filepath)
@@ -198,13 +198,13 @@ covariate.interest = "sex"
 covariates.noninterest = "meanFD_avgSes"
  
 
-if (metric %in% c("GBC", "BNC", "WNC", "networkpair")) { # run both resiPEse_Th1 and t2S for comparison
+if (metric %in% c("FC_strength", "BNC", "WNC", "networkpair")) { # run both resiPEse_Th1 and t2S for comparison
   # run resiPEse_Th1
   print("running resiPEse_Th1")
   resiPEse_Th1_output <- parallel::mclapply(parcel.labels, function(r) {
     tryCatch(fit_and_resiPEse_Th1(r),
              error=function(e) data.frame(region=r, error=conditionMessage(e)))
-  }, mc.cores=4)
+  }, mc.cores=2)
   resiPEse_Th1_output <- do.call(rbind, resiPEse_Th1_output)
   write.csv(resiPEse_Th1_output, sprintf("%1$s/%2$s_resiPEse_Th1_%3$s_maineffects_%4$s.csv", resi_outputs_dir, dataset, filename, atlas), quote = F, row.names =F)
   
@@ -214,7 +214,7 @@ if (metric %in% c("GBC", "BNC", "WNC", "networkpair")) { # run both resiPEse_Th1
   t2S_output <- parallel::mclapply(parcel.labels, function(r) {
     tryCatch(fit_and_t2S(r),
              error=function(e) data.frame(region=r, error=conditionMessage(e)))
-  }, mc.cores=4)
+  }, mc.cores=2)
   t2S_output <- do.call(rbind, t2S_output)
   write.csv(t2S_output, sprintf("%1$s/%2$s_t2S_%3$s_maineffects_%4$s.csv", resi_outputs_dir, dataset, filename, atlas), quote = F, row.names =F)
   
@@ -224,63 +224,11 @@ if (metric %in% c("GBC", "BNC", "WNC", "networkpair")) { # run both resiPEse_Th1
   t2S_output <- parallel::mclapply(parcel.labels, function(r) {
     tryCatch(fit_and_t2S(r),
              error=function(e) data.frame(region=r, error=conditionMessage(e)))
-  }, mc.cores=4)
+  }, mc.cores=2)
   t2S_output <- do.call(rbind, t2S_output) # only outputs the RESI effect size
   write.csv(t2S_output, sprintf("%1$s/%2$s_t2S_%3$s_maineffects_%4$s.csv", resi_outputs_dir, dataset, filename, atlas), quote = F, row.names =F)
   
 }
-
-
+ 
 print("Script finished!")
-
-
-
-
-
-#------------------------------------------------------------
-### TESTING!!! ###
-#y <- gam_df[[parcel.labels[188]]]
-
-# Fit GAM (example — match your actual formula options)
-#mod <- mgcv::gam(
-#  y ~ s(age, k = 3, fx = TRUE) + meanFD_avgSes + sex,
-#  data = gam_df,
-#  method = "REML"
-#)
-
-
-#pe <- RESI::t2S(
-#  model.full = mod,
-#  data = gam_df,          # include this to be safe; some methods want it
-#  coefficients = TRUE,
-#  anova = FALSE,
-#  overall = FALSE,
-#  vcovfunc = vcov,        # <- key change
-#  unbiased = TRUE
-#)
-
-#S <- RESI::t2S(
-#  summary(mod)$p.table["sexMale", "t value"],
-#  rdf = mod$df.residual,
-#  n   = nrow(gam_df),
-#  unbiased = TRUE
-#)
-
-#out <- data.frame(
-#  RESI = as.numeric(S),
-#  statistic = attr(S, "statistic"),
-#  rdf = attr(S, "rdf"),
-#  n = attr(S, "n"),
-#  unbiased = attr(S, "unbiased")
-#)
-
-#pe$coefficients
-
-#resiPEse_Th1(mod, variable="sexMale", unsigned=FALSE, torz="t", type="HC0")
-
-#boot_res <- resi(mod, vcovfunc = vcov, overall = F, anova = F) 
-#boot_res$coefficients %>% kable(caption = "CI with Bootstrap method")
-#------------------------------------------------------------
-
-
-
+ 

@@ -142,7 +142,7 @@ run_covbat <- function(subxedge_uppertri, demographics, batch_vec) {
 if (dataset != "all_datasets") {
 
   config_data <- fromJSON(file = sprintf(
-    "/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_%s.json", dataset))
+    "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%s.json", dataset))
   outputs_root <- config_data$covariate_output_root
   fc_outputs_dir <- paste0(outputs_root, "/fc_matrices")
   if (!dir.exists(fc_outputs_dir)) dir.create(fc_outputs_dir, recursive = TRUE)
@@ -185,13 +185,13 @@ if (dataset != "all_datasets") {
 if (dataset == "all_datasets") {
 
   configs <- list(
-    PNC  = fromJSON(file = "/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_PNC.json"),
-    HCPD = fromJSON(file = "/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_HCPD.json"),
-    NKI  = fromJSON(file = "/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_NKI.json"),
-    HBN  = fromJSON(file = "/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_HBN.json")
+    PNC  = fromJSON(file = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_PNC.json"),
+    HCPD = fromJSON(file = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_HCPD.json"),
+    NKI  = fromJSON(file = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_NKI.json"),
+    HBN  = fromJSON(file = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_HBN.json")
   )
 
-  outputs_root <- "/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets"
+  outputs_root <- "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/output/all_datasets"
   fc_outputs_dir <- paste0(outputs_root, "/fc_matrices")
   if (!dir.exists(fc_outputs_dir)) dir.create(fc_outputs_dir, recursive = TRUE)
 

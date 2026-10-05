@@ -19,13 +19,13 @@ print(paste("Harmonizing across datasets for", metric, atlas))
 ################## 
 # Set Directories 
 ################## 
-PNC_config_data <- fromJSON(file=sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "PNC"))
-HCPD_config_data <- fromJSON(file=sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HCPD"))
-NKI_config_data <- fromJSON(file=sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "NKI"))
-HBN_config_data <- fromJSON(file=sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HBN"))
+PNC_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "PNC"))
+HCPD_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HCPD"))
+NKI_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "NKI"))
+HBN_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HBN"))
 
 
-outputs_root <- "/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets"
+outputs_root <- "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/output/all_datasets"
 metric_outputs_dir <- paste0(outputs_root, "/", metric)
 PNC_outputs_dir <- paste0(PNC_config_data$covariate_output_root, "/", metric)
 HCPD_outputs_dir <- paste0(HCPD_config_data$covariate_output_root, "/", metric)
@@ -55,7 +55,7 @@ HBN_demographics <- read.csv(HBN_config_data$demographics, stringsAsFactors = TR
 all_datasets_demographics <- rbind(PNC_demographics, HCPD_demographics, NKI_demographics, HBN_demographics)
 
 # load subxparcel files for all datasets  
-if(metric %in% c("GBC", "BNC", "WNC")) {
+if(metric %in% c("FC_strength", "BNC", "WNC")) {
   filename <-  sprintf("%s_%s_%s", metric, "subxparcel_matrix", atlas) 
   PNC_subxparcel <- read.csv(sprintf("%1$s/%2$s.csv", PNC_outputs_dir, filename))
   HCPD_subxparcel <- read.csv(sprintf("%1$s/%2$s.csv", HCPD_outputs_dir, filename))
@@ -111,7 +111,7 @@ subxparcel_covbat <- subxparcel_covbat %>% relocate(subject)
 rownames(subxparcel_covbat) <- NULL
 
 # save out!
-if(metric %in% c("GBC", "BNC", "WNC")) {
+if(metric %in% c("FC_strength", "BNC", "WNC")) {
   filename <-  sprintf("%s_%s_%s", metric, "subxparcel_matrix", atlas) 
   write.csv(subxparcel_covbat, sprintf("%1$s/%2$s_covbat.csv", metric_outputs_dir, filename))
 } else if (metric == "edge") {

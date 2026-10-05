@@ -18,7 +18,7 @@ print(paste("Processing", dataset, metric))
 ################## 
 # Set Directories 
 ################## 
-config_data <- fromJSON(file=sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", dataset))
+config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", dataset))
 outputs_root <- config_data$covariate_output_root
 metric_outputs_dir <- paste0(outputs_root, "/", metric)
 
@@ -31,7 +31,7 @@ if (dataset == "HBN") {
 ################## 
 # Load files 
 ################## 
-if(metric %in% c("GBC", "BNC", "WNC")) {
+if(metric %in% c("FC_strength", "BNC", "WNC")) {
   filename <-  sprintf("%s_%s_%s", metric, "subxparcel_matrix", atlas) 
   subxparcel <- read.csv(sprintf("%1$s/%2$s.csv", metric_outputs_dir, filename))
 } else if (metric == "edge") {
@@ -84,7 +84,7 @@ if(metric != "edge") {
 }
 
 # save out!
-if(metric %in% c("GBC", "BNC", "WNC")) {
+if(metric %in% c("FC_strength", "BNC", "WNC")) {
   filename <-  sprintf("%s_%s_%s", metric, "subxparcel_matrix", atlas) 
   write.csv(subxparcel_covbat, sprintf("%1$s/%2$s_covbat.csv", metric_outputs_dir, filename))
 } else if (metric == "edge") {

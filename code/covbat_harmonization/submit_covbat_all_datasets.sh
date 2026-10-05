@@ -1,45 +1,57 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# set variables
-atlases=("schaefer200x7" "schaefer200x17")
-metrics=("GBC" "BNC" "WNC" "edge" "networkpair")
-r_script="/cbica/projects/network_replication/covariate_analyses/sex_diff/code/covbat_harmonization/covbat_all_datasets.R"
+# Submit CovBat harmonization for functional connectivity metrics
+# from the pooled dataset (PNC, NKI, HCPD, HBN combined).
 
-# loop through each atlas/metric
+ROOT="/ceph/projects/sattertt/pennlinc-parcc/network_replication"
+PROJDIR="$ROOT/covariate_analyses/sex_diff"
+
+APPTAINER="/vast/parcc/spack/sw/apps/linux-sapphirerapids/apptainer-1.4.1-qpr4lterya7ontg7pkqrx7b3jkab3lcw/bin/apptainer"
+SIF="$PROJDIR/software/r_packages/r-packages-for-parcc_0.0.1.sif"
+r_script="$PROJDIR/code/covbat_harmonization/covbat_all_datasets.R"
+
+atlases=("schaefer200x17")
+metrics=("FC_strength" "BNC" "WNC" "edge" "networkpair")
+
 for atlas in "${atlases[@]}"; do
     for metric in "${metrics[@]}"; do
-    # where to save output and error logs
-    logs_dir="/cbica/projects/network_replication/covariate_analyses/sex_diff/code/logs/covbat_harmonization/all_datasets/${metric}"
-    if [ ! -d "${logs_dir}" ]; then
-        mkdir -p "${logs_dir}"
-    fi
 
-    # make outputs_root
-    outputs_root="/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/${metric}"
-    if [ ! -d "${outputs_root}" ]; then
-        mkdir -p "${outputs_root}"
-    fi
+        # Where to save output and error logs
+        logs_dir="$PROJDIR/code/logs/covbat_harmonization/all_datasets/${metric}"
+        mkdir -p "$logs_dir"
 
-    job_name="all_datasets_covbat_${metric}_${atlas}"
+        # Make output directory
+        outputs_root="$PROJDIR/output/all_datasets/${metric}"
+        mkdir -p "$outputs_root"
 
-    # set memory conditionally
-    if [ "${metric}" == "edge" ]; then
-        mem="32G"
-    else
-        mem="8G"
-    fi
+        job_name="all_datasets_covbat_${metric}_${atlas}"
 
-    # submit the job to SLURM
-    sbatch --job-name=${job_name} \
-        --nodes=1 --ntasks=1 --cpus-per-task=4 \
-        --mem=${mem} \
-        --time=24:00:00 \
-        --propagate=NONE \
-        --output=${logs_dir}/${job_name}_%j.out \
-        --error=${logs_dir}/${job_name}_%j.err \
-        --wrap="singularity run --cleanenv /cbica/projects/network_replication/covariate_analyses/sex_diff/software/r_packages/r-packages-for-cubic_0.1.0.sif Rscript --save ${r_script} ${metric} ${atlas}"
+        # Edge requires more memory; otherwise minimize resources requested
+        if [ "$metric" = "edge" ]; then
+            partition="genoa-lrg-mem"
+            cpus=2
+            time_limit="01:00:00"
+        else
+            partition="genoa-std-mem"
+            cpus=1
+            time_limit="00:30:00"
+        fi
 
-    echo "Submitted all datasets ${atlas} ${metric} with ${mem} memory"
-done
+        if sbatch \
+            --job-name="$job_name" \
+            --partition="$partition" \
+            --nodes=1 \
+            --ntasks=1 \
+            --cpus-per-task="$cpus" \
+            --time="$time_limit" \
+            --output="${logs_dir}/${job_name}_%j.out" \
+            --error="${logs_dir}/${job_name}_%j.err" \
+            --wrap="$APPTAINER exec --cleanenv --bind \"$ROOT:$ROOT\" \"$SIF\" Rscript \"$r_script\" \"$metric\" \"$atlas\""
+        then
+            echo "Submitted all_datasets ${atlas} ${metric} (${partition}, ${cpus} CPU(s), ${time_limit})"
+        else
+            echo "FAILED to submit all_datasets ${atlas} ${metric}" >&2
+        fi
 
+    done
 done

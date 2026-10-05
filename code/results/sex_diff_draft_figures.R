@@ -828,7 +828,7 @@ hex_plot <- function(df, x, y, text, ylim1, ylim2, xlim1, xlim2, x_text, y_text,
 
 
 # identify overlapping WNC and BNC regions for sex effect and get average t-value
-identify_sexeffect_overlap <- function(metric = c("WNC", "BNC"), p_thresh = 0.05) {
+identify_sexeffect_overlap_tvalues <- function(metric = c("WNC", "BNC"), p_thresh = 0.05) {
   metric <- match.arg(metric)
   
   pnc  <- get(paste0("sex.main.PNC.",  metric))
@@ -876,6 +876,53 @@ identify_sexeffect_overlap <- function(metric = c("WNC", "BNC"), p_thresh = 0.05
 }
 
 
+# identify overlapping WNC and BNC regions for sex effect and get average RESI effect size
+identify_sexeffect_overlap <- function(metric = c("WNC", "BNC"), p_thresh = 0.05) {
+  metric <- match.arg(metric)
+  
+  pnc  <- get(paste0("sex.main.PNC.",  metric))
+  hcpd <- get(paste0("sex.main.HCPD.", metric))
+  nki  <- get(paste0("sex.main.NKI." , metric))
+  hbn  <- get(paste0("sex.main.HBN." , metric))
+  
+  # pvalues
+  df_list_p <- list(
+    PNC  = pnc  |> dplyr::select(region, p_PNC  = Anova.cov.pvalue.fdr),
+    HCPD = hcpd |> dplyr::select(region, p_HCPD = Anova.cov.pvalue.fdr),
+    NKI  = nki  |> dplyr::select(region, p_NKI  = Anova.cov.pvalue.fdr),
+    HBN  = hbn  |> dplyr::select(region, p_HBN  = Anova.cov.pvalue.fdr)
+  )
+  
+  # RESI
+  df_list_resi <- list(
+    PNC  = pnc  |> dplyr::select(region, resi_PNC  = RESI),
+    HCPD = hcpd |> dplyr::select(region, resi_HCPD = RESI),
+    NKI  = nki  |> dplyr::select(region, resi_NKI  = RESI),
+    HBN  = hbn  |> dplyr::select(region, resi_HBN  = RESI)
+  )
+  
+  # combine 
+  overlap_p <- Reduce(function(x, y) dplyr::full_join(x, y, by = "region"), df_list_p)
+  overlap_resi <- Reduce(function(x, y) dplyr::full_join(x, y, by = "region"), df_list_resi)
+  
+  # merge
+  overlap_df <- dplyr::left_join(overlap_p, overlap_resi, by = "region") %>%
+    dplyr::mutate(
+      signif_count = rowSums(dplyr::across(dplyr::starts_with("p_"), ~ . < p_thresh), na.rm = TRUE),
+      signif_2plus = ifelse(signif_count >= 2, 1, 0),
+      mean_resi       = rowMeans(dplyr::across(dplyr::starts_with("resi")), na.rm = TRUE),
+      mean_resi_sig2  = ifelse(signif_2plus == 1, mean_resi, NA)
+    ) %>%
+    dplyr::mutate(
+      signif_count_factor = factor(
+        signif_count, 
+        levels = 0:4,
+        labels = as.character(0:4)
+      )
+    )
+  
+  return(overlap_df)
+}
 
 # developmental trajectories by sex_diff: for male and female  
 plot_trajectories_bycov <- function(region_name, df, covariate, y.limits, colorF, colorM, margin){

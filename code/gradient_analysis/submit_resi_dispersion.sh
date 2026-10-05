@@ -24,7 +24,7 @@ for dataset in "${datasets[@]}"; do
         --time=4:00:00 \
         --output=${logs_dir}/${job_name}_%j.out \
         --error=${logs_dir}/${job_name}_%j.err \
-        --wrap="singularity run --cleanenv /cbica/projects/network_replication/covariate_analyses/sex_diff/software/r_packages/r-packages-for-cubic_0.1.1.sif Rscript --save ${r_script} ${dataset}"
+        --wrap="singularity run --cleanenv /cbica/projects/network_replication/covariate_analyses/sex_diff/software/r_packages/r-packages-for-parcc_0.0.1.sif Rscript --save ${r_script} ${dataset}"
 
     echo "Submitted resi_dispersion for ${dataset}"
 done

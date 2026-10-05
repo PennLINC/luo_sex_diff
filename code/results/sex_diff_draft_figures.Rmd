@@ -1228,8 +1228,8 @@ neurosynth.termlist <- names(neurosynth.terms)[-1] #list of terms
 We examined the 10 most positively correlated Neurosynth terms with the BNC sex difference map, focusing on positive correlations because they indicate cognitive domains whose spatial patterns overlap with parcels showing greater BNC in males relative to females. In contrast, we examined the ten most negatively correlated Neurosynth terms with the WNC sex difference map, focusing on negatively correlations because they indicate cognitive domains whose spatial patterns overlap with parcels showing greater WNC in females relative to males.
 ```{r overlapping effects neurosynth decoding of sex differences, fig.height = 7, fig.width = 7}
 # identify overlapping significant effects across datasets (2 or more datasets), and get avg t-value for each of those parcels
-BNC_sexeffect_overlap <- identify_sexeffect_overlap("BNC") %>% mutate(significant_status = ifelse(signif_2plus == 1, "Sig", "Nonsig"))
-WNC_sexeffect_overlap <- identify_sexeffect_overlap("WNC") %>% mutate(significant_status = ifelse(signif_2plus == 1, "Sig", "Nonsig"))
+BNC_sexeffect_overlap <- identify_sexeffect_overlap_tvalues("BNC") %>% mutate(significant_status = ifelse(signif_2plus == 1, "Sig", "Nonsig"))
+WNC_sexeffect_overlap <- identify_sexeffect_overlap_tvalues("WNC") %>% mutate(significant_status = ifelse(signif_2plus == 1, "Sig", "Nonsig"))
  
 # fdr correction of neurosynth terms correlations with BNC and WNC sex effect maps
 BNC_neurosynth <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/spin_test/neurosynth/BNC_neurosynth_spin_test_results_overlap.csv")

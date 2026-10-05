@@ -25,7 +25,7 @@ PNC <- PNC %>%
     TRUE ~ NA_character_
   ))
 
-PNC$sex <- factor(PNC$sex, levels = c("Female", "Male"), ordered = TRUE)
+PNC$sex <- factor(PNC$sex, levels = c("Female", "Male"))
 
 PNC_out <- file.path(rep_root, "input/PNC/sample_info/PNC_demographics_finalsample.csv")
 write.csv(PNC, PNC_out, row.names = FALSE)
@@ -44,7 +44,7 @@ HCPD <- HCPD %>%
     TRUE ~ NA_character_
   ))
 
-HCPD$sex <- factor(HCPD$sex, levels = c("Female", "Male"), ordered = TRUE)
+HCPD$sex <- factor(HCPD$sex, levels = c("Female", "Male"))
 
 HCPD_out <- file.path(rep_root, "input/HCPD/sample_info/HCPD_demographics_finalsample.csv")
 write.csv(HCPD, HCPD_out, row.names = FALSE)
@@ -55,7 +55,7 @@ cat("Wrote:", HCPD_out, "\n")
 NKI <- read.csv(file.path(root, "input/NKI/sample_selection/NKI_demographics_finalsample.csv"))
 
 NKI$sub <- gsub("sub-", "", NKI$sub)
-NKI$sex <- factor(NKI$sex, levels = c("Female", "Male"), ordered = TRUE)
+NKI$sex <- factor(NKI$sex, levels = c("Female", "Male"))
 
 NKI_out <- file.path(rep_root, "input/NKI/sample_info/NKI_demographics_finalsample.csv")
 write.csv(NKI, NKI_out, row.names = FALSE)
@@ -65,7 +65,7 @@ cat("Wrote:", NKI_out, "\n")
 # HBN
 HBN <- read.csv(file.path(root, "input/HBN/sample_selection/HBN_demographics_finalsample.csv"))
 
-HBN$sex <- factor(HBN$sex, levels = c("Female", "Male"), ordered = TRUE)
+HBN$sex <- factor(HBN$sex, levels = c("Female", "Male"))
 
 HBN_out <- file.path(rep_root, "input/HBN/sample_info/HBN_demographics_finalsample.csv")
 write.csv(HBN, HBN_out, row.names = FALSE)
