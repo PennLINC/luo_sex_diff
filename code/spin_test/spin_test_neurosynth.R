@@ -24,7 +24,7 @@ output_root <- file.path(proj_root, "output")
 output_dir <- file.path(output_root, "all_datasets")
 spin_test_outputs_dir <- file.path(output_dir, "spin_test", "neurosynth")
 
-source(file.path(proj_root, "code", "results", "sex_diff_draft_figures.R"))
+source(file.path(proj_root, "code", "results", "main_figures.R"))
 source(file.path(root, "software", "perm.sphere.p.R"))
 
 if (!dir.exists(spin_test_outputs_dir)) dir.create(spin_test_outputs_dir, recursive = TRUE)

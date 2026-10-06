@@ -504,7 +504,7 @@ gam.fit.clinical.measures <- function(gam.data,
   
   # loop over covariates 
   for (cov in covariates.interest) {
-    # find the matching row even if it's factor-coded (e.g., "sexMale")
+    # find the matching row even if it's factor-coded (e.g., "sexFemale")
     match_idx <- grep(paste0("^", cov), param.tab$term)
     if (length(match_idx) == 0) {
       warning(sprintf("Covariate '%s' not found in GAM parametric table for region %s", cov, region))

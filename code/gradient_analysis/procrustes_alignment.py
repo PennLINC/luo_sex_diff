@@ -9,12 +9,11 @@ Usage: python procrustes_alignment.py <DATASET>
 OUTPUT:
 - ALIGNED_PC1_OUT (aligned_pc1_<DATASET>.npy): Aligned PC1 values for every subject; shape is subjects*200 parcels.
 - ALIGNED_PC1_OUT (aligned_pc1_<DATASET>.csv): CSV version of the same aligned subject-by-parcel PC1 matrix.
-- QC_OUT (alignment_qc_<DATASET>.csv(): Subject-level QC containing correlation with the group PC1, correlation with the -A axis, and whether the subject was flagged for low alignment.
+- QC_OUT (alignment_qc_<DATASET>.csv(): Subject-level QC containing correlation with the group PC1, correlation with the S-A axis, and whether the subject was flagged for low alignment.
 """
 
 import os
 import sys
-
 import numpy as np
 import pandas as pd
 from brainspace.gradient import GradientMaps
@@ -24,7 +23,7 @@ CONFIG = dict(approach="pca", kernel="normalized_angle",
              n_components=10, random_state=0)
 SPARSITY = 0.0
 
-ROOT = "/cbica/projects/network_replication/covariate_analyses/sex_diff"
+ROOT = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff"
 CACHE_DIR = f"{ROOT}/cache"
 OUTPUT_DIR = f"{ROOT}/output/{DATASET}/gradient_dispersion"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -36,8 +35,8 @@ GROUP_GRADIENTS_IN = f"{OUTPUT_DIR}/group_gradients_full_{DATASET}.npy"
 ALIGNED_PC1_OUT = f"{OUTPUT_DIR}/aligned_pc1_{DATASET}.npy"
 QC_OUT = f"{OUTPUT_DIR}/alignment_qc_{DATASET}.csv"
 
-SA_AXIS_CSV = "/cbica/projects/network_replication/SAaxis/schaefer200x17_SAaxis.csv"
-SA_PARCEL_LABELS = "/cbica/projects/network_replication/atlases/parcellations/schaefer200x17_regionlist_final.csv"
+SA_AXIS_CSV = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/SAaxis/schaefer200x17_SAaxis.csv"
+SA_PARCEL_LABELS = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/schaefer200x17_regionlist_final.csv"
 
 
 def load_sa_axis():

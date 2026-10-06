@@ -70,12 +70,14 @@ fit_and_resiPEse_Th1 <- function(region) {
   # fit GAM
   mod <- mgcv::gam(formula, data = gam_df, method = "REML")
   
+  
   # Compute standardized effect size for the sex coefficient using RESI:
-  # - variable="sexMale" gives the signed male-vs-female contrast
-  # - unsigned=FALSE preserves direction of the effect (negative RESI = lower values in males relative to the female reference level)
+  # - variable="sexFemale" gives the signed female-vs-male contrast
+  # - unsigned=FALSE preserves direction of the effect
+  # - (positive RESI = higher values in females relative to the male reference level)
   # - type="HC0" uses a basic robust covariance estimator
   # - returns RESI estimate + theory-based SE and CI (no bootstrap)
-  out <- resiPEse_Th1(mod, variable="sexMale", unsigned=FALSE, torz="t", type="HC0")
+  out <- resiPEse_Th1(mod, variable="sexFemale", unsigned=FALSE, torz="t", type="HC0")
   
   # return a one-row summary for this region (or network-pair):
   # region ID + effect size estimate + CI
@@ -105,7 +107,7 @@ fit_and_t2S <- function(region) {
   # - uses the t-statistic from the GAM under the hood
   # - fast and stable for large-scale (e.g., edge-level) analyses
   resi_sex <- RESI::t2S(
-    summary(mod)$p.table["sexMale", "t value"],
+    summary(mod)$p.table["sexFemale", "t value"],
     rdf = mod$df.residual,
     n   = nrow(gam_df),
     unbiased = TRUE
@@ -142,6 +144,7 @@ if (metric %in% c("FC_strength", "BNC", "WNC")) {
 if (dataset != "all_datasets") {
   demographics <- read.csv(config_data$demographics, stringsAsFactors = TRUE)
   demographics <- demographics %>% select(sub, sex, age, meanFD_avgSes)
+  demographics$sex <- factor(demographics$sex, levels = c("Male", "Female"))
 } else if (dataset == "all_datasets") {
   # load demographics for all datasets and combine
   PNC_demographics <- read.csv(PNC_config_data$demographics, stringsAsFactors = TRUE) %>% mutate(dataset_site = "PNC") %>% select(sub, age, sex, meanFD_avgSes, dataset_site)
@@ -149,6 +152,7 @@ if (dataset != "all_datasets") {
   NKI_demographics <- read.csv(NKI_config_data$demographics, stringsAsFactors = TRUE) %>% mutate(dataset_site = "NKI") %>% select(sub, age, sex, meanFD_avgSes, dataset_site)
   HBN_demographics <- read.csv(HBN_config_data$demographics, stringsAsFactors = TRUE) %>% rename(site = ses) %>% mutate(dataset_site = paste0("HBN_", site)) %>% select(sub, age, sex, meanFD_avgSes, dataset_site)
   demographics <- rbind(PNC_demographics, HCPD_demographics, NKI_demographics, HBN_demographics)
+  demographics$sex <- factor(demographics$sex, levels = c("Male", "Female"))
 }
 
  

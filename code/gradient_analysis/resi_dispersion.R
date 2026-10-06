@@ -3,7 +3,7 @@ library(tidyr)
 library(mgcv)
 library(RESI)
 library(parallel)
-source("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/compute_effect_size/resiPEse_Th1_functions.R")
+source("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/compute_effect_size/resiPEse_Th1_functions.R")
 
 ##################
 # This script computes RESI effect size for global, within- and between-network dispersion
@@ -21,7 +21,7 @@ source("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/com
 args <- commandArgs(trailingOnly = TRUE)
 dataset <- args[1]        # PNC, NKI, HCPD, HBN, all_datasets
 
-outputs_root <- sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/%s/gradient_dispersion", dataset)
+outputs_root <- sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/output/%s/gradient_dispersion", dataset)
 resi_outputs_dir <- paste0(outputs_root, "/resi")
 if (!dir.exists(resi_outputs_dir)) dir.create(resi_outputs_dir, recursive = TRUE)
 
@@ -38,13 +38,13 @@ covariates.with_meanfc <- "meanFD_avgSes + mean_fc"
 ##################
 # Shared RESI helper
 ##################
-# Positive RESI = higher in males; negative RESI = higher in females.
+# Positive RESI = higher in females; negative RESI = higher in males.
 run_resi <- function(outcome_var, data, covariates.noninterest = covariates.primary) {
   formula <- as.formula(paste0("`", outcome_var, "` ~ s(age, k = ", k, ", fx = ", set.fx,
                                ") + ", covariates.noninterest, " + ", covariate.interest))
   mod <- mgcv::gam(formula, data = data, method = "REML")
   
-  th1 <- resiPEse_Th1(mod, variable = "sexMale", unsigned = FALSE, torz = "t", type = "HC0")
+  th1 <- resiPEse_Th1(mod, variable = "sexFemale", unsigned = FALSE, torz = "t", type = "HC0")
   
   t_robust <- th1$Estimate / th1$Std.Error
   p_robust <- 2 * pt(-abs(t_robust), df = mod$df.residual)
@@ -61,7 +61,7 @@ run_resi <- function(outcome_var, data, covariates.noninterest = covariates.prim
 ##################
 gam_df <- read.csv(sprintf("%s/dispersion_global_%s.csv", outputs_root, dataset))
 gam_df <- gam_df %>% drop_na(sex)
-gam_df$sex <- factor(gam_df$sex, levels = c("Female", "Male"))
+gam_df$sex <- factor(gam_df$sex, levels = c("Male", "Female"))
 
 cat(sprintf("\n=== %s: motion sanity check ===\n", dataset))
 print(t.test(gam_df$meanFD_avgSes[gam_df$sex == "Male"],
@@ -106,7 +106,7 @@ write.csv(meanfc_compare,
 ##################
 net_df <- read.csv(sprintf("%s/dispersion_network_%s.csv", outputs_root, dataset), check.names = FALSE)
 net_df <- net_df %>% drop_na(sex)
-net_df$sex <- factor(net_df$sex, levels = c("Female", "Male"))
+net_df$sex <- factor(net_df$sex, levels = c("Male", "Female"))
 
 wn_cols <- grep("^wn_", names(net_df), value = TRUE)
 bn_cols <- grep("^bn_", names(net_df), value = TRUE)

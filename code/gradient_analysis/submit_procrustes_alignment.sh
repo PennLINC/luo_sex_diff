@@ -1,28 +1,36 @@
-#!/bin/bash
-# submit with ./submit_procrustes_alignment.sh
+#!/usr/bin/env bash
 # run AFTER group_template.py has completed for each dataset
 
-datasets=("PNC" "NKI" "HCPD" "HBN" "all_datasets")
-script_dir="/cbica/projects/network_replication/covariate_analyses/sex_diff/code/gradient_analysis"
+ROOT="/ceph/projects/sattertt/pennlinc-parcc/network_replication"
+PROJDIR="$ROOT/covariate_analyses/sex_diff"
 
-source /cbica/projects/network_replication/miniconda3/etc/profile.d/conda.sh
-conda activate sex_diff_py311
+PYTHON="$ROOT/.conda/envs/sex_diff_py311/bin/python"
+py_script="$PROJDIR/code/gradient_analysis/procrustes_alignment.py"
+
+datasets=("PNC" "NKI" "HCPD" "HBN" "all_datasets")
+
+cpus=1
+time_limit="00:10:00"
 
 for dataset in "${datasets[@]}"; do
-    logs_dir="/cbica/projects/network_replication/covariate_analyses/sex_diff/code/logs/gradient_analysis/${dataset}"
-    if [ ! -d "${logs_dir}" ]; then
-        mkdir -p "${logs_dir}"
-    fi
+    logs_dir="$PROJDIR/code/logs/gradient_analysis/${dataset}"
+    mkdir -p "$logs_dir"
 
     job_name="procrustes_alignment_${dataset}"
 
-    sbatch --job-name=${job_name} \
-        --nodes=1 --ntasks=1 --cpus-per-task=4 \
-        --mem=24G \
-        --time=8:00:00 \
-        --output=${logs_dir}/${job_name}_%j.out \
-        --error=${logs_dir}/${job_name}_%j.err \
-        --wrap="python ${script_dir}/procrustes_alignment.py ${dataset}"
-
-    echo "Submitted procrustes_alignment for ${dataset}"
+    if sbatch \
+        --job-name="$job_name" \
+        --partition=genoa-std-mem \
+        --nodes=1 \
+        --ntasks=1 \
+        --cpus-per-task="$cpus" \
+        --time="$time_limit" \
+        --output="${logs_dir}/${job_name}_%j.out" \
+        --error="${logs_dir}/${job_name}_%j.err" \
+        --wrap="\"$PYTHON\" -u \"$py_script\" \"$dataset\""
+    then
+        echo "Submitted ${job_name} (${cpus} CPU(s), ${time_limit})"
+    else
+        echo "FAILED to submit ${job_name}" >&2
+    fi
 done

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
 compute_dispersion.py -- global, within-network, and between-network
-dispersion from aligned PC1. Saves CSVs for resi_dispersion.R.
+dispersion from aligned PC1 for each subject. Saves CSVs for resi_dispersion.R.
 
 Usage: python compute_dispersion.py <DATASET>
 
-UPDATE: primary outcome is raw dispersion 
+primary outcome is raw dispersion 
 """
 
 import os
@@ -18,7 +18,7 @@ import statsmodels.formula.api as smf
 DATASET = sys.argv[1]
 N_PARCELS = 200
 
-ROOT = "/cbica/projects/network_replication/covariate_analyses/sex_diff"
+ROOT = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff"
 CACHE_DIR = f"{ROOT}/cache"
 OUTPUT_DIR = f"{ROOT}/output/{DATASET}/gradient_dispersion"
 
@@ -39,7 +39,7 @@ PC1_LONG_OUT = f"{OUTPUT_DIR}/pc1_loadings_long_{DATASET}.csv"
 PC1_SUBJECT_SUMMARY_OUT = f"{OUTPUT_DIR}/pc1_subject_summary_{DATASET}.csv"
 PC1_SEX_BRAIN_OUT = f"{OUTPUT_DIR}/pc1_parcel_by_sex_{DATASET}.csv"
 
-SA_PARCEL_LABELS = "/cbica/projects/network_replication/atlases/parcellations/schaefer200x17_regionlist_final.csv"
+SA_PARCEL_LABELS = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/schaefer200x17_regionlist_final.csv"
 
 NET_MAP_17 = [
     ("VisCent", "visualCentral"), ("VisPeri", "visualPeripheral"),

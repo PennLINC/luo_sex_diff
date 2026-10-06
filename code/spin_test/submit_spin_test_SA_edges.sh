@@ -12,7 +12,7 @@ datasets=("PNC" "HCPD" "NKI" "HBN" "all_datasets")
 atlases=("schaefer200x17")
 
 cpus=1
-time_limit="12:00:00"
+time_limit="01:00:00"
 
 for dataset in "${datasets[@]}"; do
     for atlas in "${atlases[@]}"; do

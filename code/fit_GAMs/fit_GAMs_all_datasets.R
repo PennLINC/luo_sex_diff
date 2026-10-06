@@ -87,7 +87,7 @@ run_gam.factorsmooth.interaction <- function(gam_df, smooth.var, int.var, covs, 
 
 # 3) run gam.smooth.predict.covariateinteraction.factor to look at developmental trajectory for female and males
 run_gam.smooth.predict.sexinteraction <- function(gam_df, smooth_var, int_var, covs, k, set_fx, filename, atlas, age1, age2){
-  sex_levels <- c("Female", "Male")   
+  sex_levels <- c("Male", "Female")  
   
   results_list <- list()
   for (sex in sex_levels) {

@@ -36,10 +36,10 @@ CONFIG = dict(approach="pca", kernel="normalized_angle",
              n_components=10, random_state=0)
 SPARSITY = 0.0
 
-SA_AXIS_CSV = "/cbica/projects/network_replication/SAaxis/schaefer200x17_SAaxis.csv"
-SA_PARCEL_LABELS = "/cbica/projects/network_replication/atlases/parcellations/schaefer200x17_regionlist_final.csv"
+SA_AXIS_CSV = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/SAaxis/schaefer200x17_SAaxis.csv"
+SA_PARCEL_LABELS = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/schaefer200x17_regionlist_final.csv"
 
-ROOT = "/cbica/projects/network_replication/covariate_analyses/sex_diff"
+ROOT = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff"
 CACHE_DIR = f"{ROOT}/cache"
 OUTPUT_DIR = f"{ROOT}/output/{DATASET}/gradient_dispersion"
 os.makedirs(CACHE_DIR, exist_ok=True)
@@ -57,7 +57,7 @@ GROUP_GRADIENTS_OUT = f"{OUTPUT_DIR}/group_gradients_full_{DATASET}.npy"
 # single-site, use raw matrices. all_datasets pools all four from the
 # single combined harmonized folder (NKI IDs there lack "sub-" prefix).
 # ------------------------------------------------------------------
-RAW_ROOT = "/cbica/projects/network_replication/manuscript/input"
+RAW_ROOT = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/manuscript/input"
 HARMONIZED_ROOT = f"{ROOT}/output"
 
 DATASET_SOURCE = {

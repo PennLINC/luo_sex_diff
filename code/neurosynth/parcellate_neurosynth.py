@@ -15,6 +15,7 @@ import os
 import gc
 import json
 import requests
+import numpy as np
 import pandas as pd
 from pathlib import Path
 from scipy import stats as sstats
@@ -124,7 +125,19 @@ def schaeferize(cortical_maps, zscore=True, n_parcels=200, n_networks=17):
         resolution_mm=2
     )
 
-    labels = [lbl.decode("utf-8") for lbl in schaefer["labels"]]
+    # Get Schaefer parcel labels
+    labels = [
+        lbl.decode("utf-8") if isinstance(lbl, bytes) else str(lbl)
+        for lbl in schaefer["labels"]
+    ]
+
+    # Nilearn may include a background label; remove it
+    if len(labels) == n_parcels + 1:
+        labels = labels[1:]
+
+    assert len(labels) == n_parcels, (
+        f"Expected {n_parcels} parcel labels, got {len(labels)}"
+    )
 
     # Create Parcellater object
     schaefer_parc = Parcellater(
@@ -138,10 +151,24 @@ def schaeferize(cortical_maps, zscore=True, n_parcels=200, n_networks=17):
     for map_name, value in cortical_maps.items():
         print(f"Parcellating: {map_name}")
 
+        # Current neuromaps versions may return shape (1, n_parcels).
+        # Flatten first so z-scoring is explicitly performed across parcels.
         parcellated_map = schaefer_parc.fit_transform(
             data=value["map"],
             space=value["annotation"][2]
-        )
+        ).ravel()
+
+        if parcellated_map.size != n_parcels:
+            raise ValueError(
+                f"{map_name}: expected {n_parcels} parcels, "
+                f"got {parcellated_map.size}"
+            )
+
+        if not np.isfinite(parcellated_map).any():
+            raise ValueError(
+                f"{map_name}: all parcellated values are non-finite "
+                "before z-scoring"
+            )
 
         if zscore:
             parcellated_map = sstats.zscore(
@@ -149,19 +176,26 @@ def schaeferize(cortical_maps, zscore=True, n_parcels=200, n_networks=17):
                 nan_policy="omit"
             )
 
-        schaefer_maps[map_name] = parcellated_map.ravel()
+        if not np.isfinite(parcellated_map).any():
+            raise ValueError(
+                f"{map_name}: all parcellated values are non-finite "
+                "after z-scoring"
+            )
+
+        schaefer_maps[map_name] = parcellated_map
 
         data = images.load_data(value["map"])
         print(
             f"Original: {data.shape}, "
-            f"Parcellated: {parcellated_map.shape}"
+            f"Parcellated: {parcellated_map.shape}, "
+            f"finite: {np.isfinite(parcellated_map).sum()}/{n_parcels}"
         )
 
     return schaefer_maps, labels
 
 
 #############################################
-# Fetch and Convert Neurosynth Data
+# Fetch Neurosynth Data
 #############################################
 
 print("Fetching Neurosynth database...")
@@ -203,7 +237,11 @@ root_dir = ns_dir / "terms"
 
 cogatl_maps = {
     term: {
-        "annotation": ("cognitive atlas", term.replace("_", " "), "MNI152"),
+        "annotation": (
+            "cognitive atlas",
+            term.replace("_", " "),
+            "MNI152"
+        ),
         "map": str(root_dir / term / "z_desc-association.nii.gz"),
     }
     for term in os.listdir(root_dir)
@@ -213,7 +251,11 @@ cogatl_maps = {
 
 print(f"Loaded {len(cogatl_maps)} cognitive terms.")
 
+if len(cogatl_maps) == 0:
+    raise RuntimeError("No Neurosynth term maps were found.")
+
 print("Parcellating Neurosynth maps to Schaefer200x17...")
+
 schaefer_maps, labels = schaeferize(
     cortical_maps=cogatl_maps,
     zscore=True,
@@ -221,15 +263,38 @@ schaefer_maps, labels = schaeferize(
     n_networks=17,
 )
 
+
+##############################################
+# Save parcellated annotations
+##############################################
+
 # Save one row per Schaefer parcel and one column per Neurosynth term.
 # Keeping the atlas labels in the first column makes the output easy to
 # merge with parcel-level analyses in R.
 schaefer_df = pd.DataFrame(schaefer_maps)
-schaefer_df.insert(0, "parcel_label", labels)
 
-outfile = parc_dir / "neurosynth_schaefer200x17_zscores.csv"
+# Fail rather than silently writing an unusable all-NA term map.
+all_missing = schaefer_df.columns[schaefer_df.isna().all()].tolist()
+
+if all_missing:
+    raise ValueError(
+        f"{len(all_missing)} term(s) contain only NaN values: "
+        f"{all_missing[:10]}"
+    )
+
+schaefer_df.insert(0, "label", labels)
+schaefer_df.insert(0, "regionID", range(1, len(labels) + 1))
+
+outfile = parc_dir / "schaefer200x17_neurosynth_125terms.csv"
 schaefer_df.to_csv(outfile, index=False)
 
 print(f"Saved parcellated Neurosynth annotations -> {outfile}")
-print(f"Output shape: {schaefer_df.shape[0]} parcels x {schaefer_df.shape[1] - 1} terms")
+print(
+    f"Output shape: {schaefer_df.shape[0]} parcels x "
+    f"{len(schaefer_maps)} terms"
+)
+print(
+    f"Missing annotation values: "
+    f"{schaefer_df.iloc[:, 2:].isna().sum().sum()}"
+)
 print("Done!")

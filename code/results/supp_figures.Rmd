@@ -1,0 +1,3027 @@
+---
+title: "Sex Differences in Functional Connectivity"
+author: "Audrey Luo"
+output: 
+  html_document:
+    highlight: haddock
+    code_folding: hide
+    number_sections: no
+    theme: lumen
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+  pdf_document:
+    number_sections: no
+    toc: yes
+    toc_depth: '4'
+  word_document:
+    toc: yes
+    toc_depth: '4'
+urlcolor: blue
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(cowplot)
+library(ggpubr)
+library(ggseg)
+library(ggsegSchaefer)
+library(effsize)
+library(ggdist)
+library(knitr)
+library(kableExtra)
+library(paletteer)
+library(scales)
+ 
+source("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/results/sex_diff_draft_figures.R")
+source("/cbica/projects/network_replication/software/perm.sphere.p.R")
+
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, include = TRUE) 
+
+
+proj_root <- "/cbica/projects/network_replication/covariate_analyses/sex_diff/"
+input_root <- paste0(proj_root, "input")
+output_root <- paste0(proj_root, "output")
+ 
+```
+
+```{r set color palette}
+red_teal_white_base <- c( "#A51122FF","#E14C21FF", "#F8A86BFF", "#FFFFFFFF","#ACDFD3FF", "#0B8CACFF","#324DA0FF")
+red_teal_white <- colorRampPalette(red_teal_white_base)
+ 
+```
+
+```{r load SAaxis and labels and spin test}
+# load S-A axis
+schaefer200x17_SAaxis <- read.csv("/cbica/projects/network_replication/SAaxis/schaefer200x17_SAaxis.csv")
+schaefer200x17_SAaxis <- schaefer200x17_SAaxis %>% rename(region=label)
+
+# load parcel labels
+schaefer200x17.labels <- read.csv("/cbica/projects/network_replication/atlases/parcellations/schaefer200x17_regionlist_final.csv")
+schaefer200x17.labels <- schaefer200x17.labels$label
+  
+# load network-pair labels
+schaefer200x17.networkpair.labels <- read.csv("/cbica/projects/network_replication/atlases/parcellations/schaefer200x17_netpair_labels_noduplicates.csv")
+schaefer200x17.networkpair.labels <- schaefer200x17.networkpair.labels[,1]
+
+# load permuted schaefer200
+perm.id.full_schaefer200x17 <- readRDS("/cbica/projects/network_replication/software/rotate_parcellation/schaefer200x17.coords_sphericalrotations_N10k_seed10.rds")
+```
+
+
+# 1. Sex differences in between- and within-network connectivity
+Thus, we hypothesized that males would show greater between-network connectivity, whereas females would show greater within-network connectivity. 
+
+```{r load BNC sex effect}
+sex.main.PNC.BNC <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "PNC", "BNC"))
+sex.main.PNC.BNC$region <- paste0("17", sex.main.PNC.BNC$region)
+sex.main.PNC.BNC <- sig.effects(sex.main.PNC.BNC, "BNC", "sex", "PNC")
+resi.PNC.BNC <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/PNC/resi/BNC/PNC_resiPEse_Th1_sex_maineffects_schaefer200x17.csv") # load RESI effect sizes
+resi.PNC.BNC$region <- paste0("17", resi.PNC.BNC$region )
+resi.PNC.BNC <- resi.PNC.BNC %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+sex.main.PNC.BNC <- merge(sex.main.PNC.BNC, resi.PNC.BNC)
+
+sex.main.HCPD.BNC <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "HCPD", "BNC"))
+sex.main.HCPD.BNC <- sig.effects(sex.main.HCPD.BNC, "BNC", "sex", "HCPD")
+sex.main.HCPD.BNC$region <- paste0("17", sex.main.HCPD.BNC$region)
+resi.HCPD.BNC <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HCPD/resi/BNC/HCPD_resiPEse_Th1_sex_maineffects_schaefer200x17.csv")
+resi.HCPD.BNC$region <- paste0("17", resi.HCPD.BNC$region )
+resi.HCPD.BNC <- resi.HCPD.BNC %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+sex.main.HCPD.BNC <- merge(sex.main.HCPD.BNC, resi.HCPD.BNC)
+
+sex.main.NKI.BNC <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "NKI", "BNC"))
+sex.main.NKI.BNC <- sig.effects(sex.main.NKI.BNC, "BNC", "sex", "NKI")
+sex.main.NKI.BNC$region <- paste0("17", sex.main.NKI.BNC$region)
+resi.NKI.BNC <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/NKI/resi/BNC/NKI_resiPEse_Th1_sex_maineffects_schaefer200x17.csv")
+resi.NKI.BNC$region <- paste0("17", resi.NKI.BNC$region )
+resi.NKI.BNC <- resi.NKI.BNC %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+sex.main.NKI.BNC <- merge(sex.main.NKI.BNC, resi.NKI.BNC)
+
+sex.main.HBN.BNC <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "HBN", "BNC"))
+sex.main.HBN.BNC <- sig.effects(sex.main.HBN.BNC, "BNC", "sex", "HBN")
+sex.main.HBN.BNC$region <- paste0("17", sex.main.HBN.BNC$region)
+resi.HBN.BNC <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HBN/resi/BNC/HBN_resiPEse_Th1_sex_maineffects_schaefer200x17.csv")
+resi.HBN.BNC$region <- paste0("17", resi.HBN.BNC$region )
+resi.HBN.BNC <- resi.HBN.BNC %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+sex.main.HBN.BNC <- merge(sex.main.HBN.BNC, resi.HBN.BNC)
+
+sex.main.all_datasets.BNC <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "all_datasets", "BNC"))
+sex.main.all_datasets.BNC <- sig.effects(sex.main.all_datasets.BNC, "BNC", "sex", "all_datasets")
+sex.main.all_datasets.BNC$region <- paste0("17", sex.main.all_datasets.BNC$region)
+resi.all_datasets.BNC <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/resi/BNC/all_datasets_resiPEse_Th1_sex_maineffects_schaefer200x17.csv")
+resi.all_datasets.BNC$region <- paste0("17", resi.all_datasets.BNC$region )
+resi.all_datasets.BNC <- resi.all_datasets.BNC %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+sex.main.all_datasets.BNC <- merge(sex.main.all_datasets.BNC, resi.all_datasets.BNC)
+```
+
+
+```{r load WNC sex effect}
+sex.main.PNC.WNC <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "PNC", "WNC"))
+sex.main.PNC.WNC$region <- paste0("17", sex.main.PNC.WNC$region)
+sex.main.PNC.WNC <- sig.effects(sex.main.PNC.WNC, "WNC", "sex", "PNC")
+resi.PNC.WNC <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/PNC/resi/WNC/PNC_resiPEse_Th1_sex_maineffects_schaefer200x17.csv")
+resi.PNC.WNC$region <- paste0("17", resi.PNC.WNC$region )
+resi.PNC.WNC <- resi.PNC.WNC %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+sex.main.PNC.WNC <- merge(sex.main.PNC.WNC, resi.PNC.WNC)
+
+sex.main.HCPD.WNC <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "HCPD", "WNC"))
+sex.main.HCPD.WNC <- sig.effects(sex.main.HCPD.WNC, "WNC", "sex", "HCPD")
+sex.main.HCPD.WNC$region <- paste0("17", sex.main.HCPD.WNC$region)
+resi.HCPD.WNC <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HCPD/resi/WNC/HCPD_resiPEse_Th1_sex_maineffects_schaefer200x17.csv")
+resi.HCPD.WNC$region <- paste0("17", resi.HCPD.WNC$region )
+resi.HCPD.WNC <- resi.HCPD.WNC %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+sex.main.HCPD.WNC <- merge(sex.main.HCPD.WNC, resi.HCPD.WNC)
+
+sex.main.NKI.WNC <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "NKI", "WNC"))
+sex.main.NKI.WNC <- sig.effects(sex.main.NKI.WNC, "WNC", "sex", "NKI")
+sex.main.NKI.WNC$region <- paste0("17", sex.main.NKI.WNC$region)
+resi.NKI.WNC <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/NKI/resi/WNC/NKI_resiPEse_Th1_sex_maineffects_schaefer200x17.csv")
+resi.NKI.WNC$region <- paste0("17", resi.NKI.WNC$region )
+resi.NKI.WNC <- resi.NKI.WNC %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+sex.main.NKI.WNC <- merge(sex.main.NKI.WNC, resi.NKI.WNC)
+
+sex.main.HBN.WNC <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "HBN", "WNC"))
+sex.main.HBN.WNC <- sig.effects(sex.main.HBN.WNC, "WNC", "sex", "HBN")
+sex.main.HBN.WNC$region <- paste0("17", sex.main.HBN.WNC$region)
+resi.HBN.WNC <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HBN/resi/WNC/HBN_resiPEse_Th1_sex_maineffects_schaefer200x17.csv")
+resi.HBN.WNC$region <- paste0("17", resi.HBN.WNC$region )
+resi.HBN.WNC <- resi.HBN.WNC %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+sex.main.HBN.WNC <- merge(sex.main.HBN.WNC, resi.HBN.WNC)
+
+sex.main.all_datasets.WNC <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "all_datasets", "WNC"))
+sex.main.all_datasets.WNC <- sig.effects(sex.main.all_datasets.WNC, "WNC", "sex", "all_datasets")
+sex.main.all_datasets.WNC$region <- paste0("17", sex.main.all_datasets.WNC$region)
+resi.all_datasets.WNC <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/resi/WNC/all_datasets_resiPEse_Th1_sex_maineffects_schaefer200x17.csv")
+resi.all_datasets.WNC$region <- paste0("17", resi.all_datasets.WNC$region )
+resi.all_datasets.WNC <- resi.all_datasets.WNC %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+sex.main.all_datasets.WNC <- merge(sex.main.all_datasets.WNC, resi.all_datasets.WNC)
+
+
+#range(sex.main.PNC.WNC$GAM.cov.tvalue)
+#range(sex.main.HCPD.WNC$GAM.cov.tvalue)
+#range(sex.main.HBN.WNC$GAM.cov.tvalue)
+#range(sex.main.NKI.WNC$GAM.cov.tvalue)
+#range(sex.main.all_datasets.WNC$GAM.cov.tvalue)
+```
+## Sex effect with t-values
+```{r make BNC plots across datasets, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 14}
+
+sex.main.PNC.BNC_lh <- plot_cortex(sex.main.PNC.BNC, hemi = "left", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200") 
+sex.main.PNC.BNC_rh <- plot_cortex(sex.main.PNC.BNC, hemi = "right", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200") 
+
+sex.main.HCPD.BNC_lh <- plot_cortex(sex.main.HCPD.BNC, hemi = "left", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200") 
+sex.main.HCPD.BNC_rh <- plot_cortex(sex.main.HCPD.BNC, hemi = "right", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200") 
+
+sex.main.NKI.BNC_lh <- plot_cortex(sex.main.NKI.BNC, hemi = "left", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200") 
+sex.main.NKI.BNC_rh <- plot_cortex(sex.main.NKI.BNC, hemi = "right", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200") 
+
+sex.main.HBN.BNC_lh <- plot_cortex(sex.main.HBN.BNC, hemi = "left", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200") 
+sex.main.HBN.BNC_rh <- plot_cortex(sex.main.HBN.BNC, hemi = "right", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200") 
+ 
+sex.main.all_datasets.BNC_lh <- plot_cortex(sex.main.all_datasets.BNC, hemi = "left", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200", horizontal_layout = TRUE) 
+sex.main.all_datasets.BNC_rh <- plot_cortex(sex.main.all_datasets.BNC, hemi = "right", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200", horizontal_layout = TRUE) 
+
+
+#####
+# legend
+ylim1 = -2
+ylim2 = 10
+p <- ggplot() + 
+    geom_brain(data = sex.main.HBN.BNC, atlas = schaefer17_200, 
+               mapping=aes(fill=GAM.cov.tvalue), 
+               show.legend=TRUE) +
+     scale_fill_gradientn(colours = red_teal_white(256), 
+                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
+    theme_void()  +
+    theme(legend.title = element_blank(),
+          legend.text = element_text(size = 24),
+        legend.position = "bottom", 
+        legend.box = "horizontal", 
+        legend.key.height = unit(1, 'cm'),
+        legend.key.width = unit(2, 'cm'),
+        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
+  
+legend <- get_legend(p)
+
+# arrange plots 
+# PNC
+BNC_PNC <- annotate_figure(
+  plot_grid(sex.main.PNC.BNC_lh, sex.main.PNC.BNC_rh, ncol = 2),
+  top = text_grob("PNC", size = 24)
+)
+
+# HCP-D
+BNC_HCPD <- annotate_figure(
+  plot_grid(sex.main.HCPD.BNC_lh, sex.main.HCPD.BNC_rh, ncol = 2),
+  top = text_grob("HCP-D", size = 24)
+)
+
+# NKI
+BNC_NKI <- annotate_figure(
+  plot_grid(sex.main.NKI.BNC_lh, sex.main.NKI.BNC_rh, ncol = 2),
+  top = text_grob("NKI", size = 24)
+)
+
+# HBN
+BNC_HBN <- annotate_figure(
+  plot_grid(sex.main.HBN.BNC_lh, sex.main.HBN.BNC_rh, ncol = 2),
+  top = text_grob("HBN", size = 24)
+)
+
+# pooled dataset / all datasets
+BNC_all <- annotate_figure(
+  plot_grid(sex.main.all_datasets.BNC_lh, sex.main.all_datasets.BNC_rh, ncol = 2),
+  top = text_grob("Pooled Dataset", size = 24)
+)
+
+# blank plot for formatting
+blank_space <- ggplot() + theme_void()
+
+BNC_plots <- annotate_figure(
+  plot_grid(
+    blank_space,
+    plot_grid(BNC_PNC, BNC_HCPD, BNC_NKI, BNC_HBN, ncol = 2),
+    BNC_all,
+    legend,
+    blank_space,
+    nrow = 5,
+    rel_heights = c(0.05, 1, 0.29, 0.2, 0.05)
+  ),
+  top = text_grob("Between Network Connectivity", size = 24, face = "bold"),
+  bottom = text_grob("Sex Effect (t-value)", size = 24, y = 2)
+)
+ 
+```
+
+
+```{r make BNC overlapping effects plot}
+# overlap plots
+df_list_BNC <- list(
+  PNC  = sex.main.PNC.BNC[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_PNC = Anova.cov.pvalue.fdr),
+  HCPD = sex.main.HCPD.BNC[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HCPD = Anova.cov.pvalue.fdr),
+  NKI  = sex.main.NKI.BNC[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_NKI = Anova.cov.pvalue.fdr),
+  HBN  = sex.main.HBN.BNC[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HBN = Anova.cov.pvalue.fdr)
+)
+
+sex.main.overlap.BNC <- Reduce(function(x, y) full_join(x, y, by = "region"), df_list_BNC)
+sex.main.overlap.BNC$signif_count <- rowSums(sex.main.overlap.BNC[, -1] < 0.05, na.rm = TRUE)
+sex.main.overlap.BNC$signif_count_factor <- factor(
+  sex.main.overlap.BNC$signif_count,
+  levels = 0:4,
+  labels = c("0", "1", "2", "3", "4")
+)
+sex.main.overlap.BNC <- sex.main.overlap.BNC %>% mutate(signif_greater_than_one = ifelse(signif_count > 1, "1", "0"))
+count_colors <- c(
+  "0" = "white",
+  "1" = "white",
+  "2" = "#fcdac0",
+  "3" = "#e87b96",
+  "4" = "#ad2a72"
+)
+
+BNC_overlap.lh <- plot_cortex_overlap(sex.main.overlap.BNC, hemi = "left", atlas = "schaefer17_200", horizontal_layout = T)
+BNC_overlap.rh <- plot_cortex_overlap(sex.main.overlap.BNC, hemi = "right", atlas = "schaefer17_200", horizontal_layout = T)
+
+BNC_overlap <- annotate_figure(
+  plot_grid(BNC_overlap.lh, BNC_overlap.rh, ncol = 2),
+  top = text_grob("Overlap of Significant Effects Across Datasets", size = 24)
+)
+# legend for overlap
+count_colors_legend <- c(
+  "0–1" = "white",
+  "2"   = "#fcdac0",
+  "3"   = "#e87b96",
+  "4"   = "#ad2a72"
+)
+
+legend_df <- data.frame(
+  overlap = factor(names(count_colors_legend),
+                   levels = names(count_colors_legend))
+)
+
+legend_plot <- ggplot(data.frame(overlap = factor(names(count_colors_legend),
+                                                  levels = names(count_colors_legend))),
+                      aes(x = overlap, fill = overlap)) +
+  geom_bar() +
+  scale_fill_manual(
+    values = count_colors_legend,
+    guide = guide_legend(
+      direction = "horizontal",
+      label.position = "bottom",
+      override.aes = list(
+        colour = "black",   # outline boxes
+        size = 1
+      )
+    )
+  ) +
+  theme_void() +
+  theme(
+    legend.title = element_blank(),
+    legend.text  = element_text(size = 18),
+    legend.key.size = unit(1.3, "cm"),
+    legend.position = "bottom"
+  )
+
+# Extract the horizontal legend
+overlap_legend <- get_legend(legend_plot)
+
+overlap_BNC_plots <- annotate_figure(plot_grid(BNC_overlap, overlap_legend, nrow = 2, rel_heights = c(1, 0.2)), 
+                                     bottom = text_grob("Number of Datasets", size = 24, y = 0.1))
+ 
+ 
+BNC_plots_final <- plot_grid(BNC_plots, overlap_BNC_plots, blank_space, nrow = 3, rel_heights = c(1, 0.3, 0.01), rel_widths = c(1, 0.9, 1))
+```
+
+
+
+```{r make WNC plots, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 14}
+# WNC
+sex.main.PNC.WNC_lh <- plot_cortex(sex.main.PNC.WNC, hemi = "left", measure = "GAM.cov.tvalue", ylim1 = -11, ylim2 = 8, atlas = "schaefer17_200") 
+sex.main.PNC.WNC_rh <- plot_cortex(sex.main.PNC.WNC, hemi = "right", measure = "GAM.cov.tvalue", ylim1 = -11, ylim2 = 8, atlas = "schaefer17_200") 
+
+sex.main.HCPD.WNC_lh <- plot_cortex(sex.main.HCPD.WNC, hemi = "left", measure = "GAM.cov.tvalue", ylim1 = -11, ylim2 = 8, atlas = "schaefer17_200") 
+sex.main.HCPD.WNC_rh <- plot_cortex(sex.main.HCPD.WNC, hemi = "right", measure = "GAM.cov.tvalue", ylim1 = -11, ylim2 = 8, atlas = "schaefer17_200") 
+
+sex.main.NKI.WNC_lh <- plot_cortex(sex.main.NKI.WNC, hemi = "left", measure = "GAM.cov.tvalue", ylim1 = -11, ylim2 = 8, atlas = "schaefer17_200") 
+sex.main.NKI.WNC_rh <- plot_cortex(sex.main.NKI.WNC, hemi = "right", measure = "GAM.cov.tvalue", ylim1 = -11, ylim2 = 8, atlas = "schaefer17_200") 
+
+sex.main.HBN.WNC_lh <- plot_cortex(sex.main.HBN.WNC, hemi = "left", measure = "GAM.cov.tvalue", ylim1 = -11, ylim2 = 8, atlas = "schaefer17_200") 
+sex.main.HBN.WNC_rh <- plot_cortex(sex.main.HBN.WNC, hemi = "right", measure = "GAM.cov.tvalue", ylim1 = -11, ylim2 = 8, atlas = "schaefer17_200") 
+ 
+sex.main.all_datasets.WNC_lh <- plot_cortex(sex.main.all_datasets.WNC, hemi = "left", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200", horizontal_layout = TRUE) 
+sex.main.all_datasets.WNC_rh <- plot_cortex(sex.main.all_datasets.WNC, hemi = "right", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200", horizontal_layout = TRUE) 
+
+# legend
+ylim1 = -11
+ylim2 = 8
+p <- ggplot() + 
+    geom_brain(data = sex.main.HBN.WNC, atlas = schaefer17_200, 
+               mapping=aes(fill=GAM.cov.tvalue), 
+               show.legend=TRUE) +
+     scale_fill_gradientn(colours = red_teal_white(256), 
+                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
+    theme_void()  +
+    theme(legend.title = element_blank(),
+          legend.text = element_text(size = 24),
+        legend.position = "bottom", 
+        legend.box = "horizontal", 
+        legend.key.height = unit(1, 'cm'),
+        legend.key.width = unit(2, 'cm'),
+        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
+  
+legend <- get_legend(p)
+
+# PNC
+WNC_PNC <- annotate_figure(
+  plot_grid(sex.main.PNC.WNC_lh, sex.main.PNC.WNC_rh, ncol = 2),
+  top = text_grob("PNC", size = 24)
+)
+
+# HCP-D
+WNC_HCPD <- annotate_figure(
+  plot_grid(sex.main.HCPD.WNC_lh, sex.main.HCPD.WNC_rh, ncol = 2),
+  top = text_grob("HCP-D", size = 24)
+)
+
+# NKI
+WNC_NKI <- annotate_figure(
+  plot_grid(sex.main.NKI.WNC_lh, sex.main.NKI.WNC_rh, ncol = 2),
+  top = text_grob("NKI", size = 24)
+)
+
+# HBN
+WNC_HBN <- annotate_figure(
+  plot_grid(sex.main.HBN.WNC_lh, sex.main.HBN.WNC_rh, ncol = 2),
+  top = text_grob("HBN", size = 24)
+)
+
+# All Datasets
+WNC_all <- annotate_figure(
+  plot_grid(sex.main.all_datasets.WNC_lh, sex.main.all_datasets.WNC_rh, ncol = 2),
+  top = text_grob("Pooled Dataset", size = 24)
+)
+
+
+WNC_plots <- annotate_figure(
+  plot_grid(
+    blank_space,
+    plot_grid(WNC_PNC, WNC_HCPD, WNC_NKI, WNC_HBN, ncol = 2),
+    WNC_all,
+    legend,
+    blank_space,
+    nrow = 5,
+    rel_heights = c(0.05, 1, 0.29, 0.2, 0.05)
+  ),
+  top = text_grob("Within Network Connectivity", size = 24, face = "bold"),
+  bottom = text_grob("Sex Effect (t-value)", size = 24, y = 2)
+)
+  
+```
+
+```{r make WNC overlapping effects plot}
+# overlap plots
+df_list_WNC <- list(
+  PNC  = sex.main.PNC.WNC[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_PNC = Anova.cov.pvalue.fdr),
+  HCPD = sex.main.HCPD.WNC[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HCPD = Anova.cov.pvalue.fdr),
+  NKI  = sex.main.NKI.WNC[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_NKI = Anova.cov.pvalue.fdr),
+  HBN  = sex.main.HBN.WNC[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HBN = Anova.cov.pvalue.fdr)
+)
+
+sex.main.overlap.WNC <- Reduce(function(x, y) full_join(x, y, by = "region"), df_list_WNC)
+sex.main.overlap.WNC$signif_count <- rowSums(sex.main.overlap.WNC[, -1] < 0.05, na.rm = TRUE)
+sex.main.overlap.WNC$signif_count_factor <- factor(
+  sex.main.overlap.WNC$signif_count,
+  levels = 0:4,
+  labels = c("0", "1", "2", "3", "4")
+)
+sex.main.overlap.WNC <- sex.main.overlap.WNC %>% mutate(signif_greater_than_one = ifelse(signif_count > 1, "1", "0"))
+WNC_overlap.lh <- plot_cortex_overlap(sex.main.overlap.WNC, hemi = "left", atlas = "schaefer17_200", horizontal_layout = T)
+WNC_overlap.rh <- plot_cortex_overlap(sex.main.overlap.WNC, hemi = "right", atlas = "schaefer17_200", horizontal_layout = T)
+
+WNC_overlap <- annotate_figure(
+  plot_grid(WNC_overlap.lh, WNC_overlap.rh, ncol = 2),
+  top = text_grob("Overlap of Significant Effects Across Datasets", size = 24)
+)
+
+overlap_WNC_plots <- annotate_figure(plot_grid(WNC_overlap, overlap_legend, nrow = 2, rel_heights = c(1, 0.2)), 
+                                     bottom = text_grob("Number of Datasets", size = 24, y = 0.1))
+ 
+
+WNC_plots_final <- plot_grid(WNC_plots, overlap_WNC_plots, blank_space, nrow = 3, rel_heights = c(1, 0.3, 0.01), rel_widths = c(1, 0.9, 1))
+```
+
+
+```{r WNC and BNC plot, fig.width = 17, fig.height = 15}
+# final plot
+plot_grid(BNC_plots_final, blank_space, WNC_plots_final, ncol = 3, rel_widths = c(1, 0.1, 1))
+
+#ggsave(paste0("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/Conferences/OHBM 2026/", "fig1_BNC_WNC.svg"), plot_grid(BNC_plots_final, blank_space, WNC_plots_final, ncol = 3, rel_widths = c(1, 0.1, 1)), height = 17, width = 15, units = "in")
+
+
+
+```
+
+
+## sex effect with RESI
+
+```{r resi effect size reference}
+library(knitr)
+library(kableExtra)
+
+effect_table <- data.frame(
+  `Cohen's d` = c("[0, 0.2]", "(0.2, 0.5]", "(0.5, 0.8]", "> 0.8"),
+  `RESI`      = c("[0, 0.1]", "(0.1, 0.25]", "(0.25, 0.4]", "> 0.4"),
+  `Interpretation` = c(
+    "No effect – small",
+    "Small – medium",
+    "Medium – large",
+    "Large"
+  )
+)
+
+effect_table %>%
+  kable(
+    caption = "Table 1 from RESI paper",
+    booktabs = TRUE,
+    align = "c"
+  ) %>%
+  kable_styling(full_width = FALSE)
+```
+
+```{r make BNC plots across datasets with resi, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 14}
+
+sex.main.PNC.BNC_lh_resi <- plot_cortex(sex.main.PNC.BNC, hemi = "left", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.PNC.BNC_rh_resi <- plot_cortex(sex.main.PNC.BNC, hemi = "right", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200") 
+
+sex.main.HCPD.BNC_lh_resi <- plot_cortex(sex.main.HCPD.BNC, hemi = "left", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.HCPD.BNC_rh_resi <- plot_cortex(sex.main.HCPD.BNC, hemi = "right", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200") 
+
+sex.main.NKI.BNC_lh_resi <- plot_cortex(sex.main.NKI.BNC, hemi = "left", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.NKI.BNC_rh_resi <- plot_cortex(sex.main.NKI.BNC, hemi = "right", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200") 
+
+sex.main.HBN.BNC_lh_resi <- plot_cortex(sex.main.HBN.BNC, hemi = "left", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.HBN.BNC_rh_resi <- plot_cortex(sex.main.HBN.BNC, hemi = "right", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200") 
+ 
+sex.main.all_datasets.BNC_lh_resi <- plot_cortex(sex.main.all_datasets.BNC, hemi = "left", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200", horizontal_layout = TRUE) 
+sex.main.all_datasets.BNC_rh_resi <- plot_cortex(sex.main.all_datasets.BNC, hemi = "right", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200", horizontal_layout = TRUE) 
+
+
+#####
+# legend
+ylim1 = -0.1
+ylim2 = 0.26
+p <- ggplot() + 
+    geom_brain(data = sex.main.HBN.BNC, atlas = schaefer17_200, 
+               mapping=aes(fill=RESI), 
+               show.legend=TRUE) +
+     scale_fill_gradientn(colours = red_teal_white(256), 
+                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
+    theme_void()  +
+    theme(legend.title = element_blank(),
+          legend.text = element_text(size = 24),
+        legend.position = "bottom", 
+        legend.box = "horizontal", 
+        legend.key.height = unit(1, 'cm'),
+        legend.key.width = unit(2, 'cm'),
+        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
+  
+legend <- get_legend(p)
+
+# arrange plots 
+# PNC
+BNC_PNC <- annotate_figure(
+  plot_grid(sex.main.PNC.BNC_lh_resi, sex.main.PNC.BNC_rh_resi, ncol = 2),
+  top = text_grob("PNC", size = 24)
+)
+
+# HCP-D
+BNC_HCPD <- annotate_figure(
+  plot_grid(sex.main.HCPD.BNC_lh_resi, sex.main.HCPD.BNC_rh_resi, ncol = 2),
+  top = text_grob("HCP-D", size = 24)
+)
+
+# NKI
+BNC_NKI <- annotate_figure(
+  plot_grid(sex.main.NKI.BNC_lh_resi, sex.main.NKI.BNC_rh_resi, ncol = 2),
+  top = text_grob("NKI", size = 24)
+)
+
+# HBN
+BNC_HBN <- annotate_figure(
+  plot_grid(sex.main.HBN.BNC_lh_resi, sex.main.HBN.BNC_rh_resi, ncol = 2),
+  top = text_grob("HBN", size = 24)
+)
+
+# pooled dataset / all datasets
+BNC_all <- annotate_figure(
+  plot_grid(sex.main.all_datasets.BNC_lh_resi, sex.main.all_datasets.BNC_rh_resi, ncol = 2),
+  top = text_grob("Pooled Dataset", size = 24)
+)
+
+# blank plot for formatting
+blank_space <- ggplot() + theme_void()
+
+BNC_plots <- annotate_figure(
+  plot_grid(
+    blank_space,
+    plot_grid(BNC_PNC, BNC_HCPD, BNC_NKI, BNC_HBN, ncol = 2),
+    BNC_all,
+    legend,
+    blank_space,
+    nrow = 5,
+    rel_heights = c(0.05, 1, 0.29, 0.2, 0.05)
+  ),
+  top = text_grob("Between Network Connectivity", size = 24, face = "bold"),
+  bottom = text_grob("Sex Effect (RESI)", size = 24, y = 2)
+)
+ 
+```
+
+
+```{r make BNC overlapping effects plot with resi}
+# overlap plots
+df_list_BNC <- list(
+  PNC  = sex.main.PNC.BNC[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_PNC = Anova.cov.pvalue.fdr),
+  HCPD = sex.main.HCPD.BNC[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HCPD = Anova.cov.pvalue.fdr),
+  NKI  = sex.main.NKI.BNC[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_NKI = Anova.cov.pvalue.fdr),
+  HBN  = sex.main.HBN.BNC[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HBN = Anova.cov.pvalue.fdr)
+)
+
+sex.main.overlap.BNC <- Reduce(function(x, y) full_join(x, y, by = "region"), df_list_BNC)
+sex.main.overlap.BNC$signif_count <- rowSums(sex.main.overlap.BNC[, -1] < 0.05, na.rm = TRUE)
+sex.main.overlap.BNC$signif_count_factor <- factor(
+  sex.main.overlap.BNC$signif_count,
+  levels = 0:4,
+  labels = c("0", "1", "2", "3", "4")
+)
+sex.main.overlap.BNC <- sex.main.overlap.BNC %>% mutate(signif_greater_than_one = ifelse(signif_count > 1, "1", "0"))
+
+count_colors <- c(
+  "0" = "white",
+  "1" = "white",
+  "2" = "#fcdac0",
+  "3" = "#e87b96",
+  "4" = "#ad2a72"
+)
+
+ 
+BNC_overlap.lh <- plot_cortex_overlap(sex.main.overlap.BNC, hemi = "left", atlas = "schaefer17_200", horizontal_layout = T)
+BNC_overlap.rh <- plot_cortex_overlap(sex.main.overlap.BNC, hemi = "right", atlas = "schaefer17_200", horizontal_layout = T)
+
+BNC_overlap <- annotate_figure(
+  plot_grid(BNC_overlap.lh, BNC_overlap.rh, ncol = 2),
+  top = text_grob("Overlap of Significant Effects Across Datasets", size = 24)
+)
+# legend for overlap
+count_colors_legend <- c(
+  "0–1" = "white",
+  "2"   = "#fcdac0",
+  "3"   = "#e87b96",
+  "4"   = "#ad2a72"
+)
+
+
+legend_df <- data.frame(
+  overlap = factor(names(count_colors_legend),
+                   levels = names(count_colors_legend))
+)
+
+legend_plot <- ggplot(data.frame(overlap = factor(names(count_colors_legend),
+                                                  levels = names(count_colors_legend))),
+                      aes(x = overlap, fill = overlap)) +
+  geom_bar() +
+  scale_fill_manual(
+    values = count_colors_legend,
+    guide = guide_legend(
+      direction = "horizontal",
+      label.position = "bottom",
+      override.aes = list(
+        colour = "black",   # outline boxes
+        size = 1
+      )
+    )
+  ) +
+  theme_void() +
+  theme(
+    legend.title = element_blank(),
+    legend.text  = element_text(size = 18),
+    legend.key.size = unit(1.3, "cm"),
+    legend.position = "bottom"
+  )
+
+# Extract the horizontal legend
+overlap_legend <- get_legend(legend_plot)
+
+overlap_BNC_plots <- annotate_figure(plot_grid(BNC_overlap, overlap_legend, nrow = 2, rel_heights = c(1, 0.2)), 
+                                     bottom = text_grob("Number of Datasets", size = 24, y = 0.1))
+ 
+ 
+BNC_plots_final <- plot_grid(BNC_plots, overlap_BNC_plots, blank_space, nrow = 3, rel_heights = c(1, 0.3, 0.01), rel_widths = c(1, 0.9, 1))
+```
+
+
+
+```{r make WNC plots with resi, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 14}
+# WNC
+sex.main.PNC.WNC_lh_resi <- plot_cortex(sex.main.PNC.WNC, hemi = "left", measure = "RESI", ylim1 = -0.3, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.PNC.WNC_rh_resi <- plot_cortex(sex.main.PNC.WNC, hemi = "right", measure = "RESI", ylim1 = -0.3, ylim2 = 0.26, atlas = "schaefer17_200") 
+
+sex.main.HCPD.WNC_lh_resi <- plot_cortex(sex.main.HCPD.WNC, hemi = "left", measure = "RESI", ylim1 = -0.3, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.HCPD.WNC_rh_resi <- plot_cortex(sex.main.HCPD.WNC, hemi = "right", measure = "RESI", ylim1 = -0.3, ylim2 = 0.26, atlas = "schaefer17_200") 
+
+sex.main.NKI.WNC_lh_resi <- plot_cortex(sex.main.NKI.WNC, hemi = "left", measure = "RESI", ylim1 = -0.3, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.NKI.WNC_rh_resi <- plot_cortex(sex.main.NKI.WNC, hemi = "right", measure = "RESI", ylim1 = -0.3, ylim2 = 0.26, atlas = "schaefer17_200") 
+
+sex.main.HBN.WNC_lh_resi <- plot_cortex(sex.main.HBN.WNC, hemi = "left", measure = "RESI", ylim1 = -0.3, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.HBN.WNC_rh_resi <- plot_cortex(sex.main.HBN.WNC, hemi = "right", measure = "RESI", ylim1 = -0.3, ylim2 = 0.26, atlas = "schaefer17_200") 
+ 
+sex.main.all_datasets.WNC_lh_resi <- plot_cortex(sex.main.all_datasets.WNC, hemi = "left", measure = "RESI", ylim1 = -0.3, ylim2 = 0.26, atlas = "schaefer17_200", horizontal_layout = TRUE) 
+sex.main.all_datasets.WNC_rh_resi <- plot_cortex(sex.main.all_datasets.WNC, hemi = "right", measure = "RESI", ylim1 = -0.3, ylim2 = 0.26, atlas = "schaefer17_200", horizontal_layout = TRUE) 
+
+ 
+
+# legend
+ylim1 = -0.3
+ylim2 = 0.26
+p <- ggplot() + 
+    geom_brain(data = sex.main.HBN.WNC, atlas = schaefer17_200, 
+               mapping=aes(fill=GAM.cov.tvalue), 
+               show.legend=TRUE) +
+     scale_fill_gradientn(colours = red_teal_white(256), 
+                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
+    theme_void()  +
+    theme(legend.title = element_blank(),
+          legend.text = element_text(size = 24),
+        legend.position = "bottom", 
+        legend.box = "horizontal", 
+        legend.key.height = unit(1, 'cm'),
+        legend.key.width = unit(2, 'cm'),
+        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
+  
+legend <- get_legend(p)
+
+# PNC
+WNC_PNC <- annotate_figure(
+  plot_grid(sex.main.PNC.WNC_lh_resi, sex.main.PNC.WNC_rh_resi, ncol = 2),
+  top = text_grob("PNC", size = 24)
+)
+
+# HCP-D
+WNC_HCPD <- annotate_figure(
+  plot_grid(sex.main.HCPD.WNC_lh_resi, sex.main.HCPD.WNC_rh_resi, ncol = 2),
+  top = text_grob("HCP-D", size = 24)
+)
+
+# NKI
+WNC_NKI <- annotate_figure(
+  plot_grid(sex.main.NKI.WNC_lh_resi, sex.main.NKI.WNC_rh_resi, ncol = 2),
+  top = text_grob("NKI", size = 24)
+)
+
+# HBN
+WNC_HBN <- annotate_figure(
+  plot_grid(sex.main.HBN.WNC_lh_resi, sex.main.HBN.WNC_rh_resi, ncol = 2),
+  top = text_grob("HBN", size = 24)
+)
+
+# All Datasets
+WNC_all <- annotate_figure(
+  plot_grid(sex.main.all_datasets.WNC_lh_resi, sex.main.all_datasets.WNC_rh_resi, ncol = 2),
+  top = text_grob("Pooled Dataset", size = 24)
+)
+
+
+WNC_plots <- annotate_figure(
+  plot_grid(
+    blank_space,
+    plot_grid(WNC_PNC, WNC_HCPD, WNC_NKI, WNC_HBN, ncol = 2),
+    WNC_all,
+    legend,
+    blank_space,
+    nrow = 5,
+    rel_heights = c(0.05, 1, 0.29, 0.2, 0.05)
+  ),
+  top = text_grob("Within Network Connectivity", size = 24, face = "bold"),
+  bottom = text_grob("Sex Effect (RESI)", size = 24, y = 2)
+)
+  
+```
+
+```{r make WNC overlapping effects plot with resi}
+# overlap plots
+df_list_WNC <- list(
+  PNC  = sex.main.PNC.WNC[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_PNC = Anova.cov.pvalue.fdr),
+  HCPD = sex.main.HCPD.WNC[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HCPD = Anova.cov.pvalue.fdr),
+  NKI  = sex.main.NKI.WNC[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_NKI = Anova.cov.pvalue.fdr),
+  HBN  = sex.main.HBN.WNC[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HBN = Anova.cov.pvalue.fdr)
+)
+
+sex.main.overlap.WNC <- Reduce(function(x, y) full_join(x, y, by = "region"), df_list_WNC)
+sex.main.overlap.WNC$signif_count <- rowSums(sex.main.overlap.WNC[, -1] < 0.05, na.rm = TRUE)
+sex.main.overlap.WNC$signif_count_factor <- factor(
+  sex.main.overlap.WNC$signif_count,
+  levels = 0:4,
+  labels = c("0", "1", "2", "3", "4")
+)
+sex.main.overlap.WNC <- sex.main.overlap.WNC %>% mutate(signif_greater_than_one = ifelse(signif_count > 1, "1", "0"))
+WNC_overlap.lh <- plot_cortex_overlap(sex.main.overlap.WNC, hemi = "left", atlas = "schaefer17_200", horizontal_layout = T)
+WNC_overlap.rh <- plot_cortex_overlap(sex.main.overlap.WNC, hemi = "right", atlas = "schaefer17_200", horizontal_layout = T)
+
+WNC_overlap <- annotate_figure(
+  plot_grid(WNC_overlap.lh, WNC_overlap.rh, ncol = 2),
+  top = text_grob("Overlap of Significant Effects Across Datasets", size = 24)
+)
+
+overlap_WNC_plots <- annotate_figure(plot_grid(WNC_overlap, overlap_legend, nrow = 2, rel_heights = c(1, 0.2)), 
+                                     bottom = text_grob("Number of Datasets", size = 24, y = 0.1))
+ 
+
+WNC_plots_final <- plot_grid(WNC_plots, overlap_WNC_plots, blank_space, nrow = 3, rel_heights = c(1, 0.3, 0.01), rel_widths = c(1, 0.9, 1))
+```
+
+
+```{r WNC and BNC plot with resi, fig.width = 17, fig.height = 15}
+# final plot
+plot_grid(BNC_plots_final, blank_space, WNC_plots_final, ncol = 3, rel_widths = c(1, 0.1, 1))
+
+ 
+#ggsave(paste0("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/Conferences/OHBM 2026/", "fig1_BNC_WNC.svg"), plot_grid(BNC_plots_final, blank_space, WNC_plots_final, ncol = 3, rel_widths = c(1, 0.1, 1)), height = 17, width = 15, units = "in")
+
+#ggsave(paste0("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/Conferences/SOBP2026/", "fig1_BNC_WNC.png"), plot_grid(BNC_plots_final, blank_space, WNC_plots_final, ncol = 3, rel_widths = c(1, 0.1, 1)), height = 17, width = 15, units = "in")
+
+ 
+```
+
+### RESI plots
+```{r sanity check for RESI output}
+resi.PNC.BNC.t2S <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/PNC/resi/BNC/PNC_t2S_sex_maineffects_schaefer200x17.csv")
+cor.test(resi.PNC.BNC.t2S$RESI, resi.PNC.BNC$RESI)
+
+resi.PNC.WNC.t2S <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/PNC/resi/WNC/PNC_t2S_sex_maineffects_schaefer200x17.csv")
+cor.test(resi.PNC.WNC.t2S$RESI, resi.PNC.WNC$RESI)
+
+resi.HBN.BNC.t2S <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HBN/resi/BNC/HBN_t2S_sex_maineffects_schaefer200x17.csv")
+cor.test(resi.HBN.BNC.t2S$RESI, resi.HBN.BNC$RESI)
+
+resi.HBN.WNC.t2S <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HBN/resi/WNC/HBN_t2S_sex_maineffects_schaefer200x17.csv")
+cor.test(resi.HBN.WNC.t2S$RESI, resi.HBN.WNC$RESI)
+
+print("RESI estimates from t2S (point-estimate only, very fast, uses the mgcv t-statistic directly) and resiPEse_Th1 (theory-based, fast CI, no bootstrap) methods are highly correlated")
+```
+
+
+## maybe look at network segregation and integration
+1.1: supplementary figure - GBC?
+
+```{r load GBC sex effect}
+sex.main.PNC.GBC <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "PNC", "GBC"))
+sex.main.PNC.GBC$region <- paste0("17", sex.main.PNC.GBC$region)
+sex.main.PNC.GBC <- sig.effects(sex.main.PNC.GBC, "GBC", "sex", "PNC")
+resi.PNC.GBC <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/PNC/resi/GBC/PNC_resiPEse_Th1_sex_maineffects_schaefer200x17.csv")
+resi.PNC.GBC$region <- paste0("17", resi.PNC.GBC$region )
+resi.PNC.GBC <- resi.PNC.GBC %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+sex.main.PNC.GBC <- merge(sex.main.PNC.GBC, resi.PNC.GBC)
+
+sex.main.HCPD.GBC <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "HCPD", "GBC"))
+sex.main.HCPD.GBC <- sig.effects(sex.main.HCPD.GBC, "GBC", "sex", "HCPD")
+sex.main.HCPD.GBC$region <- paste0("17", sex.main.HCPD.GBC$region)
+resi.HCPD.GBC <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HCPD/resi/GBC/HCPD_resiPEse_Th1_sex_maineffects_schaefer200x17.csv")
+resi.HCPD.GBC$region <- paste0("17", resi.HCPD.GBC$region )
+resi.HCPD.GBC <- resi.HCPD.GBC %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+sex.main.HCPD.GBC <- merge(sex.main.HCPD.GBC, resi.HCPD.GBC)
+
+sex.main.NKI.GBC <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "NKI", "GBC"))
+sex.main.NKI.GBC <- sig.effects(sex.main.NKI.GBC, "GBC", "sex", "NKI")
+sex.main.NKI.GBC$region <- paste0("17", sex.main.NKI.GBC$region)
+resi.NKI.GBC <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/NKI/resi/GBC/NKI_resiPEse_Th1_sex_maineffects_schaefer200x17.csv")
+resi.NKI.GBC$region <- paste0("17", resi.NKI.GBC$region )
+resi.NKI.GBC <- resi.NKI.GBC %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+sex.main.NKI.GBC <- merge(sex.main.NKI.GBC, resi.NKI.GBC)
+
+sex.main.HBN.GBC <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "HBN", "GBC"))
+sex.main.HBN.GBC <- sig.effects(sex.main.HBN.GBC, "GBC", "sex", "HBN")
+sex.main.HBN.GBC$region <- paste0("17", sex.main.HBN.GBC$region)
+resi.HBN.GBC <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HBN/resi/GBC/HBN_resiPEse_Th1_sex_maineffects_schaefer200x17.csv")
+resi.HBN.GBC$region <- paste0("17", resi.HBN.GBC$region )
+resi.HBN.GBC <- resi.HBN.GBC %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+sex.main.HBN.GBC <- merge(sex.main.HBN.GBC, resi.HBN.GBC)
+
+sex.main.all_datasets.GBC <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "all_datasets", "GBC"))
+sex.main.all_datasets.GBC <- sig.effects(sex.main.all_datasets.GBC, "GBC", "sex", "all_datasets")
+sex.main.all_datasets.GBC$region <- paste0("17", sex.main.all_datasets.GBC$region)
+resi.all_datasets.GBC <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/resi/GBC/all_datasets_resiPEse_Th1_sex_maineffects_schaefer200x17.csv")
+resi.all_datasets.GBC$region <- paste0("17", resi.all_datasets.GBC$region )
+resi.all_datasets.GBC <- resi.all_datasets.GBC %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+sex.main.all_datasets.GBC <- merge(sex.main.all_datasets.GBC, resi.all_datasets.GBC)
+
+
+#range(sex.main.PNC.GBC$GAM.cov.tvalue)
+#range(sex.main.HCPD.GBC$GAM.cov.tvalue)
+#range(sex.main.HBN.GBC$GAM.cov.tvalue)
+#range(sex.main.NKI.GBC$GAM.cov.tvalue)
+#range(sex.main.all_datasets.GBC$GAM.cov.tvalue)
+```
+
+## Functional Connectivity Strength - sex effect with t-value
+```{r make GBC plots across datasets, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 14}
+
+sex.main.PNC.GBC_lh <- plot_cortex(sex.main.PNC.GBC, hemi = "left", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200") 
+sex.main.PNC.GBC_rh <- plot_cortex(sex.main.PNC.GBC, hemi = "right", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200") 
+
+sex.main.HCPD.GBC_lh <- plot_cortex(sex.main.HCPD.GBC, hemi = "left", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200") 
+sex.main.HCPD.GBC_rh <- plot_cortex(sex.main.HCPD.GBC, hemi = "right", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200") 
+
+sex.main.NKI.GBC_lh <- plot_cortex(sex.main.NKI.GBC, hemi = "left", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200") 
+sex.main.NKI.GBC_rh <- plot_cortex(sex.main.NKI.GBC, hemi = "right", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200") 
+
+sex.main.HBN.GBC_lh <- plot_cortex(sex.main.HBN.GBC, hemi = "left", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200") 
+sex.main.HBN.GBC_rh <- plot_cortex(sex.main.HBN.GBC, hemi = "right", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200") 
+ 
+sex.main.all_datasets.GBC_lh <- plot_cortex(sex.main.all_datasets.GBC, hemi = "left", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200", horizontal_layout = TRUE) 
+sex.main.all_datasets.GBC_rh <- plot_cortex(sex.main.all_datasets.GBC, hemi = "right", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2 = 10, atlas = "schaefer17_200", horizontal_layout = TRUE) 
+
+
+#####
+# legend
+ylim1 = -2
+ylim2 = 10
+p <- ggplot() + 
+    geom_brain(data = sex.main.HBN.GBC, atlas = schaefer17_200, 
+               mapping=aes(fill=GAM.cov.tvalue), 
+               show.legend=TRUE) +
+     scale_fill_gradientn(colours = red_teal_white(256), 
+                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
+    theme_void()  +
+    theme(legend.title = element_blank(),
+          legend.text = element_text(size = 24),
+        legend.position = "bottom", 
+        legend.box = "horizontal", 
+        legend.key.height = unit(1, 'cm'),
+        legend.key.width = unit(2, 'cm'),
+        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
+  
+legend <- get_legend(p)
+
+# arrange plots 
+# PNC
+GBC_PNC <- annotate_figure(
+  plot_grid(sex.main.PNC.GBC_lh, sex.main.PNC.GBC_rh, ncol = 2),
+  top = text_grob("PNC", size = 24)
+)
+
+# HCP-D
+GBC_HCPD <- annotate_figure(
+  plot_grid(sex.main.HCPD.GBC_lh, sex.main.HCPD.GBC_rh, ncol = 2),
+  top = text_grob("HCP-D", size = 24)
+)
+
+# NKI
+GBC_NKI <- annotate_figure(
+  plot_grid(sex.main.NKI.GBC_lh, sex.main.NKI.GBC_rh, ncol = 2),
+  top = text_grob("NKI", size = 24)
+)
+
+# HBN
+GBC_HBN <- annotate_figure(
+  plot_grid(sex.main.HBN.GBC_lh, sex.main.HBN.GBC_rh, ncol = 2),
+  top = text_grob("HBN", size = 24)
+)
+
+# pooled dataset / all datasets
+GBC_all <- annotate_figure(
+  plot_grid(sex.main.all_datasets.GBC_lh, sex.main.all_datasets.GBC_rh, ncol = 2),
+  top = text_grob("Pooled Dataset", size = 24)
+)
+
+# blank plot for formatting
+blank_space <- ggplot() + theme_void()
+
+GBC_plots <- annotate_figure(
+  plot_grid(
+    blank_space,
+    plot_grid(GBC_PNC, GBC_HCPD, GBC_NKI, GBC_HBN, ncol = 2),
+    GBC_all,
+    legend,
+    blank_space,
+    nrow = 5,
+    rel_heights = c(0.05, 1, 0.29, 0.2, 0.05)
+  ),
+  top = text_grob("Functional Connectivity Strength", size = 24, face = "bold"),
+  bottom = text_grob("Sex Effect (t-value)", size = 24, y = 2)
+)
+ 
+```
+
+
+```{r make GBC overlapping effects plot, fig.height = 15, fig.width = 10}
+# overlap plots
+df_list_GBC <- list(
+  PNC  = sex.main.PNC.GBC[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_PNC = Anova.cov.pvalue.fdr),
+  HCPD = sex.main.HCPD.GBC[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HCPD = Anova.cov.pvalue.fdr),
+  NKI  = sex.main.NKI.GBC[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_NKI = Anova.cov.pvalue.fdr),
+  HBN  = sex.main.HBN.GBC[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HBN = Anova.cov.pvalue.fdr)
+)
+
+sex.main.overlap.GBC <- Reduce(function(x, y) full_join(x, y, by = "region"), df_list_GBC)
+sex.main.overlap.GBC$signif_count <- rowSums(sex.main.overlap.GBC[, -1] < 0.05, na.rm = TRUE)
+sex.main.overlap.GBC$signif_count_factor <- factor(
+  sex.main.overlap.GBC$signif_count,
+  levels = 0:4,
+  labels = c("0", "1", "2", "3", "4")
+)
+sex.main.overlap.GBC <- sex.main.overlap.GBC %>% mutate(signif_greater_than_one = ifelse(signif_count > 1, "1", "0"))
+
+count_colors <- c(
+  "0" = "white",
+  "1" = "white",
+  "2" = "#fcdac0",
+  "3" = "#e87b96",
+  "4" = "#ad2a72"
+)
+
+GBC_overlap.lh <- plot_cortex_overlap(sex.main.overlap.GBC, hemi = "left", atlas = "schaefer17_200", horizontal_layout = T)
+GBC_overlap.rh <- plot_cortex_overlap(sex.main.overlap.GBC, hemi = "right", atlas = "schaefer17_200", horizontal_layout = T)
+
+GBC_overlap <- annotate_figure(
+  plot_grid(GBC_overlap.lh, GBC_overlap.rh, ncol = 2),
+  top = text_grob("Overlap of Significant Effects Across Datasets", size = 24)
+)
+# legend for overlap
+count_colors_legend <- c(
+  "0–1" = "white",
+  "2"   = "#fcdac0",
+  "3"   = "#e87b96",
+  "4"   = "#ad2a72"
+)
+
+
+legend_df <- data.frame(
+  overlap = factor(names(count_colors_legend),
+                   levels = names(count_colors_legend))
+)
+
+legend_plot <- ggplot(data.frame(overlap = factor(names(count_colors_legend),
+                                                  levels = names(count_colors_legend))),
+                      aes(x = overlap, fill = overlap)) +
+  geom_bar() +
+  scale_fill_manual(
+    values = count_colors_legend,
+    guide = guide_legend(
+      direction = "horizontal",
+      label.position = "bottom",
+      override.aes = list(
+        colour = "black",   # outline boxes
+        size = 1
+      )
+    )
+  ) +
+  theme_void() +
+  theme(
+    legend.title = element_blank(),
+    legend.text  = element_text(size = 18),
+    legend.key.size = unit(1.3, "cm"),
+    legend.position = "bottom"
+  )
+
+# Extract the horizontal legend
+overlap_legend <- get_legend(legend_plot)
+
+overlap_GBC_plots <- annotate_figure(plot_grid(GBC_overlap, overlap_legend, nrow = 2, rel_heights = c(1, 0.2)), 
+                                     bottom = text_grob("Number of Datasets", size = 24, y = 0.1))
+ 
+ 
+GBC_plots_final <- plot_grid(GBC_plots, overlap_GBC_plots, blank_space, nrow = 3, rel_heights = c(1, 0.3, 0.01), rel_widths = c(1, 0.9, 1))
+
+GBC_plots_final
+```
+
+
+## Functional Connectivity Strength - sex effect with RESI
+```{r make GBC plots across datasets with resi, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 14}
+
+sex.main.PNC.GBC_lh_resi <- plot_cortex(sex.main.PNC.GBC, hemi = "left", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.PNC.GBC_rh_resi <- plot_cortex(sex.main.PNC.GBC, hemi = "right", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200") 
+
+sex.main.HCPD.GBC_lh_resi <- plot_cortex(sex.main.HCPD.GBC, hemi = "left", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.HCPD.GBC_rh_resi <- plot_cortex(sex.main.HCPD.GBC, hemi = "right", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200") 
+
+sex.main.NKI.GBC_lh_resi <- plot_cortex(sex.main.NKI.GBC, hemi = "left", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.NKI.GBC_rh_resi <- plot_cortex(sex.main.NKI.GBC, hemi = "right", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200") 
+
+sex.main.HBN.GBC_lh_resi <- plot_cortex(sex.main.HBN.GBC, hemi = "left", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.HBN.GBC_rh_resi <- plot_cortex(sex.main.HBN.GBC, hemi = "right", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200") 
+ 
+sex.main.all_datasets.GBC_lh_resi <- plot_cortex(sex.main.all_datasets.GBC, hemi = "left", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200", horizontal_layout = TRUE) 
+sex.main.all_datasets.GBC_rh_resi <- plot_cortex(sex.main.all_datasets.GBC, hemi = "right", measure = "RESI", ylim1 = -0.1, ylim2 = 0.26, atlas = "schaefer17_200", horizontal_layout = TRUE) 
+
+
+#####
+# legend
+ylim1 = -0.1
+ylim2 = 0.26
+p <- ggplot() + 
+    geom_brain(data = sex.main.HBN.GBC, atlas = schaefer17_200, 
+               mapping=aes(fill=RESI), 
+               show.legend=TRUE) +
+     scale_fill_gradientn(colours = red_teal_white(256), 
+                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
+    theme_void()  +
+    theme(legend.title = element_blank(),
+          legend.text = element_text(size = 24),
+        legend.position = "bottom", 
+        legend.box = "horizontal", 
+        legend.key.height = unit(1, 'cm'),
+        legend.key.width = unit(2, 'cm'),
+        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
+  
+legend <- get_legend(p)
+
+# arrange plots 
+# PNC
+GBC_PNC <- annotate_figure(
+  plot_grid(sex.main.PNC.GBC_lh_resi, sex.main.PNC.GBC_rh_resi, ncol = 2),
+  top = text_grob("PNC", size = 24)
+)
+
+# HCP-D
+GBC_HCPD <- annotate_figure(
+  plot_grid(sex.main.HCPD.GBC_lh_resi, sex.main.HCPD.GBC_rh_resi, ncol = 2),
+  top = text_grob("HCP-D", size = 24)
+)
+
+# NKI
+GBC_NKI <- annotate_figure(
+  plot_grid(sex.main.NKI.GBC_lh_resi, sex.main.NKI.GBC_rh_resi, ncol = 2),
+  top = text_grob("NKI", size = 24)
+)
+
+# HBN
+GBC_HBN <- annotate_figure(
+  plot_grid(sex.main.HBN.GBC_lh_resi, sex.main.HBN.GBC_rh_resi, ncol = 2),
+  top = text_grob("HBN", size = 24)
+)
+
+# pooled dataset / all datasets
+GBC_all <- annotate_figure(
+  plot_grid(sex.main.all_datasets.GBC_lh_resi, sex.main.all_datasets.GBC_rh_resi, ncol = 2),
+  top = text_grob("Pooled Dataset", size = 24)
+)
+
+# blank plot for formatting
+blank_space <- ggplot() + theme_void()
+
+GBC_plots <- annotate_figure(
+  plot_grid(
+    blank_space,
+    plot_grid(GBC_PNC, GBC_HCPD, GBC_NKI, GBC_HBN, ncol = 2),
+    GBC_all,
+    legend,
+    blank_space,
+    nrow = 5,
+    rel_heights = c(0.05, 1, 0.29, 0.2, 0.05)
+  ),
+  top = text_grob("Functional Connectivity Strength", size = 24, face = "bold"),
+  bottom = text_grob("Sex Effect (RESI)", size = 24, y = 2)
+)
+ 
+```
+
+
+```{r make GBC overlapping effects plot with resi, fig.height = 15, fig.width = 10}
+# overlap plots
+df_list_GBC <- list(
+  PNC  = sex.main.PNC.GBC[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_PNC = Anova.cov.pvalue.fdr),
+  HCPD = sex.main.HCPD.GBC[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HCPD = Anova.cov.pvalue.fdr),
+  NKI  = sex.main.NKI.GBC[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_NKI = Anova.cov.pvalue.fdr),
+  HBN  = sex.main.HBN.GBC[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HBN = Anova.cov.pvalue.fdr)
+)
+
+sex.main.overlap.GBC <- Reduce(function(x, y) full_join(x, y, by = "region"), df_list_GBC)
+sex.main.overlap.GBC$signif_count <- rowSums(sex.main.overlap.GBC[, -1] < 0.05, na.rm = TRUE)
+sex.main.overlap.GBC$signif_count_factor <- factor(
+  sex.main.overlap.GBC$signif_count,
+  levels = 0:4,
+  labels = c("0", "1", "2", "3", "4")
+)
+sex.main.overlap.GBC <- sex.main.overlap.GBC %>% mutate(signif_greater_than_one = ifelse(signif_count > 1, "1", "0"))
+
+count_colors <- c(
+  "0" = "white",
+  "1" = "white",
+  "2" = "#fcdac0",
+  "3" = "#e87b96",
+  "4" = "#ad2a72"
+)
+
+
+
+GBC_overlap.lh <- plot_cortex_overlap(sex.main.overlap.GBC, hemi = "left", atlas = "schaefer17_200", horizontal_layout = T)
+GBC_overlap.rh <- plot_cortex_overlap(sex.main.overlap.GBC, hemi = "right", atlas = "schaefer17_200", horizontal_layout = T)
+
+GBC_overlap <- annotate_figure(
+  plot_grid(GBC_overlap.lh, GBC_overlap.rh, ncol = 2),
+  top = text_grob("Overlap of Significant Effects Across Datasets", size = 24)
+)
+# legend for overlap
+count_colors_legend <- c(
+  "0–1" = "white",
+  "2"   = "#fcdac0",
+  "3"   = "#e87b96",
+  "4"   = "#ad2a72"
+)
+
+legend_df <- data.frame(
+  overlap = factor(names(count_colors_legend),
+                   levels = names(count_colors_legend))
+)
+
+legend_plot <- ggplot(data.frame(overlap = factor(names(count_colors_legend),
+                                                  levels = names(count_colors_legend))),
+                      aes(x = overlap, fill = overlap)) +
+  geom_bar() +
+  scale_fill_manual(
+    values = count_colors_legend,
+    guide = guide_legend(
+      direction = "horizontal",
+      label.position = "bottom",
+      override.aes = list(
+        colour = "black",   # outline boxes
+        size = 1
+      )
+    )
+  ) +
+  theme_void() +
+  theme(
+    legend.title = element_blank(),
+    legend.text  = element_text(size = 18),
+    legend.key.size = unit(1.3, "cm"),
+    legend.position = "bottom"
+  )
+
+# Extract the horizontal legend
+overlap_legend <- get_legend(legend_plot)
+
+overlap_GBC_plots <- annotate_figure(plot_grid(GBC_overlap, overlap_legend, nrow = 2, rel_heights = c(1, 0.2)), 
+                                     bottom = text_grob("Number of Datasets", size = 24, y = 0.1))
+ 
+ 
+GBC_plots_final <- plot_grid(GBC_plots, overlap_GBC_plots, blank_space, nrow = 3, rel_heights = c(1, 0.3, 0.01), rel_widths = c(1, 0.9, 1))
+
+GBC_plots_final
+```
+
+1.2: supplement figure - null correlations with S-A axis?
+1.3: age-by-sex - see below
+
+# 2. parcels showing sex differences are involved in X cognitive functions via neurosynth -- may not include in final
+Which Neurosynth terms show significant functional activation (z > 1.64) within the parcels where females have higher WNC? What about where males have higher BNC?
+```{r load neurosynth}
+# code adapted from Val Sydnor's https://github.com/PennLINC/thalamocortical_development/blob/main/results/developmental_effects/thalamocortical_connectivity_development.Rmd
+#Neurosynth z-score maps generated by nimare. Nimare uses multilevel kernel density analysis- Chi-square analysis + FDR-correction to use the same procedure as Neurosynth
+neurosynth.terms <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/input/neurosynth_annotations/schaefer200/schaefer200x17_neurosynth_125terms.csv") %>% select(-regionID) %>% rename(region = label)
+neurosynth.termlist <- names(neurosynth.terms)[-1] #list of terms  
+```
+
+
+We examined the 10 most positively correlated Neurosynth terms with the BNC sex difference map, focusing on positive correlations because they indicate cognitive domains whose spatial patterns overlap with parcels showing greater BNC in males relative to females. In contrast, we examined the ten most negatively correlated Neurosynth terms with the WNC sex difference map, focusing on negatively correlations because they indicate cognitive domains whose spatial patterns overlap with parcels showing greater WNC in females relative to males.
+```{r overlapping effects neurosynth decoding of sex differences, fig.height = 7, fig.width = 7}
+# identify overlapping significant effects across datasets (2 or more datasets), and get avg t-value for each of those parcels
+BNC_sexeffect_overlap <- identify_sexeffect_overlap_tvalues("BNC") %>% mutate(significant_status = ifelse(signif_2plus == 1, "Sig", "Nonsig"))
+WNC_sexeffect_overlap <- identify_sexeffect_overlap_tvalues("WNC") %>% mutate(significant_status = ifelse(signif_2plus == 1, "Sig", "Nonsig"))
+ 
+# fdr correction of neurosynth terms correlations with BNC and WNC sex effect maps
+BNC_neurosynth <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/spin_test/neurosynth/BNC_neurosynth_spin_test_results_overlap.csv")
+BNC_neurosynth$pvalue.fdr <- p.adjust(BNC_neurosynth$p_spin, method = c("fdr")) 
+BNC_neurosynth_fdr <- BNC_neurosynth %>% filter(pvalue.fdr < 0.05)  
+BNC_neurosynth_fdr %>% arrange(pvalue.fdr)
+BNC_neurosynth_top10 <- rbind(slice_max(BNC_neurosynth_fdr, order_by = term.correlation, n = 10)) # 10 most positively correlated neurosynth terms with the sex diff map. Looking at positive correlations because they reflect cognitive terms that spatially align with regions showing higher BNC in males (male > female).
+BNC_neurosynth_top10$term <- tools::toTitleCase(gsub("_", " ", BNC_neurosynth_top10$term))
+
+WNC_neurosynth <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/spin_test/neurosynth/WNC_neurosynth_spin_test_results_overlap.csv")
+WNC_neurosynth$pvalue.fdr <- p.adjust(WNC_neurosynth$p_spin, method = c("fdr")) 
+WNC_neurosynth_fdr <- WNC_neurosynth %>% filter(pvalue.fdr < 0.05)  
+WNC_neurosynth_top10 <- rbind(slice_min(WNC_neurosynth_fdr, order_by = term.correlation, n = 10)) # 10 most negatively correlated neurosynth terms with the sex diff map. Looking at NEGATIVE correlations because they reflect cognitive terms that spatially align with regions showing higher WNC in females (female > male).
+WNC_neurosynth_top10$term <- tools::toTitleCase(gsub("_", " ", WNC_neurosynth_top10$term))
+WNC_neurosynth_top10$term <- gsub("Autobiographical Memory", "Autobio. Memory", WNC_neurosynth_top10$term)
+
+ 
+```
+
+```{r overlap tvalue plots, fig.height = 6, fig.width = 14}
+# plot avg t-value 
+BNC_overlap_tvalue_plot_lh <- plot_cortex(BNC_sexeffect_overlap, hemi = "left", measure = "mean_t_sig2", ylim1 = -0.5, ylim2 = 5.5, atlas = "schaefer17_200") 
+BNC_overlap_tvalue_plot_rh <- plot_cortex(BNC_sexeffect_overlap, hemi = "right", measure = "mean_t_sig2", ylim1 = -0.5, ylim2 = 5.5, atlas = "schaefer17_200") 
+ 
+WNC_overlap_tvalue_plot_lh <- plot_cortex(WNC_sexeffect_overlap, hemi = "left", measure = "mean_t_sig2", ylim1 = -6, ylim2 = 5, atlas = "schaefer17_200") 
+WNC_overlap_tvalue_plot_rh <- plot_cortex(WNC_sexeffect_overlap, hemi = "right", measure = "mean_t_sig2", ylim1 = -6, ylim2 = 5, atlas = "schaefer17_200") 
+  
+# legend for BNC overlap
+ylim1 = -0.5
+ylim2 = 5.5
+p_BNC <- ggplot() + 
+    geom_brain(data = BNC_sexeffect_overlap, atlas = schaefer17_200, 
+               mapping=aes(fill=mean_t_sig2), 
+               show.legend=TRUE) +
+     scale_fill_gradientn(colours = red_teal_white(256), 
+                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
+    theme_void()  +
+    theme(legend.title = element_blank(),
+          legend.text = element_text(size = 24),
+        legend.position = "bottom", 
+        legend.box = "horizontal", 
+        legend.key.height = unit(1, 'cm'),
+        legend.key.width = unit(2, 'cm'),
+        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
+  
+legend_BNC_overlap <- get_legend(p_BNC)
+
+# legend for WNC overlap
+ylim1 = -6
+ylim2 = 5
+p_WNC <- ggplot() + 
+    geom_brain(data = WNC_sexeffect_overlap, atlas = schaefer17_200, 
+               mapping=aes(fill=mean_t_sig2), 
+               show.legend=TRUE) +
+     scale_fill_gradientn(colours = red_teal_white(256), 
+                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
+    theme_void()  +
+    theme(legend.title = element_blank(),
+          legend.text = element_text(size = 24),
+        legend.position = "bottom", 
+        legend.box = "horizontal", 
+        legend.key.height = unit(1, 'cm'),
+        legend.key.width = unit(2, 'cm'),
+        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
+  
+legend_WNC_overlap <- get_legend(p_WNC)
+
+
+# arrange plots 
+BNC_overlap_tvalue_plot <- annotate_figure(
+  plot_grid(
+    blank_space,
+    annotate_figure(plot_grid(BNC_overlap_tvalue_plot_lh, BNC_overlap_tvalue_plot_rh, ncol = 2), 
+                    top = text_grob("Overlap of Significant Effects Across Datasets \n (Average T-value)", size = 20)),
+    blank_space,
+    legend_BNC_overlap,
+    blank_space,
+    nrow = 5,
+    rel_heights = c(0.05, 1, 0.1, 0.1, 0.1)
+  ),
+  top = text_grob("Between Network Connectivity", size = 24, face = "bold"),
+  bottom = text_grob("Sex Effect (t-value)", size = 24, y = 1)
+)
+
+
+
+WNC_overlap_tvalue_plot <- annotate_figure(
+  plot_grid(
+    blank_space,
+    annotate_figure(plot_grid(WNC_overlap_tvalue_plot_lh, WNC_overlap_tvalue_plot_rh, ncol = 2), 
+                    top = text_grob("Overlap of Significant Effects Across Datasets \n (Average T-value)", size = 20)),
+    blank_space,
+    legend_WNC_overlap,
+    blank_space,
+    nrow = 5,
+    rel_heights = c(0.05, 1, 0.1, 0.1, 0.1)
+  ),
+  top = text_grob("Within Network Connectivity", size = 24, face = "bold"),
+  bottom = text_grob("Sex Effect (t-value)", size = 24, y = 1)
+)
+ 
+```
+
+```{r overlap neurosynth plots}
+
+ 
+# plot neurosynth terms
+BNC_neurosynth_plot <- ggplot(BNC_neurosynth_top10, 
+       aes(x = term.correlation, 
+           y = reorder(term, abs(term.correlation)))) +
+  geom_segment(aes(x = 0, xend = term.correlation, 
+                   yend = reorder(term, abs(term.correlation))),
+               color = "gray80", linewidth = 0.9) +
+  geom_point(aes(color = term.correlation), size = 12) +
+  scale_color_gradient(low = "#ad2a72", high = "#fcdac0") +
+  scale_x_continuous(limits = c(0, 0.6), breaks = seq(0, 0.6, by = 0.2),
+                     expand = c(0, 0)) +
+  scale_y_discrete(position = "left") +   
+  labs(
+    x = "Spatial Correlation",
+    y = "Neurosynth Term"
+  ) +
+  theme_classic() +
+  coord_cartesian(clip = "off") + 
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = "none",
+    axis.title.y = element_text(size = 20, color = "black"),
+    axis.title.x = element_text(size = 20, color = "black"),
+    axis.text.y = element_text(size = 20, color = "black"),
+    axis.text.x = element_text(size = 20, color = "black"),
+    plot.margin = unit(c(0, 1, 0, 0), "cm")    
+  )
+
+WNC_neurosynth_plot <- ggplot(WNC_neurosynth_top10, 
+       aes(x = term.correlation, 
+           y = reorder(term, abs(term.correlation)))) +
+  geom_segment(aes(x = 0, xend = term.correlation, 
+                   yend = reorder(term, -abs(term.correlation))),
+               color = "gray80", linewidth = 0.9) +
+  geom_point(aes(color = term.correlation), size = 12) +
+  scale_color_gradient(low = "#fcdac0", high = "#ad2a72") +
+  scale_x_continuous(limits = c(-0.6, 0), breaks = seq(-0.6, 0, by = 0.2), 
+                     expand = c(0, 0)) +
+  scale_y_discrete(position = "right") +
+  labs(
+    x = "Spatial Correlation") +
+  theme_classic() +
+  coord_cartesian(clip = "off") + 
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = "none",
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size = 20, color = "black"),
+    axis.text.y = element_text(size = 20, color = "black"),
+    axis.text.x = element_text(size = 20, color = "black"),
+    plot.margin = unit(c(0, 0, 0, 1), "cm")
+  )
+
+
+```
+
+## option 1: overlap between datasets (average t-value across datasets is spun against neurosynth term maps)
+```{r overlap neurosynth figure, fig.height = 12, fig.width = 12}
+neurosynth_plots_row1 <- plot_grid(BNC_overlap_tvalue_plot, WNC_overlap_tvalue_plot, ncol = 2)
+neurosynth_plots_row2 <- plot_grid(blank_space, blank_space, ncol = 2)
+neurosynth_plots_row3 <- BNC_neurosynth_plot + blank_space + WNC_neurosynth_plot +
+  plot_layout(widths = c(1, 0.2,  1))  
+
+plot_grid(neurosynth_plots_row1, neurosynth_plots_row2, neurosynth_plots_row3, nrow = 3, rel_heights = c(1, 0.1, 1))
+
+
+#ggsave(paste0("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/Conferences/OHBM 2026/", "fig2_neurosynth.svg"), plot_grid(neurosynth_plots_row1, neurosynth_plots_row2, neurosynth_plots_row3, nrow = 3, rel_heights = c(1, 0.1, 1)), height = 12, width = 12, units = "in")
+```
+ 
+ 
+```{r pooled datasets neurosynth decoding of sex differences, fig.height = 7, fig.width = 7}
+
+# fdr correction of neurosynth terms correlations with BNC and WNC sex effect maps
+BNC_neurosynth_pooled <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/spin_test/neurosynth/BNC_neurosynth_spin_test_results_pooled.csv")
+BNC_neurosynth_pooled$pvalue.fdr <- p.adjust(BNC_neurosynth_pooled$p_spin, method = c("fdr")) 
+BNC_neurosynth_pooled_fdr <- BNC_neurosynth_pooled %>% filter(pvalue.fdr < 0.05)  
+BNC_neurosynth_pooled_top10 <- rbind(slice_max(BNC_neurosynth_pooled_fdr, order_by = term.correlation, n = 10)) # 10 most positively correlated neurosynth terms with the sex diff map. Looking at positive correlations because they reflect cognitive terms that spatially align with regions showing higher BNC in males (male > female).
+BNC_neurosynth_pooled_top10$term <- tools::toTitleCase(gsub("_", " ", BNC_neurosynth_pooled_top10$term))
+BNC_neurosynth_pooled_top10$term <- gsub("Autobiographical Memory", "Autobio. Memory", BNC_neurosynth_pooled_top10$term)
+BNC_neurosynth_pooled_top10 <- BNC_neurosynth_pooled_top10 %>% filter(term.correlation > 0)
+
+WNC_neurosynth_pooled <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/spin_test/neurosynth/WNC_neurosynth_spin_test_results_pooled.csv")
+WNC_neurosynth_pooled$pvalue.fdr <- p.adjust(WNC_neurosynth_pooled$p_spin, method = c("fdr")) 
+WNC_neurosynth_pooled_fdr <- WNC_neurosynth_pooled %>% filter(pvalue.fdr < 0.05)  
+WNC_neurosynth_pooled_top10 <- rbind(slice_min(WNC_neurosynth_pooled_fdr, order_by = term.correlation, n = 10)) # 10 most negatively correlated neurosynth terms with the sex diff map. Looking at NEGATIVE correlations because they reflect cognitive terms that spatially align with regions showing higher WNC in females (female > male).
+WNC_neurosynth_pooled_top10$term <- tools::toTitleCase(gsub("_", " ", WNC_neurosynth_pooled_top10$term))
+WNC_neurosynth_pooled_top10$term <- gsub("Autobiographical Memory", "Autobio. Memory", WNC_neurosynth_pooled_top10$term)
+```
+
+```{r pooled tvalue}
+# plot avg t-value 
+BNC_pooled_tvalue_plot_lh <- plot_cortex(sex.main.all_datasets.BNC, hemi = "left", measure = "cov_sig_effect", ylim1 = -0.5, ylim2 = 11, atlas = "schaefer17_200") 
+BNC_pooled_tvalue_plot_rh <- plot_cortex(sex.main.all_datasets.BNC, hemi = "right", measure = "cov_sig_effect", ylim1 = -0.5, ylim2 = 11, atlas = "schaefer17_200") 
+ 
+WNC_pooled_tvalue_plot_lh <- plot_cortex(sex.main.all_datasets.WNC, hemi = "left", measure = "cov_sig_effect", ylim1 = -13, ylim2 = 10, atlas = "schaefer17_200") 
+WNC_pooled_tvalue_plot_rh <- plot_cortex(sex.main.all_datasets.WNC, hemi = "right", measure = "cov_sig_effect", ylim1 = -13, ylim2 = 10, atlas = "schaefer17_200") 
+  
+# legend for BNC pooled
+ylim1 = -0.5
+ylim2 = 11
+p_BNC <- ggplot() + 
+    geom_brain(data = sex.main.all_datasets.BNC, atlas = schaefer17_200, 
+               mapping=aes(fill=cov_sig_effect), 
+               show.legend=TRUE) +
+         scale_fill_gradientn(colours = red_teal_white(256), 
+                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
+
+    theme_void()  +
+    theme(legend.title = element_blank(),
+          legend.text = element_text(size = 24),
+        legend.position = "bottom", 
+        legend.box = "horizontal", 
+        legend.key.height = unit(1, 'cm'),
+        legend.key.width = unit(2, 'cm'),
+        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
+  
+legend_BNC_pooled <- get_legend(p_BNC)
+
+# legend for WNC pooled
+ylim1 = -13
+ylim2 = 10
+p_WNC <- ggplot() + 
+    geom_brain(data = sex.main.all_datasets.WNC, atlas = schaefer17_200, 
+               mapping=aes(fill=cov_sig_effect), 
+               show.legend=TRUE) +
+     scale_fill_gradientn(colours = red_teal_white(256), 
+                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
+    theme_void()  +
+    theme(legend.title = element_blank(),
+          legend.text = element_text(size = 24),
+        legend.position = "bottom", 
+        legend.box = "horizontal", 
+        legend.key.height = unit(1, 'cm'),
+        legend.key.width = unit(2, 'cm'),
+        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
+  
+legend_WNC_pooled <- get_legend(p_WNC)
+
+
+# arrange plots 
+BNC_pooled_tvalue_plot <- annotate_figure(
+  plot_grid(
+    blank_space,
+    annotate_figure(plot_grid(BNC_pooled_tvalue_plot_lh, BNC_pooled_tvalue_plot_rh, ncol = 2), 
+                    top = text_grob("Pooled Dataset", size = 20)),
+    blank_space,
+    legend_BNC_pooled,
+    blank_space,
+    nrow = 5,
+    rel_heights = c(0.05, 1, 0.1, 0.1, 0.1)
+  ),
+  top = text_grob("Between Network Connectivity", size = 24, face = "bold"),
+  bottom = text_grob("Sex Effect (t-value)", size = 24, y = 1)
+)
+
+
+
+WNC_pooled_tvalue_plot <- annotate_figure(
+  plot_grid(
+    blank_space,
+    annotate_figure(plot_grid(WNC_pooled_tvalue_plot_lh, WNC_pooled_tvalue_plot_rh, ncol = 2), 
+                    top = text_grob("Pooled Dataset", size = 20)),
+    blank_space,
+    legend_WNC_pooled,
+    blank_space,
+    nrow = 5,
+    rel_heights = c(0.05, 1, 0.1, 0.1, 0.1)
+  ),
+  top = text_grob("Within Network Connectivity", size = 24, face = "bold"),
+  bottom = text_grob("Sex Effect (t-value)", size = 24, y = 1)
+)
+ 
+```
+
+
+```{r pooled neurosynth plots}
+# plot neurosynth terms
+BNC_neurosynth_pooled_plot <- ggplot(BNC_neurosynth_pooled_top10, 
+       aes(x = term.correlation, 
+           y = reorder(term, abs(term.correlation)))) +
+  geom_segment(aes(x = 0, xend = term.correlation, 
+                   yend = reorder(term, abs(term.correlation))),
+               color = "gray80", linewidth = 0.9) +
+  geom_point(aes(color = term.correlation), size = 12) +
+  scale_color_gradient(low = "#fcdac0", high = "#ad2a72") +
+  scale_x_continuous(limits = c(0, 0.6), breaks = seq(0, 0.6, by = 0.2),
+                     expand = c(0, 0)) +
+  scale_y_discrete(position = "left") +   
+  labs(
+    x = "Spatial Correlation",
+    y = "Neurosynth Term"
+  ) +
+  theme_classic() +
+  coord_cartesian(clip = "off") + 
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = "none",
+    axis.title.y = element_text(size = 20, color = "black"),
+    axis.title.x = element_text(size = 20, color = "black"),
+    axis.text.y = element_text(size = 20, color = "black"),
+    axis.text.x = element_text(size = 20, color = "black"),
+    plot.margin = unit(c(0, 1, 0, 0), "cm")    
+  )
+
+WNC_neurosynth_pooled_plot <- ggplot(WNC_neurosynth_pooled_top10, 
+       aes(x = term.correlation, 
+           y = reorder(term, abs(term.correlation)))) +
+  geom_segment(aes(x = 0, xend = term.correlation, 
+                   yend = reorder(term, -abs(term.correlation))),
+               color = "gray80", linewidth = 0.9) +
+  geom_point(aes(color = term.correlation), size = 12) +
+  scale_color_gradient(low = "#ad2a72", high = "#fcdac0") +
+  scale_x_continuous(limits = c(-0.6, 0), breaks = seq(-0.6, 0, by = 0.2), 
+                     expand = c(0, 0)) +
+  scale_y_discrete(position = "right") +
+  labs(
+    x = "Spatial Correlation") +
+  theme_classic() +
+  coord_cartesian(clip = "off") + 
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = "none",
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size = 20, color = "black"),
+    axis.text.y = element_text(size = 20, color = "black"),
+    axis.text.x = element_text(size = 20, color = "black"),
+    plot.margin = unit(c(0, 0, 0, 1), "cm")
+  )
+```
+
+## option 2: pooled between datasets (average t-value across datasets is spun against neurosynth term maps)
+```{r pooled neurosynth figure, fig.height = 12, fig.width = 12}
+neurosynth_plots_row1 <- plot_grid(BNC_pooled_tvalue_plot, WNC_pooled_tvalue_plot, ncol = 2)
+neurosynth_plots_row2 <- plot_grid(blank_space, blank_space, ncol = 2)
+neurosynth_plots_row3 <- BNC_neurosynth_pooled_plot + blank_space + WNC_neurosynth_pooled_plot +
+  plot_layout(widths = c(1, 0.2,  1))  
+
+plot_grid(neurosynth_plots_row1, neurosynth_plots_row2, neurosynth_plots_row3, nrow = 3, rel_heights = c(1, 0.1, 1))
+```
+ 
+
+# 3. Sex differences in network-level connectivity
+Given that males exhibit greater between-network connectivity across nearly all brain regions, and females exhibit greater within-network connectivity in select regions that appear to be a part of the DMN, we examined sex differences in connectivity between and within networks. 
+```{r load networkpair sex for 17 networks}
+num_networks = 17
+sex.main.PNC.networkpair.17 <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x%4$s.csv", output_root, "PNC", "networkpair", num_networks))
+sex.main.HCPD.networkpair.17 <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x%4$s.csv", output_root, "HCPD", "networkpair", num_networks))
+sex.main.NKI.networkpair.17 <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x%4$s.csv", output_root, "NKI", "networkpair", num_networks))
+sex.main.HBN.networkpair.17 <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x%4$s.csv", output_root, "HBN", "networkpair", num_networks))
+sex.main.all_datasets.networkpair.17 <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x%4$s.csv", output_root, "all_datasets", "networkpair", num_networks))
+
+
+# make two new columns identifying network 1 and network 2
+sex.main.PNC.networkpair.17<- sex.main.PNC.networkpair.17%>% 
+  mutate(network1 = str_extract(region, "[[:alpha:]]+"), network2=str_extract(region, "(?<=_).*"))
+sex.main.HCPD.networkpair.17<- sex.main.HCPD.networkpair.17%>% 
+  mutate(network1 = str_extract(region, "[[:alpha:]]+"), network2=str_extract(region, "(?<=_).*"))
+sex.main.NKI.networkpair.17<- sex.main.NKI.networkpair.17%>% 
+  mutate(network1 = str_extract(region, "[[:alpha:]]+"), network2=str_extract(region, "(?<=_).*"))
+sex.main.HBN.networkpair.17<- sex.main.HBN.networkpair.17%>% 
+  mutate(network1 = str_extract(region, "[[:alpha:]]+"), network2=str_extract(region, "(?<=_).*"))
+sex.main.all_datasets.networkpair.17<- sex.main.all_datasets.networkpair.17%>% 
+  mutate(network1 = str_extract(region, "[[:alpha:]]+"), network2=str_extract(region, "(?<=_).*"))
+
+# fdr correction on non-duplicated pairs only and sorts pairs
+sex.main.PNC.networkpair.17<- prep_networkpair_df(sex.main.PNC.networkpair.17, "networkpair", "sex", "PNC")
+sex.main.HCPD.networkpair.17<- prep_networkpair_df(sex.main.HCPD.networkpair.17,  "networkpair", "sex", "HCPD")
+sex.main.NKI.networkpair.17<- prep_networkpair_df(sex.main.NKI.networkpair.17,  "networkpair", "sex", "NKI")
+sex.main.HBN.networkpair.17<- prep_networkpair_df(sex.main.HBN.networkpair.17,  "networkpair", "sex", "HBN")
+sex.main.all_datasets.networkpair.17<- prep_networkpair_df(sex.main.all_datasets.networkpair.17,  "networkpair", "sex", "All datasets")
+
+resi.PNC.networkpair <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/PNC/resi/networkpair/PNC_resiPEse_Th1_sex_maineffects_schaefer200x17.csv") %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+resi.HCPD.networkpair <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HCPD/resi/networkpair/HCPD_resiPEse_Th1_sex_maineffects_schaefer200x17.csv") %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+resi.NKI.networkpair <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/NKI/resi/networkpair/NKI_resiPEse_Th1_sex_maineffects_schaefer200x17.csv") %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+resi.HBN.networkpair <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HBN/resi/networkpair/HBN_resiPEse_Th1_sex_maineffects_schaefer200x17.csv") %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+resi.all_datasets.networkpair <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/resi/networkpair/all_datasets_resiPEse_Th1_sex_maineffects_schaefer200x17.csv") %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
+
+sex.main.PNC.networkpair.17 <- merge(sex.main.PNC.networkpair.17, resi.PNC.networkpair)
+sex.main.NKI.networkpair.17 <- merge(sex.main.NKI.networkpair.17, resi.NKI.networkpair)
+sex.main.HCPD.networkpair.17 <- merge(sex.main.HCPD.networkpair.17, resi.HCPD.networkpair)
+sex.main.HBN.networkpair.17 <- merge(sex.main.HBN.networkpair.17, resi.HBN.networkpair)
+sex.main.all_datasets.networkpair.17 <- merge(sex.main.all_datasets.networkpair.17, resi.all_datasets.networkpair)
+
+
+#range(sex.main.PNC.networkpair.17$GAM.cov.tvalue)
+#range(sex.main.HCPD.networkpair.17$GAM.cov.tvalue)
+#range(sex.main.NKI.networkpair.17$GAM.cov.tvalue)
+#range(sex.main.HBN.networkpair.17$GAM.cov.tvalue)
+#range(sex.main.all_datasets.networkpair.17$GAM.cov.tvalue)
+ 
+```
+
+## sex effect with t-values
+```{r plot networkpair sex for 17 networks, fig.width = 25, fig.height = 15}
+
+# plot each dataset
+networkpair_PNC <- annotate_figure(
+  make_networkpair17_plot(sex.main.PNC.networkpair.17, dataset = "PNC", ylim1 = -10, ylim2 = 10, fontsize = 12, fontsize_label = 4, measure = "GAM.cov.tvalue"))
+
+networkpair_HCPD <- annotate_figure(
+  make_networkpair17_plot(sex.main.HCPD.networkpair.17, dataset = "HCP-D", ylim1 = -10, ylim2 = 10, fontsize = 12, fontsize_label = 4, measure = "GAM.cov.tvalue"))
+
+networkpair_NKI <- annotate_figure(
+  make_networkpair17_plot(sex.main.NKI.networkpair.17, dataset = "NKI", ylim1 = -10, ylim2 = 10, fontsize = 12, fontsize_label = 4, measure = "GAM.cov.tvalue"))
+
+networkpair_HBN <- annotate_figure(
+  make_networkpair17_plot(sex.main.HBN.networkpair.17, dataset = "HBN", ylim1 = -10, ylim2 = 10, fontsize = 12, fontsize_label = 4, measure = "GAM.cov.tvalue"))
+
+networkpair_all_datasets_plot <- annotate_figure(
+  make_networkpair17_plot(sex.main.all_datasets.networkpair.17, dataset = "Pooled Dataset", ylim1 = -10, ylim2 = 10, fontsize = 12, fontsize_label = 4, measure = "GAM.cov.tvalue"))
+
+combined_networkpair_temp_plots <- plot_grid(
+  networkpair_PNC,
+  networkpair_HCPD,
+  networkpair_NKI,
+  networkpair_HBN,
+  ncol = 2
+)
+
+
+# legend
+ylim1 = -10
+ylim2 = 10
+p <- ggplot() + 
+    geom_brain(data = sex.main.HBN.BNC, atlas = schaefer17_200, 
+               mapping=aes(fill=GAM.cov.tvalue), 
+               show.legend=TRUE) +
+     scale_fill_gradientn(colours = red_teal_white(256), 
+                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
+    theme_void()  +
+    theme(legend.title = element_blank(),
+          legend.text = element_text(size = 24),
+        legend.position = "bottom", 
+        legend.box = "horizontal", 
+        legend.key.height = unit(1, 'cm'),
+        legend.key.width = unit(3, 'cm'),
+        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
+  
+legend <- get_legend(p)
+ 
+```
+
+```{r plot networkpair overlap}
+
+# overlap of datasets:
+df_list_networkpair <- list(
+  PNC  = sex.main.PNC.networkpair.17[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_PNC = Anova.cov.pvalue.fdr),
+  HCPD = sex.main.HCPD.networkpair.17[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HCPD = Anova.cov.pvalue.fdr),
+  NKI  = sex.main.NKI.networkpair.17[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_NKI = Anova.cov.pvalue.fdr),
+  HBN  = sex.main.HBN.networkpair.17[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HBN = Anova.cov.pvalue.fdr)
+)
+
+sex.main.overlap.networkpair <- Reduce(function(x, y) full_join(x, y, by = "region"), df_list_networkpair)
+
+sex.main.overlap.networkpair <- sex.main.overlap.networkpair %>%
+  mutate(
+    signif_count = rowSums(across(starts_with("p_")) < 0.05, na.rm = TRUE),
+    signif_count_factor = factor(
+      signif_count,
+      levels = 0:4,
+      labels = c("0", "1", "2", "3", "4")
+    ),
+    signif_greater_than_one = ifelse(signif_count > 1, "1", "0")
+  )
+
+sex.main.overlap.networkpair <- sex.main.overlap.networkpair %>%
+  mutate(
+    network1 = str_extract(region, "^[[:alpha:]]+"),
+    network2 = str_extract(region, "(?<=_).*")
+  )
+
+
+# overlap legend
+legend_plot <- ggplot(data.frame(overlap = factor(names(count_colors_legend),
+                                                  levels = names(count_colors_legend))),
+                      aes(x = overlap, fill = overlap)) +
+  geom_bar() +
+  scale_fill_manual(values = count_colors_legend,
+                    guide = guide_legend(direction = "horizontal",
+                                         label.position = "bottom",
+                                         override.aes = list(colour = "black", size = 1))) +
+  theme_void() +
+  theme(
+    legend.title = element_blank(),
+    legend.text  = element_text(size = 18),
+    legend.key.size = unit(1.3, "cm"),
+    legend.position = "bottom"
+  )
+
+overlap_legend <- get_legend(legend_plot)
+networkpair_overlap_plot <-  annotate_figure(plot_networkpair_overlap(sex.main.overlap.networkpair), top = text_grob("Overlap of Significant Effects Across Datasets", size = 24, x = 0.55))
+ 
+```
+
+
+```{r plot networkpair, fig.height = 12, fig.width = 20}
+networkpair_col1 <- annotate_figure(
+  plot_grid(
+    combined_networkpair_temp_plots,
+    legend,
+    nrow = 2, rel_heights = c(1, 0.1)  ),
+  bottom = text_grob("Sex Effect (t-value)", size = 24, y = 1)
+)
+
+
+
+networkpair_col2 <- annotate_figure(plot_grid(networkpair_all_datasets_plot, networkpair_overlap_plot, overlap_legend, nrow = 3, rel_heights = c(1, 1, 0.2)), 
+                                     bottom = text_grob("Number of Datasets", size = 24, y = 0.1))
+
+
+
+networkpair_col2 <- plot_grid(networkpair_all_datasets_plot, networkpair_overlap_plot, nrow = 2)
+overlap_legend_layout <- plot_grid(blank_space, overlap_legend, ncol = 2, rel_widths = c(0.08, 1))
+overlap_legend_layout <- plot_grid(overlap_legend_layout, blank_space, nrow = 2, rel_heights = c(1, 0.1))
+
+networkpair_col2 <- annotate_figure(plot_grid(networkpair_col2, overlap_legend_layout, nrow = 2, rel_heights = c(1, 0.1)),  bottom = text_grob("Number of Datasets", size = 24, y = 0.9, x = 0.54))
+
+plot_grid(networkpair_col1, blank_space, networkpair_col2, blank_space, ncol = 4, rel_widths = c(2,0.1, 1, 0.1))
+ 
+```
+
+
+## sex effect with RESI
+```{r plot networkpair sex for 17 networks with resi, fig.width = 25, fig.height = 15}
+
+# plot each dataset
+networkpair_resi_PNC <- annotate_figure(
+  make_networkpair17_plot(sex.main.PNC.networkpair.17, dataset = "PNC", ylim1 = -0.3, ylim2 = 0.3, fontsize = 12, fontsize_label = 4, measure = "RESI"))
+ 
+networkpair_resi_HCPD <- annotate_figure(
+  make_networkpair17_plot(sex.main.HCPD.networkpair.17, dataset = "HCP-D", ylim1 = -0.3, ylim2 = 0.3, fontsize = 12, fontsize_label = 4, measure = "RESI"))
+
+networkpair_resi_NKI <- annotate_figure(
+  make_networkpair17_plot(sex.main.NKI.networkpair.17, dataset = "NKI", ylim1 = -0.3, ylim2 = 0.3, fontsize = 12, fontsize_label = 4, measure = "RESI"))
+
+networkpair_resi_HBN <- annotate_figure(
+  make_networkpair17_plot(sex.main.HBN.networkpair.17, dataset = "HBN", ylim1 = -0.3, ylim2 = 0.3, fontsize = 12, fontsize_label = 4, measure = "RESI"))
+
+networkpair_resi_all_datasets_plot <- annotate_figure(
+  make_networkpair17_plot(sex.main.all_datasets.networkpair.17, dataset = "Pooled Dataset", ylim1 = -0.3, ylim2 = 0.3, fontsize = 12, fontsize_label = 4, measure = "RESI"))
+
+combined_networkpair_resi_temp_plots <- plot_grid(
+  networkpair_resi_PNC,
+  networkpair_resi_HCPD,
+  networkpair_resi_NKI,
+  networkpair_resi_HBN,
+  ncol = 2
+)
+
+
+# legend
+ylim1 = -0.3
+ylim2 = 0.3
+p <- ggplot() + 
+    geom_brain(data = sex.main.HBN.BNC, atlas = schaefer17_200, 
+               mapping=aes(fill=GAM.cov.tvalue), 
+               show.legend=TRUE) +
+     scale_fill_gradientn(colours = red_teal_white(256), 
+                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
+    theme_void()  +
+    theme(legend.title = element_blank(),
+          legend.text = element_text(size = 24),
+        legend.position = "bottom", 
+        legend.box = "horizontal", 
+        legend.key.height = unit(1, 'cm'),
+        legend.key.width = unit(3, 'cm'),
+        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
+  
+legend <- get_legend(p)
+ 
+```
+
+
+```{r plot networkpair overlap with resi}
+
+# overlap of datasets:
+df_list_networkpair <- list(
+  PNC  = sex.main.PNC.networkpair.17[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_PNC = Anova.cov.pvalue.fdr),
+  HCPD = sex.main.HCPD.networkpair.17[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HCPD = Anova.cov.pvalue.fdr),
+  NKI  = sex.main.NKI.networkpair.17[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_NKI = Anova.cov.pvalue.fdr),
+  HBN  = sex.main.HBN.networkpair.17[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HBN = Anova.cov.pvalue.fdr)
+)
+
+sex.main.overlap.networkpair <- Reduce(function(x, y) full_join(x, y, by = "region"), df_list_networkpair)
+
+sex.main.overlap.networkpair <- sex.main.overlap.networkpair %>%
+  mutate(
+    signif_count = rowSums(across(starts_with("p_")) < 0.05, na.rm = TRUE),
+    signif_count_factor = factor(
+      signif_count,
+      levels = 0:4,
+      labels = c("0", "1", "2", "3", "4")
+    ),
+    signif_greater_than_one = ifelse(signif_count > 1, "1", "0")
+  )
+
+sex.main.overlap.networkpair <- sex.main.overlap.networkpair %>%
+  mutate(
+    network1 = str_extract(region, "^[[:alpha:]]+"),
+    network2 = str_extract(region, "(?<=_).*")
+  )
+
+
+# overlap legend
+legend_plot <- ggplot(data.frame(overlap = factor(names(count_colors_legend),
+                                                  levels = names(count_colors_legend))),
+                      aes(x = overlap, fill = overlap)) +
+  geom_bar() +
+  scale_fill_manual(values = count_colors_legend,
+                    guide = guide_legend(direction = "horizontal",
+                                         label.position = "bottom",
+                                         override.aes = list(colour = "black", size = 1))) +
+  theme_void() +
+  theme(
+    legend.title = element_blank(),
+    legend.text  = element_text(size = 18),
+    legend.key.size = unit(1.3, "cm"),
+    legend.position = "bottom"
+  )
+
+overlap_legend <- get_legend(legend_plot)
+networkpair_resi_overlap_plot <-  annotate_figure(plot_networkpair_overlap(sex.main.overlap.networkpair), top = text_grob("Overlap of Significant Effects Across Datasets", size = 24, x = 0.55))
+ 
+```
+
+
+```{r plot networkpair with resi, fig.height = 12, fig.width = 20}
+networkpair_resi_col1 <- annotate_figure(
+  plot_grid(
+    combined_networkpair_resi_temp_plots,
+    legend,
+    nrow = 2, rel_heights = c(1, 0.1)  ),
+  bottom = text_grob("Sex Effect (RESI)", size = 24, y = 1)
+)
+
+
+
+networkpair_resi_col2 <- annotate_figure(plot_grid(networkpair_resi_all_datasets_plot, networkpair_resi_overlap_plot, overlap_legend, nrow = 3, rel_heights = c(1, 1, 0.2)), 
+                                     bottom = text_grob("Number of Datasets", size = 24, y = 0.1))
+
+
+
+networkpair_resi_col2 <- plot_grid(networkpair_resi_all_datasets_plot, networkpair_resi_overlap_plot, nrow = 2)
+overlap_legend_layout <- plot_grid(blank_space, overlap_legend, ncol = 2, rel_widths = c(0.08, 1))
+overlap_legend_layout <- plot_grid(overlap_legend_layout, blank_space, nrow = 2, rel_heights = c(1, 0.1))
+
+networkpair_resi_col2 <- annotate_figure(plot_grid(networkpair_resi_col2, overlap_legend_layout, nrow = 2, rel_heights = c(1, 0.1)),  bottom = text_grob("Number of Datasets", size = 24, y = 0.9, x = 0.54))
+
+plot_grid(networkpair_resi_col1, blank_space, networkpair_resi_col2, blank_space, ncol = 4, rel_widths = c(2,0.1, 1, 0.1))
+ 
+ggsave(
+  paste0("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/Conferences/SOBP2026/", "fig_networkpair.png"),
+  plot_grid(networkpair_resi_col1, blank_space, networkpair_resi_col2, blank_space,
+            ncol = 4, rel_widths = c(2, 0.1, 1, 0.1)),
+  height = 12, width = 20, units = "in", 
+  bg = "white"
+)
+
+ 
+
+```
+ 
+Network enrichment significance testing showed that default mode subnetwork A within-network connectivity is indeed more enriched in females than in males in all 4 datasets.  
+- may need to run this for all datasets
+
+```{r NEST DMN A table}
+PNC_NEST_DMNA <- readRDS("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/PNC/NEST/WNC/NEST_DefaultA_WNC.RData")
+HCPD_NEST_DMNA <- readRDS("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HCPD/NEST/WNC/NEST_DefaultA_WNC.RData")
+NKI_NEST_DMNA <- readRDS("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/NKI/NEST/WNC/NEST_DefaultA_WNC.RData")
+HBN_NEST_DMNA <- readRDS("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HBN/NEST/WNC/NEST_DefaultA_WNC.RData")
+
+NEST_results <- data.frame(
+  Dataset = c("PNC", "HCP-D", "NKI", "HBN"),
+  `NEST p-value` = c(
+    as.numeric(PNC_NEST_DMNA$pval),
+    as.numeric(HCPD_NEST_DMNA$pval),
+    as.numeric(NKI_NEST_DMNA$pval),
+    as.numeric(HBN_NEST_DMNA$pval)
+  )
+)
+
+NEST_results %>%
+  kbl(format = "html", align = "lcccc", digits = 4,
+      caption = "Network enrichment significance testing for Default Mode Subnetwork A (female > male).") %>%
+  add_header_above(c(" " = 1, "Default Mode Subnetwork A" = 1), bold = TRUE) %>%
+  kable_styling(full_width = FALSE, position = "center") %>%
+  kable_classic(full_width = FALSE, html_font = "Arial") %>%
+  row_spec(0:nrow(NEST_results), extra_css = "line-height: 0.7;") %>%
+  column_spec(2, background = "gray90", include_thead = TRUE)
+
+```
+
+```{r NEST Limbic A table, echo=FALSE, include=FALSE}
+#Network enrichment significance testing showed that limbic subnetwork A within-network connectivity is indeed more enriched in male than in females in all 4 datasets.  
+
+#PNC_NEST_LimbA <- readRDS("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/PNC/NEST/WNC/NEST_LimbicA_TempPole_WNC.RData")
+#HCPD_NEST_LimbA <- readRDS("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HCPD/NEST/WNC/NEST_LimbicA_TempPole_WNC.RData")
+#NKI_NEST_LimbA <- readRDS("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/NKI/NEST/WNC/NEST_LimbicA_TempPole_WNC.RData")
+#HBN_NEST_LimbA <- readRDS("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HBN/NEST/WNC/NEST_LimbicA_TempPole_WNC.RData")
+
+#NEST_results <- data.frame(
+#  Dataset = c("PNC", "HCP-D", "NKI", "HBN"),
+#  `NEST p-value` = c(
+#    as.numeric(PNC_NEST_LimbA$pval),
+#    as.numeric(HCPD_NEST_LimbA$pval),
+#    as.numeric(NKI_NEST_LimbA$pval),
+#    NA
+    #as.numeric(HBN_NEST_LimbA$pval)
+#  )
+#)
+
+#NEST_results %>%
+#  kbl(format = "html", align = "lcccc", digits = 4,
+#      caption = "Network enrichment significance testing for LimbicA Temporal Pole (male > female).") %>%
+#  add_header_above(c(" " = 1, "Limbic Subnetwork A" = 1), bold = TRUE) %>%
+#  kable_styling(full_width = FALSE, position = "center") %>%
+#  kable_classic(full_width = FALSE, html_font = "Arial") %>%
+#  row_spec(0:nrow(NEST_results), extra_css = "line-height: 0.7;") %>%
+#  column_spec(2, background = "gray90", include_thead = TRUE)
+
+```
+
+
+
+# 4. Sex differences in edge-level connectivity vary with hierarchical span of functional connections
+```{r load edge sex main effect}
+# edge gam output
+sex.main.PNC.edge <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "PNC", "edge"))
+sex.main.HCPD.edge <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "HCPD", "edge"))
+sex.main.NKI.edge <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "NKI", "edge"))
+sex.main.HBN.edge <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "HBN", "edge"))
+sex.main.all_datasets.edge <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "all_datasets", "edge"))
+
+# resi
+resi.PNC.edge <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/PNC/resi/edge/PNC_t2S_sex_maineffects_schaefer200x17.csv")
+resi.HCPD.edge <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HCPD/resi/edge/HCPD_t2S_sex_maineffects_schaefer200x17.csv")
+resi.NKI.edge <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/NKI/resi/edge/NKI_t2S_sex_maineffects_schaefer200x17.csv")
+resi.HBN.edge <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HBN/resi/edge/HBN_t2S_sex_maineffects_schaefer200x17.csv")
+resi.all_datasets.edge <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/resi/edge/all_datasets_t2S_sex_maineffects_schaefer200x17.csv")
+
+# merge resi
+sex.main.PNC.edge <- merge(sex.main.PNC.edge, resi.PNC.edge, by = "region", all.x = TRUE, sort = FALSE)
+sex.main.HCPD.edge <- merge(sex.main.HCPD.edge, resi.HCPD.edge, by = "region", all.x = TRUE, sort = FALSE)
+sex.main.NKI.edge <- merge(sex.main.NKI.edge, resi.NKI.edge, by = "region", all.x = TRUE, sort = FALSE)
+sex.main.HBN.edge <- merge(sex.main.HBN.edge, resi.HBN.edge, by = "region", all.x = TRUE, sort = FALSE)
+sex.main.all_datasets.edge <- merge(sex.main.all_datasets.edge, resi.all_datasets.edge, by = "region", all.x = TRUE, sort = FALSE)
+
+# load vector of differences in S-A rank between the 2 regions connecting each edge
+SA.diff <- read.csv("/cbica/projects/network_replication/atlases/edge/SA.diff_schaefer200x17.csv")
+
+# make df for plotting (and do FDR correction)
+double.PNC <- make_double_df(sex.main.PNC.edge, "edge", "sex", "PNC")  
+double.HCPD <- make_double_df(sex.main.HCPD.edge, "edge", "sex", "HCPD")  
+double.NKI <- make_double_df(sex.main.NKI.edge, "edge", "sex", "NKI")  
+double.HBN <- make_double_df(sex.main.HBN.edge, "edge", "sex", "HBN")  
+double.all_datasets <- make_double_df(sex.main.all_datasets.edge, "edge", "sex", "All datasets")  
+
+
+# load spin test results
+PNC_edges_spin <- readRDS(sprintf("%1$s/%2$s/spin_test/edge/SA_edges_schaefer200x17_spin_test_results.RData", output_root, "PNC"))
+HCPD_edges_spin <- readRDS(sprintf("%1$s/%2$s/spin_test/edge/SA_edges_schaefer200x17_spin_test_results.RData", output_root, "HCPD"))
+NKI_edges_spin <- readRDS(sprintf("%1$s/%2$s/spin_test/edge/SA_edges_schaefer200x17_spin_test_results.RData", output_root, "NKI"))
+HBN_edges_spin <- readRDS(sprintf("%1$s/%2$s/spin_test/edge/SA_edges_schaefer200x17_spin_test_results.RData", output_root, "HBN"))
+all_datasets_edges_spin <- readRDS(sprintf("%1$s/%2$s/spin_test/edge/SA_edges_schaefer200x17_spin_test_results.RData", output_root, "all_datasets"))
+
+```
+
+We modeled the sex-effect map (t-values) across edges using tensor product smooth:
+
+$$
+edge.sex.effect \sim te(SArank_{parcel1}, SArank_{parcel2})
+$$
+
+We assessed significance with a spin test that preserves spatial autocorrelation by rotating the S-A axis and recomputing model fit statistics (R2). The spin test evaluates whether the 2D tensor smooth linking sex effects to S–A axis ranks is stronger than expected given spatial autocorrelation.
+
+We found that sex differences in edge-level connectivity are systematically organized along the cortical hierarchy. We observed stronger connectivity between regions connecting high- to low-ranking 
+
+```{r plot edge sex, fig.height = 14, fig.width = 20}
+
+# plot surfaces
+PNC_surf_plot <- make_surface_plot(double.PNC, dataset = "PNC", measure = "GAM.cov.tvalue", ylim1 = -3, ylim2  = 3, 
+                                   p_label = NULL)
+HCPD_surf_plot <-  make_surface_plot(double.HCPD, dataset = "HCP-D", measure = "GAM.cov.tvalue", ylim1 = -3, ylim2  = 3, 
+                                   p_label = NULL)
+NKI_surf_plot <-  make_surface_plot(double.NKI, dataset = "NKI", measure = "GAM.cov.tvalue", ylim1 = -3, ylim2  = 3, 
+                                   p_label = NULL)
+HBN_surf_plot <-  make_surface_plot(double.HBN, dataset = "HBN", measure = "GAM.cov.tvalue", ylim1 = -3, ylim2  = 3, 
+                                   p_label = NULL)
+row1 <- plot_grid(PNC_surf_plot, blank_space, HCPD_surf_plot, ncol = 3, rel_widths = c(1, 0.1, 1))
+row2 <- plot_grid(NKI_surf_plot, blank_space, HBN_surf_plot, ncol = 3, rel_widths = c(1, 0.1, 1))
+combined_surf_plots <- plot_grid(row1, blank_space, row2, ncol = 1, nrow = 3, rel_heights = c(1, 0.1, 1))
+combined_surf_plots <- annotate_figure(combined_surf_plots, 
+                                 left = text_grob("S-A Axis Rank", size = 20, x = 0.5, rot = 90),
+                                 bottom = text_grob("S-A Axis Rank", size = 20, x = 0.53, y = -0.5))
+
+all_datasets_surf_plot <-  make_surface_plot(double.all_datasets, dataset = "All Datasets", measure = "GAM.cov.tvalue", ylim1 = -3, ylim2  = 3, 
+                                   p_label = bquote(italic(p[spin]) == .(format(round(all_datasets_edges_spin$p_values$R2, 4), scientific = FALSE))))  
+all_datasets_surf_plot <- annotate_figure(all_datasets_surf_plot, 
+                                 left = text_grob("S-A Axis Rank", size = 20, x = 0.5, rot = 90),
+                                 bottom = text_grob("S-A Axis Rank", size = 20, x = 0.53, y = -0.5))
+# make legend
+ylim1 = -3
+ylim2 = 3
+g2 <- gam(GAM.cov.tvalue ~ te(parcel2_SA,parcel1_SA,k=3), data = double.PNC)
+  
+surface.plot.fig <- gg_tensor(g2) + theme_classic() +
+    theme(
+      axis.title.x=element_blank(),
+      axis.title.y=element_blank(),
+      axis.line = element_line(color = "black"),
+      axis.text=element_text(size=24, color = "black")) + 
+     scale_fill_gradientn(colours = red_teal_white(256), 
+                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") +     geom_vline(xintercept = mean(range(double.PNC$parcel1.SA.vec)),
+               linetype='dashed',size=1) + 
+    geom_hline(yintercept = mean(range(double.PNC$parcel1.SA.vec)),
+               linetype='dashed',size=1) + 
+    theme(legend.position='bottom',
+          legend.key.height = unit(1, 'cm'),
+          legend.key.width = unit(3, 'cm'),
+          legend.title = element_blank(),
+          legend.text = element_text(size=24),
+          strip.background = element_blank(),
+          plot.margin = margin(0, 0, 0, 0, "cm"),
+          plot.title = element_text(size=24, hjust=0.5))  
+  
+legend <- get_legend(surface.plot.fig)
+blank_space <- ggplot() + theme_void()
+
+# combine plots
+combined_surf_plots <- plot_grid(combined_surf_plots, blank_space, all_datasets_surf_plot, ncol = 3, rel_widths = (c(1, 0.05, 1)))
+
+final_surf_plots <- plot_grid(blank_space, combined_surf_plots, legend, nrow = 3, rel_heights = c(0.05, 1, 0.2))
+annotate_figure(final_surf_plots, 
+                bottom = text_grob("Sex Effect (t-value)", size = 20, x = 0.5, y = 2))
+
+
+
+```
+
+
+
+```{r plot edge sex effect with resi, fig.height = 14, fig.width = 20}
+# plot surfaces
+PNC_surf_plot <- make_surface_plot(double.PNC, dataset = "PNC", measure = "RESI", ylim1 = -0.1, ylim2  = 0.1, 
+                                   p_label = NULL)
+HCPD_surf_plot <-  make_surface_plot(double.HCPD, dataset = "HCP-D", measure = "RESI", ylim1 = -0.1, ylim2  = 0.1, 
+                                   p_label = NULL)
+NKI_surf_plot <-  make_surface_plot(double.NKI, dataset = "NKI", measure = "RESI", ylim1 = -0.1, ylim2  = 0.1, 
+                                   p_label = NULL)
+HBN_surf_plot <-  make_surface_plot(double.HBN, dataset = "HBN", measure = "RESI", ylim1 = -0.1, ylim2  = 0.1, 
+                                   p_label = NULL)
+row1 <- plot_grid(PNC_surf_plot, blank_space, HCPD_surf_plot, ncol = 3, rel_widths = c(1, 0.1, 1))
+row2 <- plot_grid(NKI_surf_plot, blank_space, HBN_surf_plot, ncol = 3, rel_widths = c(1, 0.1, 1))
+combined_surf_plots <- plot_grid(row1, blank_space, row2, ncol = 1, nrow = 3, rel_heights = c(1, 0.1, 1))
+combined_surf_plots <- annotate_figure(combined_surf_plots, 
+                                 left = text_grob("S-A Axis Rank", size = 20, x = 0.5, rot = 90),
+                                 bottom = text_grob("S-A Axis Rank", size = 20, x = 0.53, y = -0.5))
+
+all_datasets_surf_plot <-  make_surface_plot(double.all_datasets, dataset = "All Datasets", measure = "RESI", ylim1 = -0.1, ylim2  = 0.1, 
+                                   p_label = bquote(italic(p[spin]) == .(format(round(all_datasets_edges_spin$p_values$R2, 4), scientific = FALSE))))  
+all_datasets_surf_plot <- annotate_figure(all_datasets_surf_plot, 
+                                 left = text_grob("S-A Axis Rank", size = 20, x = 0.5, rot = 90),
+                                 bottom = text_grob("S-A Axis Rank", size = 20, x = 0.53, y = -0.5))
+# make legend
+ylim1 = -0.1
+ylim2 = 0.1
+g2 <- gam(RESI ~ te(parcel2_SA,parcel1_SA,k=3), data = double.PNC)
+  
+surface.plot.fig <- gg_tensor(g2) + theme_classic() +
+    theme(
+      axis.title.x=element_blank(),
+      axis.title.y=element_blank(),
+      axis.line = element_line(color = "black"),
+      axis.text=element_text(size=24, color = "black")) + 
+     scale_fill_gradientn(colours = red_teal_white(256), 
+                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") +     
+  geom_vline(xintercept = mean(range(double.PNC$parcel1.SA.vec)),
+               linetype='dashed',size=1) + 
+    geom_hline(yintercept = mean(range(double.PNC$parcel1.SA.vec)),
+               linetype='dashed',size=1) + 
+    theme(legend.position='bottom',
+          legend.key.height = unit(1, 'cm'),
+          legend.key.width = unit(3, 'cm'),
+          legend.title = element_blank(),
+          legend.text = element_text(size=24),
+          strip.background = element_blank(),
+          plot.margin = margin(0, 0, 0, 0, "cm"),
+          plot.title = element_text(size=24, hjust=0.5))  
+  
+legend <- get_legend(surface.plot.fig)
+
+
+# combine plots
+combined_surf_plots <- plot_grid(combined_surf_plots, blank_space, all_datasets_surf_plot, ncol = 3, rel_widths = (c(1, 0.05, 1)))
+
+final_surf_plots <- plot_grid(blank_space, combined_surf_plots, legend, nrow = 3, rel_heights = c(0.05, 1, 0.2))
+annotate_figure(final_surf_plots, 
+                bottom = text_grob("Sex Effect (RESI)", size = 20, x = 0.5, y = 2))
+
+
+#ggsave(paste0("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/Conferences/SOBP2026/", "fig3_edge.png"), annotate_figure(final_surf_plots, 
+               # bottom = text_grob("Sex Effect (RESI)", size = 20, x = 0.5, y = 2)), height = 14, width = 20, units = "in", bg = "white")
+ 
+```
+
+## edge plot colored by RESI of edges surviving FDR correction only
+```{r plot edge fdr sig sex effect with resi, fig.height = 14, fig.width = 20}
+# plot surfaces
+PNC_sigonly_surf_plot <- make_surface_plot(double.PNC, dataset = "PNC", measure = "RESI", ylim1 = -0.1, ylim2  = 0.1, 
+                                   p_label = NULL, significant_only = TRUE)
+HCPD_sigonly_surf_plot <-  make_surface_plot(double.HCPD, dataset = "HCP-D", measure = "RESI", ylim1 = -0.1, ylim2  = 0.1, 
+                                   p_label = NULL, significant_only = TRUE)
+NKI_sigonly_surf_plot <-  make_surface_plot(double.NKI, dataset = "NKI", measure = "RESI", ylim1 = -0.1, ylim2  = 0.1, 
+                                   p_label = NULL, significant_only = TRUE)
+HBN_sigonly_surf_plot <-  make_surface_plot(double.HBN, dataset = "HBN", measure = "RESI", ylim1 = -0.1, ylim2  = 0.1, 
+                                   p_label = NULL, significant_only = TRUE)
+row1 <- plot_grid(PNC_sigonly_surf_plot, blank_space, HCPD_sigonly_surf_plot, ncol = 3, rel_widths = c(1, 0.1, 1))
+row2 <- plot_grid(NKI_sigonly_surf_plot, blank_space, HBN_sigonly_surf_plot, ncol = 3, rel_widths = c(1, 0.1, 1))
+combined_sigonly_surf_plots <- plot_grid(row1, blank_space, row2, ncol = 1, nrow = 3, rel_heights = c(1, 0.1, 1))
+combined_sigonly_surf_plots <- annotate_figure(combined_sigonly_surf_plots, 
+                                 left = text_grob("S-A Axis Rank", size = 20, x = 0.5, rot = 90),
+                                 bottom = text_grob("S-A Axis Rank", size = 20, x = 0.53, y = -0.5))
+
+all_datasets_sigonly_surf_plot <-  make_surface_plot(double.all_datasets, dataset = "All Datasets", measure = "RESI", ylim1 = -0.1, ylim2  = 0.1, 
+                                   p_label = bquote(italic(p[spin]) == .(format(round(all_datasets_edges_spin$p_values$R2, 4), scientific = FALSE))), significant_only = TRUE)  
+all_datasets_sigonly_surf_plot <- annotate_figure(all_datasets_sigonly_surf_plot, 
+                                 left = text_grob("S-A Axis Rank", size = 20, x = 0.5, rot = 90),
+                                 bottom = text_grob("S-A Axis Rank", size = 20, x = 0.53, y = -0.5))
+# make legend
+ylim1 = -0.1
+ylim2 = 0.1
+g2 <- gam(RESI ~ te(parcel2_SA,parcel1_SA,k=3), data = double.PNC)
+  
+surface.plot.fig <- gg_tensor(g2) + theme_classic() +
+    theme(
+      axis.title.x=element_blank(),
+      axis.title.y=element_blank(),
+      axis.line = element_line(color = "black"),
+      axis.text=element_text(size=24, color = "black")) + 
+     scale_fill_gradientn(colours = red_teal_white(256), 
+                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") +     
+  geom_vline(xintercept = mean(range(double.PNC$parcel1.SA.vec)),
+               linetype='dashed',size=1) + 
+    geom_hline(yintercept = mean(range(double.PNC$parcel1.SA.vec)),
+               linetype='dashed',size=1) + 
+    theme(legend.position='bottom',
+          legend.key.height = unit(1, 'cm'),
+          legend.key.width = unit(3, 'cm'),
+          legend.title = element_blank(),
+          legend.text = element_text(size=24),
+          strip.background = element_blank(),
+          plot.margin = margin(0, 0, 0, 0, "cm"),
+          plot.title = element_text(size=24, hjust=0.5))  
+  
+legend <- get_legend(surface.plot.fig)
+
+
+# combine plots
+combined_sigonly_surf_plots <- plot_grid(combined_sigonly_surf_plots, blank_space, all_datasets_sigonly_surf_plot, ncol = 3, rel_widths = (c(1, 0.05, 1)))
+
+final_sigonly_surf_plots <- plot_grid(blank_space, combined_sigonly_surf_plots, legend, nrow = 3, rel_heights = c(0.05, 1, 0.2))
+annotate_figure(final_sigonly_surf_plots, 
+                bottom = text_grob("Sex Effect (RESI)", size = 20, x = 0.5, y = 2))
+
+ 
+```
+
+Sex effects at the edge-level appear to be distributed hierarchically, with males showing stronger connectivity in edges connecting regions across the S-A axis and in the middle of the axis (i.e. association-sensorimotor and middle-middle ranking regions) and females showing higher connectivity between similarly ranked regions (i.e. association-association and sensorimotor-sensorimotor regions). Connectivity in males appear to be more integrative, whereas females exhibit greater segregation.
+
+ 
+```{r resi rain cloud plot}
+
+RESI_all_datasets <- rbind(sex.main.PNC.edge %>% mutate(Dataset="PNC"), sex.main.HCPD.edge %>% mutate(Dataset="HCP-D"), sex.main.NKI.edge %>% mutate(Dataset="NKI"), sex.main.HBN.edge %>% mutate(Dataset="HBN"), sex.main.all_datasets.edge %>% mutate(Dataset="All datasets"))
+RESI_all_datasets$Dataset <- factor(RESI_all_datasets$Dataset, levels = c("PNC", "HCP-D", "NKI", "HBN", "All datasets"))
+
+
+# raincloud of RESI edge distribution of data
+ggplot(RESI_all_datasets, aes(Dataset, RESI, fill = Dataset, color = Dataset)) +
+  
+  ggdist::stat_halfeye(
+    adjust = .5, 
+    width = .6, 
+    .width = 0,
+    justification = -.3,
+    alpha = 0.9,        
+    size = 0.6        
+  ) +
+  
+  geom_boxplot(
+    width = .25,
+    outlier.shape = NA,
+    alpha = 0.7,
+    linewidth = 0.7
+  ) +
+  
+  geom_hline(
+    yintercept = 0,
+    linetype = "dashed",
+    color = "black",
+    linewidth = 0.5
+  ) +
+  
+  paletteer::scale_fill_paletteer_d("PNWColors::Shuksan") +
+  paletteer::scale_color_paletteer_d("PNWColors::Shuksan") +
+  
+  theme_classic() + 
+  
+  theme(
+    legend.position = "none",
+    strip.background = element_blank(),
+    plot.margin = margin(0, 0, -0.1, 0.5, "cm"),
+    axis.text.y = element_text(size = 20),
+    axis.text.x = element_text(size = 20),
+    axis.title.x = element_text(size = 20),
+    axis.title.y = element_text(size = 20),
+    axis.line = element_line(color = "black"),
+    axis.text = element_text(size = 24, color = "black")
+  )
+
+
+```
+Raincloud distribution of RESI sex effect sizes of edges show comparable distributions across datasets. Median effect size appears to be above zero, indicating a shift toward greater connectivity in males across connections, though magnitude of effects at individual edges was small. 
+ 
+  
+  
+# 5. Gradients Analysis
+global dispersion is consistently greater in females (small to medium effect). females show greater within-network dispersion too, with FPN and limbic OFC showing up the most often (i.e. parcels within a network are more 'different' from each other in females).  between-network dispersion has greatest effects, with greater dispersion in females across the board with really pronounced effects at DMN A, B, and C with somatomotor and visual networks (so those networks are way more different from each other in females than males; i.e. a these two networks' centroids on PC1 are way more far apart in females).
+
+also HBN is very much the problem child in this analysis. this isn't the best measure of data quality, but one of the things i looked at earlier was comparing PC1 (for the group average connectivity matrix) in thresholded (keep top 10% edges) vs unthresholded matrices. and the correlation in HBN was 0.05 :face_with_spiral_eyes:
+
+For reference, PNC was 0.72, NKI: 0.26, HCPD: 0.25, pooled dataset: 0.49
+```{r global dispersion, fig.height = 9, fig.width = 15}
+blank_space <- ggplot() + theme_void()
+global_disp_row1 <- plot_grid(plot_global_dispersion("PNC", "PNC"), blank_space, plot_global_dispersion("HCPD", "HCP-D"), ncol = 3, rel_widths = c(1, 0.1, 1))
+global_disp_row2 <- plot_grid(plot_global_dispersion("NKI", "NKI"), blank_space, plot_global_dispersion("HBN", "HBN"), ncol = 3, rel_widths = c(1, 0.1, 1))
+global_disp_p1 <- plot_grid(global_disp_row1, blank_space, global_disp_row2, nrow = 3, rel_heights = c(1, 0.05, 1))
+
+
+global_disp_p2 <- plot_grid(global_disp_p1, blank_space, plot_global_dispersion("all_datasets", "Pooled Dataset"), ncol = 3, rel_widths = c(1, 0.1, 1))
+global_disp_p3 <- plot_grid(blank_space, global_disp_p2, nrow = 2, rel_heights = c(0.05, 1))
+
+
+annotate_figure(global_disp_p3,
+      top = text_grob("Global Dispersion", size = 30), 
+      left = text_grob("Dispersion", size = 24, rot = 90))
+```
+
+```{r within network dispersion, fig.height = 12, fig.width = 20}
+blank_space <- ggplot() + theme_void()
+within_disp_row1 <- plot_grid(plot_within_dispersion("PNC", "PNC"), blank_space, plot_within_dispersion("HCPD", "HCP-D"), ncol = 3, rel_widths = c(1, 0.02, 1))
+within_disp_row2 <- plot_grid(plot_within_dispersion("NKI", "NKI"), blank_space, plot_within_dispersion("HBN", "HBN"), ncol = 3, rel_widths = c(1, 0.02, 1))
+within_disp_p1 <- plot_grid(within_disp_row1, blank_space, within_disp_row2, nrow = 3, rel_heights = c(1, 0.02, 1))
+within_disp_datasets <- annotate_figure(within_disp_p1, bottom = text_grob("Sex Effect (RESI)", size = 20))
+      
+within_disp_p2 <- plot_grid(plot_within_dispersion("all_datasets", "Pooled Dataset"), blank_space, plot_within_overlap(), nrow = 3, rel_heights = c(1, 0.05, 1))
+ 
+within_disp_final <- plot_grid(within_disp_p1, blank_space,  within_disp_p2, blank_space, ncol = 4, rel_widths = c(1, 0.01, 0.5, 0.05))
+ 
+
+annotate_figure(within_disp_final,
+      top = text_grob("Within-Network Dispersion", size = 30))
+ 
+```
+ 
+
+```{r between network dispersion,  fig.height = 12, fig.width = 18}
+ 
+# plots
+between_PNC <- plot_between_dispersion("PNC", "PNC")
+between_HCPD <- plot_between_dispersion("HCPD", "HCP-D")
+between_NKI <- plot_between_dispersion("NKI", "NKI")
+between_HBN <- plot_between_dispersion("HBN", "HBN")
+between_all <- plot_between_dispersion("all_datasets", "Pooled Dataset")
+between_overlap <- plot_between_overlap()
+
+# RESI legend
+resi_legend_plot <- ggplot(data.frame(x = 1, y = 1, z = 0), aes(x, y, fill = z)) +
+  geom_tile() +
+  scale_fill_gradientn(colours = red_teal_white(256), values = scales::rescale(c(-0.2, 0, 0.2)),
+                       limits = c(-0.23, 0.2), oob = squish, name = NULL) +
+  theme_void() +
+  theme(legend.position = "bottom", legend.text = element_text(size = 18),
+        legend.key.height = unit(0.8, "cm"), legend.key.width = unit(3, "cm"))
+
+resi_legend <- get_legend(resi_legend_plot)
+
+# overlap legend
+count_colors <- c("0-1" = "white", "2" = "#F6D0B5", "3" = "#D95F8D", "4" = "#AD2A72")
+
+overlap_legend_plot <- ggplot(
+  data.frame(overlap = factor(c("0-1", "2", "3", "4"), levels = c("0-1", "2", "3", "4"))),
+  aes(x = overlap, fill = overlap)
+) +
+  geom_bar() +
+  scale_fill_manual(values = count_colors, drop = FALSE,
+                    guide = guide_legend(direction = "horizontal", label.position = "bottom",
+                                         override.aes = list(colour = "black", linewidth = 0.5))) +
+  theme_void() +
+  theme(legend.title = element_blank(), legend.text = element_text(size = 18),
+        legend.key.size = unit(1.3, "cm"), legend.position = "bottom")
+
+overlap_legend <- get_legend(overlap_legend_plot)
+
+# left column: 4 datasets + RESI legend
+between_four <- plot_grid(between_PNC, between_HCPD, between_NKI, between_HBN, ncol = 2)
+
+between_col1 <- annotate_figure(
+  plot_grid(between_four, resi_legend, nrow = 2, rel_heights = c(1, 0.08)),
+  bottom = text_grob("Sex Effect (RESI)", size = 20, y = 0.5)
+)
+
+# right column: pooled + overlap + overlap legend
+between_col2_plots <- plot_grid(between_all, between_overlap, nrow = 2)
+
+overlap_legend_layout <- plot_grid(blank_space, overlap_legend, ncol = 2, rel_widths = c(0.08, 1))
+overlap_legend_layout <- plot_grid(overlap_legend_layout, blank_space, nrow = 2, rel_heights = c(1, 0.1))
+
+between_col2 <- annotate_figure(
+  plot_grid(between_col2_plots, overlap_legend_layout, nrow = 2, rel_heights = c(1, 0.1)),
+  bottom = text_grob("Number of Datasets", size = 20, y = 0.9, x = 0.5)
+)
+
+# final layout
+between_dispersion_figure <- plot_grid(blank_space, plot_grid(between_col1, between_col2, blank_space,
+                                       ncol = 3, rel_widths = c(2, 1, 0.1)), nrow = 2, rel_heights = c(0.01, 1))
+
+annotate_figure(between_dispersion_figure,
+                top = text_grob("Between-Network Dispersion", size = 24))
+
+```
+
+ 
+## Distribution of PC1
+Interestingly, the overall male/female PC1 distributions and mean cortical PC1 maps look quite similar. so the dispersion sex effects above don’t seem to reflect a simple overall difference in PC1... and i think the key is that dispersion is looking within subjects (i.e. in a given subject, how spread out are their 200 parcel loadings around that subject’s own PC1 median?). So even though females and males have a very similar average PC1 spatial organization, within individuals, females tend to have parcels/networks that are more spread out along PC1. And looking at average PC1 loadings ends up obscuring these within-individual difference between males/females
+
+```{r distribution of PC1, fig.height = 7, fig.width = 15}
+sex_colors <- c(Female = "#C53121", Male = "#0B8CACFF")
+
+root <- "/cbica/projects/network_replication/covariate_analyses/sex_diff"
+datasets <- c("PNC", "NKI", "HCPD", "HBN", "all_datasets")
+
+ 
+pc1_long <- map_dfr(datasets, function(dataset) {
+  df <- read.csv(sprintf("%s/output/%s/gradient_dispersion/pc1_loadings_long_%s.csv", root, dataset, dataset))
+  if(dataset == "all_datasets") df$dataset <- "all_datasets"
+  df
+})
+
+pc1_long$sex <- factor(pc1_long$sex, levels = c("Female", "Male"))
+
+plot_pc1_density <- function(dataset, title) {
+  df <- pc1_long %>% filter(dataset == !!dataset)
+  
+  ggplot(df, aes(x = pc1, fill = sex, color = sex)) +
+    geom_density(alpha = 0.25, linewidth = 1) +
+    scale_fill_manual(values = sex_colors) +
+    scale_color_manual(values = sex_colors) +
+    coord_cartesian(xlim = c(-4, 6)) +
+    labs(title = title, x = NULL, y = NULL) +
+    theme_classic(base_size = 20) +
+    theme(legend.position = "none",
+          plot.title = element_text(size = 20, hjust = 0.5),
+          axis.text = element_text(size = 20, color = "black"))
+}
+
+pc1_density_PNC <- plot_pc1_density("PNC", "PNC")
+pc1_density_HCPD <- plot_pc1_density("HCPD", "HCP-D")
+pc1_density_NKI <- plot_pc1_density("NKI", "NKI")
+pc1_density_HBN <- plot_pc1_density("HBN", "HBN")
+pc1_density_all <- plot_pc1_density("all_datasets", "Pooled Dataset")
+
+sex_legend_plot <- ggplot(data.frame(sex = factor(c("Female", "Male"), levels = c("Female", "Male")), x = 1:2, y = 1),
+                          aes(x, y, fill = sex, color = sex)) +
+  geom_point(shape = 21, size = 6) +
+  scale_fill_manual(values = sex_colors) +
+  scale_color_manual(values = sex_colors) +
+  guides(fill = guide_legend(direction = "horizontal", override.aes = list(size = 6, alpha = 0.5)), color = "none") +
+  theme_void() +
+  theme(legend.position = "bottom", legend.title = element_blank(),
+        legend.text = element_text(size = 20), legend.key.size = unit(1.1, "cm"))
+
+sex_legend <- get_legend(sex_legend_plot)
+
+blank_space <- ggplot() + theme_void()
+
+pc1_density_row1 <- plot_grid(pc1_density_PNC, blank_space, pc1_density_HCPD, ncol = 3, rel_widths = c(1, 0.1, 1))
+pc1_density_row2 <- plot_grid(pc1_density_NKI, blank_space, pc1_density_HBN, ncol = 3, rel_widths = c(1, 0.1, 1))
+pc1_density_p1 <- plot_grid(pc1_density_row1, blank_space, pc1_density_row2, nrow = 3, rel_heights = c(1, 0.05, 1))
+pc1_density_p2 <- plot_grid(pc1_density_p1, blank_space, pc1_density_all, ncol = 3, rel_widths = c(1, 0.1, 1))
+
+pc1_density_figure <- plot_grid(pc1_density_p2, sex_legend, nrow = 2, rel_heights = c(1, 0.08))
+
+pc1_density_figure <- annotate_figure(pc1_density_figure,
+                                      top = text_grob("PC1 Distribution", size = 30),
+                                      left = text_grob("Density", size = 24, rot = 90),
+                                      bottom = text_grob("PC1 Loading", size = 24))
+
+pc1_density_figure
+
+```
+
+
+## PC1 loadings in males vs females
+```{r PC1 in males and females, fig.height = 10, fig.width = 15}
+
+library(tidyverse)
+library(ggseg)
+library(ggsegSchaefer)
+library(cowplot)
+library(scales)
+library(paletteer)
+
+root <- "/cbica/projects/network_replication/covariate_analyses/sex_diff"
+datasets <- c("PNC", "NKI", "HCPD", "HBN", "all_datasets")
+
+pc1_brain <- map_dfr(datasets, function(dataset) {
+  if(dataset == "all_datasets") {
+    df <- read.csv(sprintf("%s/output/%s/gradient_dispersion/pc1_loadings_long_%s.csv", root, dataset, dataset)) %>%
+      group_by(sex, parcel, parcel_label, hemisphere, network) %>%
+      summarise(pc1_mean = mean(pc1, na.rm = TRUE), # fyi: pc1_mean at parcel 1 = mean(PC1 at parcel 1 for every female subject across PNC + NKI + HCPD + HBN)
+                pc1_median = median(pc1, na.rm = TRUE),
+                pc1_sd = sd(pc1, na.rm = TRUE),
+                n = sum(!is.na(pc1)),
+                pc1_se = pc1_sd / sqrt(n), .groups = "drop") %>%
+      mutate(dataset = "all_datasets")
+  } else {
+    df <- read.csv(sprintf("%s/output/%s/gradient_dispersion/pc1_parcel_by_sex_%s.csv", root, dataset, dataset))
+  }
+  
+  df <- df %>% rename(region = parcel_label) %>% mutate(region = paste0("17", region))
+  df
+})
+
+
+
+
+# common symmetric PC1 scale across all datasets and both sexes
+pc1_lim <- max(abs(pc1_brain$pc1_mean), na.rm = TRUE)
+ylim1 <- -pc1_lim
+ylim2 <- pc1_lim
+
+# adapted from your existing plot_cortex() function
+plot_cortex_pc1 <- function(df, hemi, sex_name, ylim1, ylim2, horizontal_layout = NULL) {
+  df <- df %>% filter(sex == sex_name)
+
+  if(hemi == "left") {
+    cortical_pos1 <- "left lateral"
+    cortical_pos2 <- "left medial"
+  } else {
+    cortical_pos1 <- "right lateral"
+    cortical_pos2 <- "right medial"
+  }
+
+  plot_lateral <- ggplot() +
+    geom_brain(data = df, atlas = schaefer17_200, mapping = aes(fill = pc1_mean),
+               show.legend = TRUE, hemi = hemi, position = position_brain(cortical_pos1)) +
+    paletteer::scale_fill_paletteer_c("pals::ocean.curl",
+                                      limits = c(ylim1, ylim2), oob = squish, na.value = "white") +
+    theme_void() +
+    theme(legend.position = "none",
+          legend.title = element_blank(),
+          plot.margin = unit(c(0.1, -1, 0.1, -1), "cm"),
+          plot.title = element_blank())
+
+  plot_medial <- ggplot() +
+    geom_brain(data = df, atlas = schaefer17_200, mapping = aes(fill = pc1_mean),
+               show.legend = TRUE, hemi = hemi, position = position_brain(cortical_pos2)) +
+    paletteer::scale_fill_paletteer_c("pals::ocean.curl",
+                                      limits = c(ylim1, ylim2), oob = squish, na.value = "white") +
+    theme_void() +
+    theme(legend.position = "none",
+          legend.title = element_blank(),
+          plot.margin = unit(c(0.1, -1, 0.1, -1), "cm"),
+          plot.title = element_blank())
+
+  if(is.null(horizontal_layout)) {
+    return(plot_grid(plot_lateral, plot_medial, ncol = 1, rel_heights = c(1, 1), align = "v", axis = "lr"))
+  } else {
+    return(plot_grid(plot_lateral, plot_medial, ncol = 2, align = "v", axis = "lr"))
+  }
+}
+
+# individual datasets: female and male side-by-side;
+# each sex has left/right hemispheres, each shown lateral + medial vertically
+plot_pc1_dataset <- function(dataset, title) {
+  df <- pc1_brain %>% filter(dataset == !!dataset)
+
+  female_left <- plot_cortex_pc1(df, "left", "Female", ylim1, ylim2)
+  female_right <- plot_cortex_pc1(df, "right", "Female", ylim1, ylim2)
+  male_left <- plot_cortex_pc1(df, "left", "Male", ylim1, ylim2)
+  male_right <- plot_cortex_pc1(df, "right", "Male", ylim1, ylim2)
+
+  female <- plot_grid(female_left, female_right, ncol = 2)
+  male <- plot_grid(male_left, male_right, ncol = 2)
+
+  female <- plot_grid(ggdraw() + draw_label("Female", size = 18),
+                      female, ncol = 1, rel_heights = c(0.08, 1))
+  male <- plot_grid(ggdraw() + draw_label("Male", size = 18),
+                    male, ncol = 1, rel_heights = c(0.08, 1))
+
+  brains <- plot_grid(female, male, ncol = 2)
+
+  plot_grid(ggdraw() + draw_label(title, size = 20),
+            brains, ncol = 1, rel_heights = c(0.08, 1))
+}
+
+# pooled dataset: all 8 views in one row
+plot_pc1_pooled <- function() {
+  df <- pc1_brain %>% filter(dataset == "all_datasets")
+
+  female_left <- plot_cortex_pc1(df, "left", "Female", ylim1, ylim2, horizontal_layout = TRUE)
+  female_right <- plot_cortex_pc1(df, "right", "Female", ylim1, ylim2, horizontal_layout = TRUE)
+  male_left <- plot_cortex_pc1(df, "left", "Male", ylim1, ylim2, horizontal_layout = TRUE)
+  male_right <- plot_cortex_pc1(df, "right", "Male", ylim1, ylim2, horizontal_layout = TRUE)
+
+  female <- plot_grid(female_left, female_right, ncol = 2)
+  male <- plot_grid(male_left, male_right, ncol = 2)
+
+  female <- plot_grid(ggdraw() + draw_label("Female", size = 18),
+                      female, ncol = 1, rel_heights = c(0.10, 1))
+  male <- plot_grid(ggdraw() + draw_label("Male", size = 18),
+                    male, ncol = 1, rel_heights = c(0.10, 1))
+
+  blank_space <- ggplot() + theme_void()
+
+  brains <- plot_grid(female, blank_space, male, ncol = 3, rel_widths = c(1, 0.08, 1))
+
+  plot_grid(ggdraw() + draw_label("Pooled Dataset", size = 20),
+            brains, ncol = 1, rel_heights = c(0.10, 1))
+}
+# dataset plots
+pc1_brain_PNC <- plot_pc1_dataset("PNC", "PNC")
+pc1_brain_HCPD <- plot_pc1_dataset("HCPD", "HCP-D")
+pc1_brain_NKI <- plot_pc1_dataset("NKI", "NKI")
+pc1_brain_HBN <- plot_pc1_dataset("HBN", "HBN")
+pc1_brain_pooled <- plot_pc1_pooled()
+
+# shared PC1 legend
+pc1_legend_plot <- ggplot(data.frame(x = 1, y = 1, pc1 = 0), aes(x, y, fill = pc1)) +
+  geom_tile() +
+  paletteer::scale_fill_paletteer_c("pals::ocean.curl",
+                                    limits = c(ylim1, ylim2), oob = squish, name = NULL) +
+  theme_void() +
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 18),
+        legend.key.height = unit(0.8, "cm"),
+        legend.key.width = unit(3, "cm"))
+
+pc1_legend <- get_legend(pc1_legend_plot)
+blank_space <- ggplot() + theme_void()
+
+# four individual datasets
+pc1_brain_row1 <- plot_grid(pc1_brain_PNC, blank_space, pc1_brain_HCPD,
+                            ncol = 3, rel_widths = c(1, 0.1, 1))
+
+pc1_brain_row2 <- plot_grid(pc1_brain_NKI, blank_space, pc1_brain_HBN,
+                            ncol = 3, rel_widths = c(1, 0.1, 1))
+
+pc1_brain_four <- plot_grid(pc1_brain_row1, blank_space, pc1_brain_row2,
+                            nrow = 3, rel_heights = c(1, 0.1, 1))
+
+# pooled dataset underneath
+pc1_brain_main <- plot_grid(pc1_brain_four, blank_space, pc1_brain_pooled,
+                            nrow = 3, rel_heights = c(2, 0.1, 0.55))
+
+# legend underneath everything
+pc1_brain_with_legend <- plot_grid(pc1_brain_main, blank_space, pc1_legend, blank_space, 
+                                   nrow = 4, rel_heights = c(1, 0.06, 0.06, 0.06))
+
+pc1_brain_figure <- annotate_figure(
+  pc1_brain_with_legend,
+  bottom = text_grob("Mean PC1 Loading", size = 20, vjust = 0.05)
+)
+
+pc1_brain_figure
+```
+
+
+
+# Supplementary analyses
+
+## Histogram of WNC and BNC
+
+```{r BNC and WNC histograms, fig.height = 8, fig.width = 20}
+# load subject levels BNC and WNC
+PNC_BNC_subxparcel <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/PNC/BNC/BNC_subxparcel_matrix_schaefer200x17.csv")
+HCPD_BNC_subxparcel <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HCPD/BNC/BNC_subxparcel_matrix_schaefer200x17.csv")
+NKI_BNC_subxparcel <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/NKI/BNC/BNC_subxparcel_matrix_schaefer200x17.csv")
+HBN_BNC_subxparcel <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HBN/BNC/BNC_subxparcel_matrix_schaefer200x17.csv")
+
+PNC_WNC_subxparcel <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/PNC/WNC/WNC_subxparcel_matrix_schaefer200x17.csv")
+HCPD_WNC_subxparcel <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HCPD/WNC/WNC_subxparcel_matrix_schaefer200x17.csv")
+NKI_WNC_subxparcel <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/NKI/WNC/WNC_subxparcel_matrix_schaefer200x17.csv")
+HBN_WNC_subxparcel <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/HBN/WNC/WNC_subxparcel_matrix_schaefer200x17.csv")
+
+# hist function
+make_hist_plot <- function(subxparcel_df, dataset, xlim1, xlim2, color) {
+  long_df <- subxparcel_df %>%
+    pivot_longer(cols = -subject, names_to = "region", values_to = "value") %>%
+    filter(!is.na(value))
+  
+  p <- ggplot(long_df, aes(x = value)) +
+    geom_histogram(bins = 20, color = color, fill = color, linewidth = 0.7, alpha = 0.7) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "#33271EFF", linewidth = 0.7) +
+    theme_classic() +
+    labs(x = "", y = "") + ggtitle(dataset) +
+    theme(axis.text = element_text(size = 20, color = "#33271EFF"),
+          axis.title = element_text(size = 20),
+          plot.title = element_text(size = 20, hjust = 0.5)) + xlim(xlim1, xlim2)
+  
+  return(p)
+}
+
+
+# make histograms
+BNC_hist <- plot_grid(blank_space, plot_grid(make_hist_plot(PNC_BNC_subxparcel, "PNC", -0.5, 0.5, color = "#B7E6A5FF"), make_hist_plot(HCPD_BNC_subxparcel, "HCP-D", -0.5, 0.5, color = "#B7E6A5FF"),
+                                 make_hist_plot(NKI_BNC_subxparcel,"NKI", -0.5, 0.5, color = "#B7E6A5FF"), make_hist_plot(HBN_BNC_subxparcel,"HBN", -0.5, 0.5, color = "#B7E6A5FF")), 
+                      nrow = 2, rel_heights = c(0.03, 1))
+
+
+WNC_hist <- plot_grid(blank_space, plot_grid(make_hist_plot(PNC_WNC_subxparcel, "PNC", -0.7, 1, color = "#64A8A8FF"), make_hist_plot(HCPD_WNC_subxparcel, "HCP-D", -0.7, 1, color = "#64A8A8FF"),
+                                 make_hist_plot(NKI_WNC_subxparcel,"NKI", -0.7, 1, color = "#64A8A8FF"), make_hist_plot(HBN_WNC_subxparcel,"HBN", -0.7, 1, color = "#64A8A8FF")), 
+                      nrow = 2, rel_heights = c(0.03, 1))
+
+
+BNC_hist_plots <- annotate_figure(BNC_hist, bottom = text_grob("Between-Network Connectivity", size = 24),
+                left = text_grob("Count", size = 24, rot = 90),
+                top = text_grob("Distribution of BNC", size = 24))
+
+
+
+WNC_hist_plots <- annotate_figure(WNC_hist, bottom = text_grob("Within-Network Connectivity", size = 24),
+                left = text_grob("Count", size = 24, rot = 90),
+                top = text_grob("Distribution of WNC", size = 24))
+
+
+plot_grid(BNC_hist_plots, blank_space, WNC_hist_plots, ncol = 3, rel_widths = c(1, 0.1, 1))
+```
+
+## Age-by-sex interaction across ALL datasets
+
+-   WNC in 11 regions (5%; schaefer200x7) and 22 regions (11%; schafer200x17) has some age-by-sex effects when datasets are pooled.
+-   network-pair connectivity also has some significant age-by-sex interactions
+
+```{r load age by sex interaction across datasets}
+GBC_schaefer7 <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/GAM/GBC/all_datasets_GAM_agebysex_interaction_schaefer200x7.csv")
+GBC_schaefer7 <- sig.effects.all_datasets(GBC_schaefer7, "GBC", "sex", "all_datasets 7 networks", "GAM.int.pvalue", "GAM.int.Fvalue")
+GBC_schaefer17 <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/GAM/GBC/all_datasets_GAM_agebysex_interaction_schaefer200x17.csv")
+GBC_schaefer17 <- sig.effects.all_datasets(GBC_schaefer17, "GBC", "sex", "all_datasets 17 networks", "GAM.int.pvalue", "GAM.int.Fvalue")
+
+BNC_schaefer7 <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/GAM/BNC/all_datasets_GAM_agebysex_interaction_schaefer200x7.csv")
+BNC_schaefer7 <- sig.effects.all_datasets(BNC_schaefer7, "BNC", "sex", "all_datasets 7 networks", "GAM.int.pvalue", "GAM.int.Fvalue")
+BNC_schaefer17 <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/GAM/BNC/all_datasets_GAM_agebysex_interaction_schaefer200x17.csv")
+BNC_schaefer17 <- sig.effects.all_datasets(BNC_schaefer17, "BNC", "sex", "all_datasets 17 networks", "GAM.int.pvalue", "GAM.int.Fvalue")
+
+WNC_schaefer7 <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/GAM/WNC/all_datasets_GAM_agebysex_interaction_schaefer200x7.csv")
+WNC_schaefer7 <- sig.effects.all_datasets(WNC_schaefer7, "WNC", "sex", "all_datasets 7 networks", "GAM.int.pvalue", "GAM.int.Fvalue")
+WNC_schaefer17 <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/GAM/WNC/all_datasets_GAM_agebysex_interaction_schaefer200x17.csv")
+WNC_schaefer17 <- sig.effects.all_datasets(WNC_schaefer17, "WNC", "sex", "all_datasets 17 networks", "GAM.int.pvalue", "GAM.int.Fvalue")
+#WNC_schaefer17 %>% arrange(desc(int_sig_effect))
+
+netpair_schaefer7 <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/GAM/networkpair/all_datasets_GAM_agebysex_interaction_schaefer200x7.csv")
+netpair_schaefer7 <- sig.effects.all_datasets(netpair_schaefer7, "netpair", "sex", "all_datasets 7 networks", "GAM.int.pvalue", "GAM.int.Fvalue")
+netpair_schaefer17 <- read.csv("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/all_datasets/GAM/networkpair/all_datasets_GAM_agebysex_interaction_schaefer200x17.csv")
+netpair_schaefer17 <- sig.effects.all_datasets(netpair_schaefer17, "netpair", "sex", "all_datasets 17 networks", "GAM.int.pvalue", "GAM.int.Fvalue")
+#netpair_schaefer17 %>% arrange(desc(int_sig_effect))
+```
+
+ 
+```{r plot WNC age by sex regions, fig.height = 10, fig.width = 10}
+WNC_schaefer17 <- WNC_schaefer17 %>% mutate(region = if_else(startsWith(region, "17"), region, paste0("17", region)))
+sex.int.all_dataset.WNC_lh <- plot_cortex_int(WNC_schaefer17, hemi = "left", measure = "int_sig_effect", ylim1 = 1, ylim2 = 9, atlas = "schaefer17_200") 
+sex.int.all_dataset.WNC_rh <- plot_cortex_int(WNC_schaefer17, hemi = "right", measure = "int_sig_effect", ylim1 = 1, ylim2 = 9, atlas = "schaefer17_200")
+
+ylim1 = 1
+ylim2 = 9
+p <- ggplot() + 
+    geom_brain(data = WNC_schaefer17, atlas = schaefer17_200, 
+               mapping=aes(fill=int_sig_effect, colour=significant_status, size=I(0.7)), 
+               show.legend=TRUE) +
+    scale_fill_paletteer_c("ggthemes::Blue-Green Sequential", na.value = "white") + 
+    scale_colour_manual(values = c("Sig" = "black", "Nonsig" = "grey50")) + 
+    theme_void() +
+    theme(legend.title = element_blank(),
+          legend.text = element_text(size = 24),
+        legend.position = "bottom", 
+        legend.box = "horizontal", 
+        legend.key.height = unit(1, 'cm'),
+        legend.key.width = unit(2, 'cm'),
+        plot.margin = unit(c(0, 1, 0, -0.5), "cm")) + guides(color = "none")
+  
+  
+legend <- get_legend(p)
+blank_space <- ggplot() + theme_void()
+
+annotate_figure(
+  plot_grid(
+    annotate_figure(
+      plot_grid(
+        sex.int.all_dataset.WNC_lh,
+        sex.int.all_dataset.WNC_rh,
+        ncol = 2
+      ),
+      top = text_grob("WNC age-by-sex all datasets (Schaefer 200x17)", size = 24)
+    ),
+    legend,
+    ncol = 1,
+    rel_heights = c(1, 0.2)
+  ),
+  bottom = text_grob("Interaction (F-value)", size = 24)
+)
+
+ print(WNC_schaefer17 %>% arrange(desc(int_sig_effect)) %>% filter(significant_status == "Sig") %>% pull(region))
+```
+
+```{r print networkpair age by sex pairs}
+ print(netpair_schaefer17 %>% arrange(desc(int_sig_effect)) %>% filter(significant_status == "Sig") %>% pull(region))
+
+ print(WNC_schaefer17 %>% arrange(desc(int_sig_effect)) %>% filter(significant_status == "Sig") %>% pull(region))
+
+```
+ 
+ 
+ 
+ 
+```{r load WNC age by sex dev trajectories}
+agebysex.all_datasets.WNC <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_agebysex_fitted_%4$s.csv", output_root, "all_datasets", "WNC", "schaefer200x17"))
+agebysex.all_datasets.WNC$region <- paste0("17", agebysex.all_datasets.WNC$region)
+agebysex.all_datasets.WNC <- agebysex.all_datasets.WNC %>% rename(age=smooth_var)
+
+```
+
+```{r WNC dev trajectories vis, fig.height = 20, fig.width = 20}
+WNC_interaction_regions <- WNC_schaefer17 %>% filter(significant.fdr == 1) %>% pull(region) #%>% paste0('17', .)
+agebysex.all_datasets.WNC.interaction <- agebysex.all_datasets.WNC %>% filter(region %in% WNC_interaction_regions)
+
+colorF = "#e67239"
+colorM = "#0B8CACFF"
+WNC.interaction.all_datasets.plots <- lapply(WNC_interaction_regions, plot_trajectories_bycov, df = agebysex.all_datasets.WNC, covariate = "sex", y.limits = range(agebysex.all_datasets.WNC$fitted), colorF, colorM, margin = 0)
+names(WNC.interaction.all_datasets.plots) <- WNC_interaction_regions 
+ 
+ 
+# get legend
+y.limits = range(agebysex.all_datasets.WNC$fitted)
+df_plot <- agebysex.all_datasets.WNC %>% filter(region %in% "17Networks_LH_VisCent_ExStr_3")
+
+plot <- ggplot(df_plot, aes(x = age, y = fitted, group = interaction(sex, region))) + 
+  geom_line(aes(color = sex), linewidth = 3) +
+    theme_classic() +
+    scale_y_continuous(limits = y.limits) +
+    scale_color_manual(values = c("Female" = colorF, "Male" = colorM)) +
+  theme_classic() + 
+  theme(plot.title = element_text(hjust = 0.5, size = 20),
+        legend.position = "bottom",
+        legend.title = element_text(size=20),
+        legend.text = element_text(size=20),
+        axis.title = element_blank(),
+        axis.text.x = element_text(size = 20, color = "black"),
+        axis.text.y = element_text(size = 20, color = "black"))  
+dev_traj_legend <- get_legend(plot)
+
+
+WNC.interaction.all_datasets.plots.combined <- plot_grid(blank_space, plot_grid(plotlist = WNC.interaction.all_datasets.plots), nrow = 2, rel_heights = c(0.03, 1))
+WNC.interaction.all_datasets.plots.text <- annotate_figure(WNC.interaction.all_datasets.plots.combined, bottom = text_grob("Age (years)", size = 24),
+                left = text_grob("Within Network Connectivity", size = 24, rot = 90),
+                top = text_grob("Developmental Patterns of Within Network Connectivity by Sex", size = 24))
+
+
+plot_grid(WNC.interaction.all_datasets.plots.text, dev_traj_legend, nrow = 2, rel_heights = c(1, 0.05))
+
+```
+
+ 
+```{r load netpair age by sex dev trajectories}
+agebysex.all_datasets.netpair <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_agebysex_fitted_%4$s.csv", output_root, "all_datasets", "networkpair", "schaefer200x17"))
+agebysex.all_datasets.netpair <- agebysex.all_datasets.netpair %>% rename(age=smooth_var)
+
+```
+
+```{r netpair dev trajectories vis, fig.height = 25, fig.width = 15}
+netpair_interaction_regions <- netpair_schaefer17 %>% filter(significant.fdr == 1) %>% pull(region) %>% gsub("_", " - ", .)
+agebysex.all_datasets.netpair$region <- gsub("_", " - ", agebysex.all_datasets.netpair$region)
+agebysex.all_datasets.netpair.interaction <- agebysex.all_datasets.netpair %>% filter(region %in% netpair_interaction_regions)
+
+colorF = "#A51122FF"
+colorM = "#0B8CACFF"
+netpair.interaction.all_datasets.plots <- lapply(netpair_interaction_regions, plot_trajectories_bycov, df = agebysex.all_datasets.netpair, covariate = "sex", y.limits = range(agebysex.all_datasets.netpair$fitted), colorF, colorM, margin = 2)
+names(netpair.interaction.all_datasets.plots) <- netpair_interaction_regions 
+
+ 
+# get legend
+y.limits = range(agebysex.all_datasets.netpair$fitted)
+df_plot <- agebysex.all_datasets.netpair %>% filter(region %in% "defaultA - defaultA")
+
+plot <- ggplot(df_plot, aes(x = age, y = fitted, group = interaction(sex, region))) + 
+  geom_line(aes(color = sex), linewidth = 3) +
+    theme_classic() +
+    scale_y_continuous(limits = y.limits) +
+    scale_color_manual(values = c("Female" = colorF, "Male" = colorM)) +
+  theme_classic() + 
+  theme(plot.title = element_text(hjust = 0.5, size = 20),
+        legend.position = "bottom",
+        legend.title = element_text(size=20),
+        legend.text = element_text(size=20),
+        axis.title = element_blank(),
+        axis.text.x = element_text(size = 20, color = "black"),
+        axis.text.y = element_text(size = 20, color = "black"))  
+
+dev_traj_legend <- get_legend(plot)
+
+
+netpair.interaction.all_datasets.plots.combined <- plot_grid(blank_space, plot_grid(plotlist = netpair.interaction.all_datasets.plots, ncol = 2), nrow = 2, rel_heights = c(0.03, 1))
+netpair.interaction.all_datasets.plots.text <- annotate_figure(netpair.interaction.all_datasets.plots.combined, bottom = text_grob("Age (years)", size = 24),
+                left = text_grob("Connectivity between Pairs of Networks", size = 24, rot = 90),
+                top = text_grob("Developmental Patterns of Within Network Connectivity by Sex", size = 24))
+
+
+plot_grid(plot_grid(netpair.interaction.all_datasets.plots.text, dev_traj_legend, nrow = 2, rel_heights = c(1, 0.05)), blank_space, ncol = 2, rel_widths = c(1, 0.05))
+
+```
+ 
+# Clinical measures exploration - just fyi
+ 
+- To quantify whether pfactor and sex affect similar edges/networks: topographical overlap of effects
+- To test whether one map statistically predicts another: spatial covariance structure
+
+- Goal: Does the pattern of connections that differ by pfactor resemble the pattern that differs by sex?
+```{r load edge sex, fig.height = 10, fig.width = 9}
+# edge gam output
+clinical.main.all_datasets.edge <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_clinical_maineffects_schaefer200x17.csv", output_root, "all_datasets", "edge"))
+clinical.main.all_datasets.edge_pfactor <- clinical.main.all_datasets.edge %>% filter(covariate == "p_factor_mcelroy_harmonized_all_samples") %>% rename(GAM.cov.pvalue = p_value, GAM.cov.tvalue = t_value)
+clinical.main.all_datasets.edge_int <- clinical.main.all_datasets.edge %>% filter(covariate == "internalizing_mcelroy_harmonized_all_samples") %>% rename(GAM.cov.pvalue = p_value, GAM.cov.tvalue = t_value)
+clinical.main.all_datasets.edge_ext <- clinical.main.all_datasets.edge %>% filter(covariate == "externalizing_mcelroy_harmonized_all_samples") %>% rename(GAM.cov.pvalue = p_value, GAM.cov.tvalue = t_value)
+clinical.main.all_datasets.edge_att <- clinical.main.all_datasets.edge %>% filter(covariate == "attention_mcelroy_harmonized_all_samples") %>% rename(GAM.cov.pvalue = p_value, GAM.cov.tvalue = t_value)
+
+clinical.main.all_datasets.edge_sex <- clinical.main.all_datasets.edge %>% filter(covariate == "sex") %>% rename(GAM.cov.pvalue = p_value, GAM.cov.tvalue = t_value)
+ 
+
+# make df for plotting (and do FDR correction)
+double.pfactor <- make_double_df(clinical.main.all_datasets.edge_pfactor, "edge", "pfactor", "All datasets")
+double.int <- make_double_df(clinical.main.all_datasets.edge_int, "edge", "internalizing", "All datasets")
+double.ext <- make_double_df(clinical.main.all_datasets.edge_ext, "edge", "externalizing", "All datasets")
+double.att <- make_double_df(clinical.main.all_datasets.edge_att, "edge", "attention", "All datasets")
+double.sex <- make_double_df(clinical.main.all_datasets.edge_sex, "edge", "sex", "All datasets")
+
+pfactor_surf <- make_surface_plot(double.pfactor, dataset = "P-factor", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2  = 2, 
+                                   p_label = "")
+
+int_surf <- make_surface_plot(double.int, dataset = "Internalizing", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2  = 2, 
+                                   p_label = "")
+ 
+ext_surf <- make_surface_plot(double.ext, dataset = "Externalizing", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2  = 2, 
+                                   p_label = "")
+att_surf <- make_surface_plot(double.att, dataset = "Attention", measure = "GAM.cov.tvalue", ylim1 = -2, ylim2  = 2, 
+                                   p_label = "")
+
+row1_clinical <- plot_grid(pfactor_surf, int_surf, ncol=2)
+row2_clinical <- plot_grid(ext_surf, att_surf, ncol=2)
+plot_grid(row1_clinical, blank_space, row2_clinical, nrow = 3, rel_heights = c(1, 0.2, 1))
+  
+```
+
+
+```{r pfactor explore, fig.height = 10, fig.width = 10}
+ 
+
+PNC_config_data <- fromJSON(file=sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "PNC"))
+HCPD_config_data <- fromJSON(file=sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HCPD"))
+NKI_config_data <- fromJSON(file=sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "NKI"))
+HBN_config_data <- fromJSON(file=sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HBN"))
+
+################### 
+# Define functions 
+###################
+# load pfactor data and merge with demographics
+load_pfactor_data <- function(file_path) {
+  pfactor <- fread(file_path)
+  pfactor <- pfactor %>% rename(sub = participant_id)
+  pfactor$sub <- paste0("sub-", pfactor$sub)
+  pfactor <- pfactor %>% select(sub, p_factor_mcelroy_harmonized_all_samples, internalizing_mcelroy_harmonized_all_samples, externalizing_mcelroy_harmonized_all_samples, attention_mcelroy_harmonized_all_samples)
+  pfactor <- pfactor[!duplicated(pfactor), ]
+  pfactor <- pfactor[complete.cases(pfactor), ]
+  return(pfactor)
+}
+
+# load demographics for all datasets and combine
+PNC_demographics <- read.csv(PNC_config_data$demographics, stringsAsFactors = TRUE) %>% mutate(dataset_site = "PNC") %>% select(sub, age, sex, meanFD_avgSes, dataset_site)
+NKI_demographics <- read.csv(NKI_config_data$demographics, stringsAsFactors = TRUE) %>% mutate(dataset_site = "NKI") %>% select(sub, age, sex, meanFD_avgSes, dataset_site)
+HBN_demographics <- read.csv(HBN_config_data$demographics, stringsAsFactors = TRUE) %>% rename(site = ses) %>% mutate(dataset_site = paste0("HBN_", site)) %>% select(sub, age, sex, meanFD_avgSes, dataset_site)
+
+#load clinical measures
+PNC_pfactor <- load_pfactor_data("/cbica/projects/network_replication/covariate_analyses/pfactor/input/PNC/sample_info/study-PNC_desc-participants.tsv")
+NKI_pfactor <- load_pfactor_data("/cbica/projects/network_replication/covariate_analyses/pfactor/input/NKI/sample_info/study-NKI_desc-participants.tsv")
+NKI_pfactor$sub <- gsub("sub-", "", NKI_pfactor$sub)
+HBN_pfactor <- load_pfactor_data("/cbica/projects/network_replication/covariate_analyses/pfactor/input/HBN/sample_info/study-HBN_desc-participants.tsv")
+
+PNC_demographics <- inner_join(PNC_pfactor, PNC_demographics,by = "sub")
+NKI_demographics <- inner_join(NKI_pfactor, NKI_demographics,by = "sub")
+HBN_demographics <- inner_join(HBN_pfactor, HBN_demographics,by = "sub")
+
+demographics <- rbind(PNC_demographics, NKI_demographics, HBN_demographics)
+# load demographics for all datasets and combine
+PNC_demographics <- read.csv(PNC_config_data$demographics, stringsAsFactors = TRUE) %>% mutate(dataset_site = "PNC") %>% select(sub, age, sex, meanFD_avgSes, dataset_site)
+NKI_demographics <- read.csv(NKI_config_data$demographics, stringsAsFactors = TRUE) %>% mutate(dataset_site = "NKI") %>% select(sub, age, sex, meanFD_avgSes, dataset_site)
+HBN_demographics <- read.csv(HBN_config_data$demographics, stringsAsFactors = TRUE) %>% rename(site = ses) %>% mutate(dataset_site = paste0("HBN_", site)) %>% select(sub, age, sex, meanFD_avgSes, dataset_site)
+
+#load clinical measures
+PNC_pfactor <- load_pfactor_data("/cbica/projects/network_replication/covariate_analyses/pfactor/input/PNC/sample_info/study-PNC_desc-participants.tsv")
+NKI_pfactor <- load_pfactor_data("/cbica/projects/network_replication/covariate_analyses/pfactor/input/NKI/sample_info/study-NKI_desc-participants.tsv")
+NKI_pfactor$sub <- gsub("sub-", "", NKI_pfactor$sub)
+HBN_pfactor <- load_pfactor_data("/cbica/projects/network_replication/covariate_analyses/pfactor/input/HBN/sample_info/study-HBN_desc-participants.tsv")
+
+PNC_demographics <- inner_join(PNC_pfactor, PNC_demographics,by = "sub")
+NKI_demographics <- inner_join(NKI_pfactor, NKI_demographics,by = "sub")
+HBN_demographics <- inner_join(HBN_pfactor, HBN_demographics,by = "sub")
+
+demographics <- rbind(PNC_demographics, NKI_demographics, HBN_demographics)
+
+
+
+pfactor_plot <- ggplot(demographics, aes(x = sex, y = p_factor_mcelroy_harmonized_all_samples, fill = sex)) +
+  geom_boxplot(alpha = 0.7) +
+  stat_compare_means(method = "t.test") +
+  labs(title = "P-factor by Sex",
+       x = "Sex", y = "P-factor (McElroy Harmonized)") +
+  theme_classic() +
+  scale_fill_manual(values = c("pink", "lightblue"))
+
+
+
+int_plot <- ggplot(demographics, aes(x = sex, y = internalizing_mcelroy_harmonized_all_samples, fill = sex)) +
+  geom_boxplot(alpha = 0.7) +
+  stat_compare_means(method = "t.test") +
+  labs(title = "Internalizing by Sex",
+       x = "Sex", y = "Internalizing") +
+  theme_classic() +
+  scale_fill_manual(values = c("pink", "lightblue"))
+
+
+ext_plot <- ggplot(demographics, aes(x = sex, y = externalizing_mcelroy_harmonized_all_samples, fill = sex)) +
+  geom_boxplot(alpha = 0.7) +
+  stat_compare_means(method = "t.test") +
+  labs(title = "Externalizing by Sex",
+       x = "Sex", y = "Externalizing") +
+  theme_classic() +
+  scale_fill_manual(values = c("pink", "lightblue"))
+
+att_plot <- ggplot(demographics, aes(x = sex, y = attention_mcelroy_harmonized_all_samples, fill = sex)) +
+  geom_boxplot(alpha = 0.7) +
+  stat_compare_means(method = "t.test") +
+  labs(title = "Attention by Sex",
+       x = "Sex", y = "Attention") +
+  theme_classic() +
+  scale_fill_manual(values = c("pink", "lightblue"))
+
+plot_grid(pfactor_plot, int_plot, ext_plot, att_plot, ncol=2)
+
+```
+ 
+
+```{r}
+library(ggpubr)
+library(dplyr)
+library(effsize)
+
+ 
+# Compute t-test and effect size
+t_out <- t.test(p_factor_mcelroy_harmonized_all_samples ~ sex, data = demographics)
+cohen_d <- effsize::cohen.d(p_factor_mcelroy_harmonized_all_samples ~ sex, data = demographics)$estimate
+ 
+
+p_str <- ifelse(t_out$p.value < 0.0001, "< 0.0001",
+                sprintf("%.3f", t_out$p.value))
+
+stat_label <- sprintf(
+  "t(%.0f) = %.2f, p %s, Cohen's d = %.2f",
+  t_out$parameter,
+  t_out$statistic,
+  p_str,
+  cohen_d
+)
+ 
+ 
+```
+
