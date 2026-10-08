@@ -262,7 +262,7 @@ plot_cortex <- function(df, hemi, measure, ylim1, ylim2, atlas, horizontal_layou
   }
   plot_lateral <- ggplot() + 
     geom_brain(data = df, atlas = get(atlas), 
-               mapping=aes(fill=get(measure), colour=significant_status, size=I(0.7)), 
+               mapping=aes(fill=get(measure), colour=significant_status, size=I(0.3)), 
                show.legend=TRUE, 
                hemi = hemi,
                position = position_brain(cortical_pos1)) +  
@@ -271,12 +271,12 @@ plot_cortex <- function(df, hemi, measure, ylim1, ylim2, atlas, horizontal_layou
     theme_void() +
     theme(legend.position = "none",
           legend.title = element_blank(),
-          plot.margin = unit(c(0.1, -1, 0.1, -1), "cm"),
+          plot.margin = unit(c(0.1, -2, 0.1, -2), "cm"),
           plot.title = element_blank()) 
   
   plot_medial <- ggplot() + 
     geom_brain(data = df, atlas= get(atlas), 
-               mapping=aes(fill=get(measure), colour=significant_status, size=I(0.8)), 
+               mapping=aes(fill=get(measure), colour=significant_status, size=I(0.3)), 
                show.legend=TRUE, 
                hemi = hemi,
                position = position_brain(cortical_pos2)) +
@@ -285,7 +285,7 @@ plot_cortex <- function(df, hemi, measure, ylim1, ylim2, atlas, horizontal_layou
     theme_void() +
     theme(legend.position = "none",
           legend.title = element_blank(),
-          plot.margin = unit(c(0.1, -1, 0.1, -1), "cm"),
+          plot.margin = unit(c(0.1, -2, 0.1, -2), "cm"),
           plot.title = element_blank())
   if (is.null(horizontal_layout)) {
     return(plot_grid(plot_lateral, plot_medial, ncol = 1, rel_heights = c(1, 1), align = "v", axis = "lr"))
@@ -311,7 +311,8 @@ plot_cortex_overlap <- function(df, hemi, atlas, horizontal_layout = NULL) {
       geom_brain(
         data = df,
         atlas = get(atlas),
-        mapping = aes(fill = signif_count_factor, size=I(0.8)),
+        mapping = aes(fill = signif_count_factor, size=I(0.3)), 
+        colour = "black",
         show.legend = FALSE,
         hemi = hemi,
         position = position_brain(pos)
@@ -319,7 +320,7 @@ plot_cortex_overlap <- function(df, hemi, atlas, horizontal_layout = NULL) {
       scale_fill_manual(values = count_colors, name = "Number of Datasets",  na.value = "white") +
       theme_void() +
       theme(legend.position = "right",
-            plot.margin = unit(c(0.1, -1, 0.1, -1), "cm"))
+            plot.margin = unit(c(0.1, -0.5, 0.1, -0.5), "cm"))
   }
   
   plot_lateral <- base_plot(cortical_pos1)
@@ -489,17 +490,17 @@ make_networkpair17_plot <- function(df, dataset, ylim1, ylim2, fontsize, fontsiz
       Anova.cov.pvalue.fdr < 1e-3 ~ "**",
       Anova.cov.pvalue.fdr < 0.05 ~ "*",
       TRUE ~ ""
-    )), colour = "black", size = fontsize_label) +
+    )), colour = "black", size = fontsize_label, nudge_y = -0.2) +
     scale_x_discrete(limits = net_levels, drop = FALSE) +
     scale_y_discrete(limits = net_levels, drop = FALSE) +
-    coord_fixed() +
+    coord_fixed(ratio = 0.7) +
     theme_classic(base_size = fontsize) +
     theme(
       axis.text.x = element_text(angle = 45, hjust = 1, size = fontsize),
       axis.text.y = element_text(size = fontsize),
       axis.title.x = element_blank(),
       axis.title.y = element_blank(),
-      plot.title = element_text(hjust = 0.5, size = 24),
+      plot.title = element_text(hjust = 0.5, size = 10, face = "bold"),
       legend.position = "none",
       plot.margin = margin(0.1, -0.1, 0.5, -0.1, "cm")
     ) +
@@ -514,7 +515,7 @@ make_networkpair17_plot <- function(df, dataset, ylim1, ylim2, fontsize, fontsiz
 }
 
 # make network pair overlap plot
-plot_networkpair_overlap <- function(df, num_networks = 17, fontsize = 12, fontsize_label = 4) {
+plot_networkpair_overlap <- function(df, num_networks = 17, fontsize = 7, fontsize_label = 2.4) {
   
   # use your lab_map and net_levels logic from make_networkpair17_plot()
   lab_map <- c(
@@ -556,14 +557,17 @@ plot_networkpair_overlap <- function(df, num_networks = 17, fontsize = 12, fonts
   ggplot(dfp, aes(x = x, y = y, fill = signif_count_factor)) +
     geom_tile() +
     scale_fill_manual(values = count_colors, na.value = "white") +
-    coord_fixed() +
+    coord_fixed(0.7) +
     theme_classic(base_size = fontsize) +
     theme(
       axis.text.x = element_text(angle = 45, hjust = 1, size = fontsize),
       axis.text.y = element_text(size = fontsize),
-      axis.title = element_blank(),
-      legend.position = "none"
-    )
+      axis.title.x = element_blank(),
+      axis.title.y = element_blank(),
+      plot.title = element_text(hjust = 0.5, size = 10, face = "bold"),
+      legend.position = "none",
+      plot.margin = margin(0.1, -0.1, 0.5, -0.1, "cm")
+    ) + ggtitle("Overlap of Significant Effects")
 }
 
 # edge level analysis: 

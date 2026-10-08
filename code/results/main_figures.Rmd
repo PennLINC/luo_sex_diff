@@ -33,6 +33,7 @@ library(ggsegSchaefer)
 library(kableExtra)
 library(knitr)
 library(paletteer)
+library(purrr)
 library(scales)
 library(tidyverse)
  
@@ -83,7 +84,6 @@ perm.id.full_schaefer200x17 <- readRDS(file.path(root, "software", "rotate_parce
 ### Negative effect = Male > Female
 
 # 1. Males exhibit greater functional connectivity strength across the cortex
-
 ```{r load FC_strength sex effect}
 sex.main.PNC.FC_strength <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "PNC", "FC_strength"))
 sex.main.PNC.FC_strength$region <- paste0("17", sex.main.PNC.FC_strength$region)
@@ -126,7 +126,7 @@ resi.all_datasets.FC_strength <- resi.all_datasets.FC_strength %>% rename(RESI =
 sex.main.all_datasets.FC_strength <- merge(sex.main.all_datasets.FC_strength, resi.all_datasets.FC_strength)
 ```
 
-```{r make FC_strength plots across datasets with resi, message = FALSE, warning = FALSE}
+```{r make FC_strength plots across datasets with resi, message = FALSE, warning = FALSE, fig.width = 5, fig.height = 6}
 sex.main.PNC.FC_strength_lh_resi <- plot_cortex(sex.main.PNC.FC_strength, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
 sex.main.PNC.FC_strength_rh_resi <- plot_cortex(sex.main.PNC.FC_strength, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
 
@@ -147,74 +147,63 @@ sex.main.all_datasets.FC_strength_rh_resi <- plot_cortex(sex.main.all_datasets.F
 ylim1 = -0.26
 ylim2 = 0.1
 p <- ggplot() + 
-    geom_brain(data = sex.main.HBN.FC_strength, atlas = schaefer17_200, 
-               mapping=aes(fill=RESI), 
-               show.legend=TRUE) +
-     scale_fill_gradientn(colours = red_teal_white(256), 
-                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
-    theme_void()  +
-    theme(legend.title = element_blank(),
-          legend.text = element_text(size = 24),
-        legend.position = "bottom", 
-        legend.box = "horizontal", 
-        legend.key.height = unit(1, 'cm'),
-        legend.key.width = unit(2, 'cm'),
-        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
-  
+  geom_brain(data = sex.main.HBN.FC_strength, atlas = schaefer17_200, mapping = aes(fill = RESI), show.legend = TRUE) +
+  scale_fill_gradientn(colours = red_teal_white(256), values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
+  theme_void() +
+  theme(legend.title = element_blank(), legend.text = element_text(size = 10), legend.position = "bottom", legend.box = "horizontal",
+        legend.key.height = unit(0.53, "cm"), legend.key.width = unit(1.07, "cm"), plot.margin = unit(c(0, 0.53, 0, -0.27), "cm"))
+
 legend <- get_legend(p)
 legend <- ggdraw() +
-  draw_plot(legend, x = 0.27, y = 0, width = 0.46, height = 1) +
-  draw_label("Male > Female", x = 0.265, y = 0.66, size = 24, hjust = 1) +
-  draw_label("Female > Male", x = 0.735, y = 0.66, size = 24, hjust = 0)
+  draw_plot(legend, x = 0.23, y = 0, width = 0.54, height = 1) +
+  draw_label("Male > Female", x = 0.075, y = 0.66, size = 10, hjust = 0) +
+  draw_label("Female > Male", x = 0.925, y = 0.66, size = 10, hjust = 1) 
 
 # arrange plots 
 # PNC
 FC_strength_PNC <- annotate_figure(
   plot_grid(sex.main.PNC.FC_strength_lh_resi, sex.main.PNC.FC_strength_rh_resi, ncol = 2),
-  top = text_grob("PNC", size = 24, face = "bold")
+  top = text_grob("PNC", size = 10, face = "bold")
 )
 
 # HCP-D
 FC_strength_HCPD <- annotate_figure(
   plot_grid(sex.main.HCPD.FC_strength_lh_resi, sex.main.HCPD.FC_strength_rh_resi, ncol = 2),
-  top = text_grob("HCP-D", size = 24, face = "bold")
+  top = text_grob("HCP-D", size = 10, face = "bold")
 )
 
 # NKI
 FC_strength_NKI <- annotate_figure(
   plot_grid(sex.main.NKI.FC_strength_lh_resi, sex.main.NKI.FC_strength_rh_resi, ncol = 2),
-  top = text_grob("NKI", size = 24, face = "bold")
+  top = text_grob("NKI", size = 10, face = "bold")
 )
 
 # HBN
 FC_strength_HBN <- annotate_figure(
   plot_grid(sex.main.HBN.FC_strength_lh_resi, sex.main.HBN.FC_strength_rh_resi, ncol = 2),
-  top = text_grob("HBN", size = 24, face = "bold")
+  top = text_grob("HBN", size = 10, face = "bold")
 )
 
+ 
 # pooled dataset / all datasets
 FC_strength_all <- annotate_figure(
   plot_grid(sex.main.all_datasets.FC_strength_lh_resi, sex.main.all_datasets.FC_strength_rh_resi, ncol = 2),
-  top = text_grob("Pooled Dataset", size = 24, face = "bold")
+  top = text_grob("Pooled Dataset", size = 10, face = "bold")
 )
+
 
 # blank plot for formatting
 blank_space <- ggplot() + theme_void()
 
+FC_strength_plots_row1 <- plot_grid(FC_strength_PNC, FC_strength_HCPD, ncol = 2)
+FC_strength_plots_row2 <- plot_grid(FC_strength_NKI, FC_strength_HBN, ncol = 2)
+FC_strength_plots_row1and2 <- plot_grid(FC_strength_plots_row1, FC_strength_plots_row2, nrow = 2)
 FC_strength_plots <- annotate_figure(
-  plot_grid(
-    blank_space,
-    plot_grid(FC_strength_PNC, FC_strength_HCPD, FC_strength_NKI, FC_strength_HBN, ncol = 2),
-    FC_strength_all,
-    legend,
-    blank_space,
-    nrow = 5,
-    rel_heights = c(0.05, 1, 0.29, 0.2, 0.05)
-  ),
-  top = text_grob("Functional Connectivity Strength", size = 24, face = "bold"),
-  bottom = text_grob("Sex Effect (RESI)", size = 24, y = 2)
+  plot_grid(blank_space, FC_strength_plots_row1and2, FC_strength_all, legend, nrow = 4, rel_heights = c(0.05, 1.2, 0.35, 0.2)),
+  top = text_grob("Functional Connectivity Strength", size = 10, face = "bold"),
+  bottom = text_grob("Sex Effect (RESI)", size = 10, y = 1)
 )
- 
+
 ```
 
 ```{r make FC_strength overlapping effects plot with resi}
@@ -250,7 +239,7 @@ FC_strength_overlap.rh <- plot_cortex_overlap(sex.main.overlap.FC_strength, hemi
 
 FC_strength_overlap <- annotate_figure(
   plot_grid(FC_strength_overlap.lh, FC_strength_overlap.rh, ncol = 2),
-  top = text_grob("Overlap of Significant Effects Across Datasets", size = 24, face = "bold")
+  top = text_grob("Overlap of Significant Effects Across Datasets", size = 10, face = "bold")
 )
 # legend for overlap
 count_colors_legend <- c(
@@ -283,28 +272,27 @@ legend_plot <- ggplot(data.frame(overlap = factor(names(count_colors_legend),
   theme_void() +
   theme(
     legend.title = element_blank(),
-    legend.text  = element_text(size = 18),
-    legend.key.size = unit(1.3, "cm"),
+    legend.text  = element_text(size = 10),
+    legend.key.size = unit(0.7, "cm"),
     legend.position = "bottom"
   )
 
 # Extract the horizontal legend
 overlap_legend <- get_legend(legend_plot)
 
-overlap_FC_strength_plots <- annotate_figure(plot_grid(FC_strength_overlap, overlap_legend, nrow = 2, rel_heights = c(1, 0.2)), 
-                                     bottom = text_grob("Number of Datasets", size = 24, y = 0.1))
- 
+overlap_FC_strength_plots <- annotate_figure(plot_grid(FC_strength_overlap, blank_space, overlap_legend, nrow = 3, rel_heights = c(1, 0.25, 0.1)), bottom = text_grob("Number of Datasets", size = 10, y = -0.4))
+
 FC_strength_plots_final <- plot_grid(
   FC_strength_plots, overlap_FC_strength_plots, blank_space,
-  nrow = 3, rel_heights = c(1, 0.3, 0.01),
-  labels = c("A", "B", ""), label_size = 24,
-  label_x = 0.015, label_y = c(0.995, 0.982, 1),
+  nrow = 3, rel_heights = c(1, 0.277, 0.05),
+  labels = c("A", "B", ""), label_size = 10,
+  label_x = 0.015, label_y = c(0.99, 0.967, 1),
   hjust = 0, vjust = 1)
-
 ```
 
-```{r FC_strength_plots_final, fig.height = 15, fig.width = 10 }
+```{r FC_strength_plots_final, fig.width = 5, fig.height = 8} 
 FC_strength_plots_final
+#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig1.tiff", plot = FC_strength_plots_final, width = 5, height = 8, units = "in")
 ```
 
 ### Regions showing significantly greater FC strength in females than males in two or more datasets.
@@ -399,7 +387,7 @@ resi.all_datasets.BNC <- resi.all_datasets.BNC %>% rename(RESI = RESI_Xinyu) %>%
 sex.main.all_datasets.BNC <- merge(sex.main.all_datasets.BNC, resi.all_datasets.BNC)
 ```
 
-```{r make BNC plots across datasets with resi, message = FALSE, warning = FALSE}
+```{r make BNC plots across datasets with resi, message = FALSE, warning = FALSE, fig.width = 5, fig.height = 6}
 sex.main.PNC.BNC_lh_resi <- plot_cortex(sex.main.PNC.BNC, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
 sex.main.PNC.BNC_rh_resi <- plot_cortex(sex.main.PNC.BNC, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
 
@@ -420,74 +408,63 @@ sex.main.all_datasets.BNC_rh_resi <- plot_cortex(sex.main.all_datasets.BNC, hemi
 ylim1 = -0.26
 ylim2 = 0.1
 p <- ggplot() + 
-    geom_brain(data = sex.main.HBN.BNC, atlas = schaefer17_200, 
-               mapping=aes(fill=RESI), 
-               show.legend=TRUE) +
-     scale_fill_gradientn(colours = red_teal_white(256), 
-                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
-    theme_void()  +
-    theme(legend.title = element_blank(),
-          legend.text = element_text(size = 24),
-        legend.position = "bottom", 
-        legend.box = "horizontal", 
-        legend.key.height = unit(1, 'cm'),
-        legend.key.width = unit(2, 'cm'),
-        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
-  
+  geom_brain(data = sex.main.HBN.BNC, atlas = schaefer17_200, mapping = aes(fill = RESI), show.legend = TRUE) +
+  scale_fill_gradientn(colours = red_teal_white(256), values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
+  theme_void() +
+  theme(legend.title = element_blank(), legend.text = element_text(size = 10), legend.position = "bottom", legend.box = "horizontal",
+        legend.key.height = unit(0.53, "cm"), legend.key.width = unit(1.07, "cm"), plot.margin = unit(c(0, 0.53, 0, -0.27), "cm"))
+
 legend <- get_legend(p)
 legend <- ggdraw() +
-  draw_plot(legend, x = 0.27, y = 0, width = 0.46, height = 1) +
-  draw_label("Male > Female", x = 0.265, y = 0.66, size = 24, hjust = 1) +
-  draw_label("Female > Male", x = 0.735, y = 0.66, size = 24, hjust = 0)
+  draw_plot(legend, x = 0.23, y = 0, width = 0.54, height = 1) +
+  draw_label("Male > Female", x = 0.075, y = 0.66, size = 10, hjust = 0) +
+  draw_label("Female > Male", x = 0.925, y = 0.66, size = 10, hjust = 1) 
 
 # arrange plots 
 # PNC
 BNC_PNC <- annotate_figure(
   plot_grid(sex.main.PNC.BNC_lh_resi, sex.main.PNC.BNC_rh_resi, ncol = 2),
-  top = text_grob("PNC", size = 24, face = "bold")
+  top = text_grob("PNC", size = 10, face = "bold")
 )
 
 # HCP-D
 BNC_HCPD <- annotate_figure(
   plot_grid(sex.main.HCPD.BNC_lh_resi, sex.main.HCPD.BNC_rh_resi, ncol = 2),
-  top = text_grob("HCP-D", size = 24, face = "bold")
+  top = text_grob("HCP-D", size = 10, face = "bold")
 )
 
 # NKI
 BNC_NKI <- annotate_figure(
   plot_grid(sex.main.NKI.BNC_lh_resi, sex.main.NKI.BNC_rh_resi, ncol = 2),
-  top = text_grob("NKI", size = 24, face = "bold")
+  top = text_grob("NKI", size = 10, face = "bold")
 )
 
 # HBN
 BNC_HBN <- annotate_figure(
   plot_grid(sex.main.HBN.BNC_lh_resi, sex.main.HBN.BNC_rh_resi, ncol = 2),
-  top = text_grob("HBN", size = 24, face = "bold")
+  top = text_grob("HBN", size = 10, face = "bold")
 )
 
+ 
 # pooled dataset / all datasets
 BNC_all <- annotate_figure(
   plot_grid(sex.main.all_datasets.BNC_lh_resi, sex.main.all_datasets.BNC_rh_resi, ncol = 2),
-  top = text_grob("Pooled Dataset", size = 24, face = "bold")
+  top = text_grob("Pooled Dataset", size = 10, face = "bold")
 )
+
 
 # blank plot for formatting
 blank_space <- ggplot() + theme_void()
 
+BNC_plots_row1 <- plot_grid(BNC_PNC, BNC_HCPD, ncol = 2)
+BNC_plots_row2 <- plot_grid(BNC_NKI, BNC_HBN, ncol = 2)
+BNC_plots_row1and2 <- plot_grid(BNC_plots_row1, BNC_plots_row2, nrow = 2)
 BNC_plots <- annotate_figure(
-  plot_grid(
-    blank_space,
-    plot_grid(BNC_PNC, BNC_HCPD, BNC_NKI, BNC_HBN, ncol = 2),
-    BNC_all,
-    legend,
-    blank_space,
-    nrow = 5,
-    rel_heights = c(0.05, 1, 0.29, 0.2, 0.05)
-  ),
-  top = text_grob("Average Between-Network Connectivity", size = 24, face = "bold"),
-  bottom = text_grob("Sex Effect (RESI)", size = 24, y = 2)
+  plot_grid(blank_space, BNC_plots_row1and2, BNC_all, legend, nrow = 4, rel_heights = c(0.05, 1.2, 0.35, 0.2)),
+  top = text_grob("Average Between-Network Connectivity", size = 10, face = "bold"),
+  bottom = text_grob("Sex Effect (RESI)", size = 10, y = 1)
 )
- 
+
 ```
 
 ```{r make BNC overlapping effects plot with resi}
@@ -523,7 +500,7 @@ BNC_overlap.rh <- plot_cortex_overlap(sex.main.overlap.BNC, hemi = "right", atla
 
 BNC_overlap <- annotate_figure(
   plot_grid(BNC_overlap.lh, BNC_overlap.rh, ncol = 2),
-  top = text_grob("Overlap of Significant Effects Across Datasets", size = 24, face = "bold")
+  top = text_grob("Overlap of Significant Effects Across Datasets", size = 10, face = "bold")
 )
 # legend for overlap
 count_colors_legend <- c(
@@ -556,29 +533,29 @@ legend_plot <- ggplot(data.frame(overlap = factor(names(count_colors_legend),
   theme_void() +
   theme(
     legend.title = element_blank(),
-    legend.text  = element_text(size = 18),
-    legend.key.size = unit(1.3, "cm"),
+    legend.text  = element_text(size = 10),
+    legend.key.size = unit(0.7, "cm"),
     legend.position = "bottom"
   )
 
 # Extract the horizontal legend
 overlap_legend <- get_legend(legend_plot)
 
-overlap_BNC_plots <- annotate_figure(plot_grid(BNC_overlap, overlap_legend, nrow = 2, rel_heights = c(1, 0.2)), 
-                                     bottom = text_grob("Number of Datasets", size = 24, y = 0.1))
- 
+overlap_BNC_plots <- annotate_figure(plot_grid(BNC_overlap, blank_space, overlap_legend, nrow = 3, rel_heights = c(1, 0.25, 0.1)), bottom = text_grob("Number of Datasets", size = 10, y = -0.4))
+
 BNC_plots_final <- plot_grid(
   BNC_plots, overlap_BNC_plots, blank_space,
-  nrow = 3, rel_heights = c(1, 0.3, 0.01),
-  labels = c("A", "B", ""), label_size = 24,
-  label_x = 0.015, label_y = c(0.995, 0.982, 1),
+  nrow = 3, rel_heights = c(1, 0.277, 0.05),
+  labels = c("A", "B", ""), label_size = 10,
+  label_x = 0.015, label_y = c(0.99, 0.967, 1),
   hjust = 0, vjust = 1)
-
 ```
 
-```{r BNC_plots_final, fig.height = 15, fig.width = 10 }
+```{r BNC_plots_final, fig.width = 5, fig.height = 8} 
 BNC_plots_final
+ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig2.tiff", plot = BNC_plots_final, width = 5, height = 8, units = "in")
 ```
+
 
 
 ### Regions showing significantly greater BNC in females than males in two or more datasets.
@@ -631,7 +608,6 @@ female_greater_BNC %>%
 ```
 
 # 3. Females exhibit greater average within-network connectivity in medial prefrontal, posterior cingulate, precuneus, and inferior parietal cortices
-
 ```{r load WNC sex effect}
 sex.main.PNC.WNC <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "PNC", "WNC"))
 sex.main.PNC.WNC$region <- paste0("17", sex.main.PNC.WNC$region)
@@ -672,11 +648,9 @@ resi.all_datasets.WNC <- read.csv(file.path(root, "covariate_analyses", "sex_dif
 resi.all_datasets.WNC$region <- paste0("17", resi.all_datasets.WNC$region )
 resi.all_datasets.WNC <- resi.all_datasets.WNC %>% rename(RESI = RESI_Xinyu) %>% select(region, RESI)
 sex.main.all_datasets.WNC <- merge(sex.main.all_datasets.WNC, resi.all_datasets.WNC)
-
 ```
 
-```{r make WNC plots with resi, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 14}
-# WNC
+```{r make WNC plots across datasets with resi, message = FALSE, warning = FALSE, fig.width = 5, fig.height = 6}
 sex.main.PNC.WNC_lh_resi <- plot_cortex(sex.main.PNC.WNC, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.3, atlas = "schaefer17_200") 
 sex.main.PNC.WNC_rh_resi <- plot_cortex(sex.main.PNC.WNC, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.3, atlas = "schaefer17_200") 
 
@@ -692,77 +666,68 @@ sex.main.HBN.WNC_rh_resi <- plot_cortex(sex.main.HBN.WNC, hemi = "right", measur
 sex.main.all_datasets.WNC_lh_resi <- plot_cortex(sex.main.all_datasets.WNC, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.3, atlas = "schaefer17_200", horizontal_layout = TRUE) 
 sex.main.all_datasets.WNC_rh_resi <- plot_cortex(sex.main.all_datasets.WNC, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.3, atlas = "schaefer17_200", horizontal_layout = TRUE) 
 
- 
-
+  
 # legend
 ylim1 = -0.26
 ylim2 = 0.3
 p <- ggplot() + 
-    geom_brain(data = sex.main.HBN.WNC, atlas = schaefer17_200, 
-               mapping=aes(fill=GAM.cov.tvalue), 
-               show.legend=TRUE) +
-     scale_fill_gradientn(colours = red_teal_white(256), 
-                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
-    theme_void()  +
-    theme(legend.title = element_blank(),
-          legend.text = element_text(size = 24),
-        legend.position = "bottom", 
-        legend.box = "horizontal", 
-        legend.key.height = unit(1, 'cm'),
-        legend.key.width = unit(2, 'cm'),
-        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
-  
+  geom_brain(data = sex.main.HBN.WNC, atlas = schaefer17_200, mapping = aes(fill = RESI), show.legend = TRUE) +
+  scale_fill_gradientn(colours = red_teal_white(256), values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
+  theme_void() +
+  theme(legend.title = element_blank(), legend.text = element_text(size = 10), legend.position = "bottom", legend.box = "horizontal",
+        legend.key.height = unit(0.53, "cm"), legend.key.width = unit(1.07, "cm"), plot.margin = unit(c(0, 0.53, 0, -0.27), "cm"))
+
 legend <- get_legend(p)
 legend <- ggdraw() +
-  draw_plot(legend, x = 0.27, y = 0, width = 0.46, height = 1) +
-  draw_label("Male > Female", x = 0.265, y = 0.66, size = 24, hjust = 1) +
-  draw_label("Female > Male", x = 0.735, y = 0.66, size = 24, hjust = 0)
+  draw_plot(legend, x = 0.23, y = 0, width = 0.54, height = 1) +
+  draw_label("Male > Female", x = 0.075, y = 0.66, size = 10, hjust = 0) +
+  draw_label("Female > Male", x = 0.925, y = 0.66, size = 10, hjust = 1) 
 
+# arrange plots 
 # PNC
 WNC_PNC <- annotate_figure(
   plot_grid(sex.main.PNC.WNC_lh_resi, sex.main.PNC.WNC_rh_resi, ncol = 2),
-  top = text_grob("PNC", size = 24, face = "bold")
+  top = text_grob("PNC", size = 10, face = "bold")
 )
 
 # HCP-D
 WNC_HCPD <- annotate_figure(
   plot_grid(sex.main.HCPD.WNC_lh_resi, sex.main.HCPD.WNC_rh_resi, ncol = 2),
-  top = text_grob("HCP-D", size = 24, face = "bold")
+  top = text_grob("HCP-D", size = 10, face = "bold")
 )
 
 # NKI
 WNC_NKI <- annotate_figure(
   plot_grid(sex.main.NKI.WNC_lh_resi, sex.main.NKI.WNC_rh_resi, ncol = 2),
-  top = text_grob("NKI", size = 24, face = "bold")
+  top = text_grob("NKI", size = 10, face = "bold")
 )
 
 # HBN
 WNC_HBN <- annotate_figure(
   plot_grid(sex.main.HBN.WNC_lh_resi, sex.main.HBN.WNC_rh_resi, ncol = 2),
-  top = text_grob("HBN", size = 24, face = "bold")
+  top = text_grob("HBN", size = 10, face = "bold")
 )
 
-# All Datasets
+ 
+# pooled dataset / all datasets
 WNC_all <- annotate_figure(
   plot_grid(sex.main.all_datasets.WNC_lh_resi, sex.main.all_datasets.WNC_rh_resi, ncol = 2),
-  top = text_grob("Pooled Dataset", size = 24, face = "bold")
+  top = text_grob("Pooled Dataset", size = 10, face = "bold")
 )
 
 
+# blank plot for formatting
+blank_space <- ggplot() + theme_void()
+
+WNC_plots_row1 <- plot_grid(WNC_PNC, WNC_HCPD, ncol = 2)
+WNC_plots_row2 <- plot_grid(WNC_NKI, WNC_HBN, ncol = 2)
+WNC_plots_row1and2 <- plot_grid(WNC_plots_row1, WNC_plots_row2, nrow = 2)
 WNC_plots <- annotate_figure(
-  plot_grid(
-    blank_space,
-    plot_grid(WNC_PNC, WNC_HCPD, WNC_NKI, WNC_HBN, ncol = 2),
-    WNC_all,
-    legend,
-    blank_space,
-    nrow = 5,
-    rel_heights = c(0.05, 1, 0.29, 0.2, 0.05)
-  ),
-  top = text_grob("Average Within-Network Connectivity", size = 24, face = "bold"),
-  bottom = text_grob("Sex Effect (RESI)", size = 24, y = 2)
+  plot_grid(blank_space, WNC_plots_row1and2, WNC_all, legend, nrow = 4, rel_heights = c(0.05, 1.2, 0.35, 0.2)),
+  top = text_grob("Average Within-Network Connectivity", size = 10, face = "bold"),
+  bottom = text_grob("Sex Effect (RESI)", size = 10, y = 1)
 )
-  
+
 ```
 
 ```{r make WNC overlapping effects plot with resi}
@@ -782,31 +747,78 @@ sex.main.overlap.WNC$signif_count_factor <- factor(
   labels = c("0", "1", "2", "3", "4")
 )
 sex.main.overlap.WNC <- sex.main.overlap.WNC %>% mutate(signif_greater_than_one = ifelse(signif_count > 1, "1", "0"))
+
+count_colors <- c(
+  "0" = "white",
+  "1" = "white",
+  "2" = "#fcdac0",
+  "3" = "#e87b96",
+  "4" = "#ad2a72"
+)
+
+
+
 WNC_overlap.lh <- plot_cortex_overlap(sex.main.overlap.WNC, hemi = "left", atlas = "schaefer17_200", horizontal_layout = T)
 WNC_overlap.rh <- plot_cortex_overlap(sex.main.overlap.WNC, hemi = "right", atlas = "schaefer17_200", horizontal_layout = T)
 
 WNC_overlap <- annotate_figure(
   plot_grid(WNC_overlap.lh, WNC_overlap.rh, ncol = 2),
-  top = text_grob("Overlap of Significant Effects Across Datasets", size = 24, face = "bold")
+  top = text_grob("Overlap of Significant Effects Across Datasets", size = 10, face = "bold")
+)
+# legend for overlap
+count_colors_legend <- c(
+  "0–1" = "white",
+  "2"   = "#fcdac0",
+  "3"   = "#e87b96",
+  "4"   = "#ad2a72"
 )
 
-overlap_WNC_plots <- annotate_figure(plot_grid(WNC_overlap, overlap_legend, nrow = 2, rel_heights = c(1, 0.2)), 
-                                     bottom = text_grob("Number of Datasets", size = 24, y = 0.1))
- 
+legend_df <- data.frame(
+  overlap = factor(names(count_colors_legend),
+                   levels = names(count_colors_legend))
+)
 
- 
+legend_plot <- ggplot(data.frame(overlap = factor(names(count_colors_legend),
+                                                  levels = names(count_colors_legend))),
+                      aes(x = overlap, fill = overlap)) +
+  geom_bar() +
+  scale_fill_manual(
+    values = count_colors_legend,
+    guide = guide_legend(
+      direction = "horizontal",
+      label.position = "bottom",
+      override.aes = list(
+        colour = "black",   # outline boxes
+        size = 1
+      )
+    )
+  ) +
+  theme_void() +
+  theme(
+    legend.title = element_blank(),
+    legend.text  = element_text(size = 10),
+    legend.key.size = unit(0.7, "cm"),
+    legend.position = "bottom"
+  )
+
+# Extract the horizontal legend
+overlap_legend <- get_legend(legend_plot)
+
+overlap_WNC_plots <- annotate_figure(plot_grid(WNC_overlap, blank_space, overlap_legend, nrow = 3, rel_heights = c(1, 0.25, 0.1)), bottom = text_grob("Number of Datasets", size = 10, y = -0.4))
+
 WNC_plots_final <- plot_grid(
   WNC_plots, overlap_WNC_plots, blank_space,
-  nrow = 3, rel_heights = c(1, 0.3, 0.01),
-  labels = c("A", "B", ""), label_size = 24,
-  label_x = 0.015, label_y = c(0.995, 0.982, 1),
+  nrow = 3, rel_heights = c(1, 0.277, 0.05),
+  labels = c("A", "B", ""), label_size = 10,
+  label_x = 0.015, label_y = c(0.99, 0.967, 1),
   hjust = 0, vjust = 1)
-
 ```
 
-```{r WNC_plots_final, fig.height = 15, fig.width = 10 }
+```{r WNC_plots_final, fig.width = 5, fig.height = 8} 
 WNC_plots_final
+ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig3.tiff", plot = WNC_plots_final, width = 5, height = 8, units = "in")
 ```
+
 
 ### Regions showing significantly greater WNC in males than females in two or more datasets.
 ```{r check-WNC-male-greater, echo=FALSE, message=FALSE, warning=FALSE}
@@ -901,12 +913,12 @@ p_BNC <- ggplot() +
                           values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
     theme_void()  +
     theme(legend.title = element_blank(),
-          legend.text = element_text(size = 24),
+          legend.text = element_text(size = 10),
         legend.position = "bottom", 
         legend.box = "horizontal", 
-        legend.key.height = unit(1, 'cm'),
-        legend.key.width = unit(2, 'cm'),
-        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
+        legend.key.height = unit(0.4, 'cm'),
+        legend.key.width = unit(0.9, 'cm'),
+        plot.margin = unit(c(0, 0.5, 0, -0.5), "cm"))
   
 legend_BNC_overlap <- get_legend(p_BNC)
 
@@ -921,12 +933,12 @@ p_WNC <- ggplot() +
                           values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
     theme_void()  +
     theme(legend.title = element_blank(),
-          legend.text = element_text(size = 24),
+          legend.text = element_text(size = 10),
         legend.position = "bottom", 
         legend.box = "horizontal", 
-        legend.key.height = unit(1, 'cm'),
-        legend.key.width = unit(2, 'cm'),
-        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
+        legend.key.height = unit(0.4, 'cm'),
+        legend.key.width = unit(0.9, 'cm'),
+        plot.margin = unit(c(0, 0.5, 0, -0.5), "cm"))
   
 legend_WNC_overlap <- get_legend(p_WNC)
 
@@ -940,14 +952,14 @@ BNC_overlap_RESI_plot <- annotate_figure(
     legend_BNC_overlap,
     blank_space,
     nrow = 5,
-    rel_heights = c(0.05, 1, 0.1, 0.1, 0.1)
+    rel_heights = c(0.05, 2.2, 0.3, 0.1, 0.05)
   ),
-  top = text_grob("Average Between-Network Connectivity", size = 24),
-  bottom = text_grob("Sex Effect (RESI)", size = 24, y = 0.7)
+  top = text_grob("Average Between-Network Connectivity", size = 10, face = "bold"),
+  bottom = text_grob("Sex Effect (RESI)", size = 10, y = 0.15)
 )
 
 
-
+ 
 WNC_overlap_RESI_plot <- annotate_figure(
   plot_grid(
     blank_space,
@@ -956,10 +968,10 @@ WNC_overlap_RESI_plot <- annotate_figure(
     legend_WNC_overlap,
     blank_space,
     nrow = 5,
-    rel_heights = c(0.05, 1, 0.1, 0.1, 0.1)
+    rel_heights = c(0.05, 2.2, 0.3, 0.1, 0.05)
   ),
-  top = text_grob("Average Within-Network Connectivity", size = 24),
-  bottom = text_grob("Sex Effect (RESI)", size = 24, y = 0.7)
+  top = text_grob("Average Within-Network Connectivity", size = 10, face = "bold"),
+  bottom = text_grob("Sex Effect (RESI)", size = 10, y = 0.15)
 )
  
 ```
@@ -972,9 +984,9 @@ BNC_neurosynth_plot <- ggplot(
 ) +
   geom_segment(
     aes(x = 0, xend = term.correlation, yend = reorder(term, abs(term.correlation))),
-    color = "gray80", linewidth = 0.9
+    color = "gray80", linewidth = 0.5
   ) +
-  geom_point(aes(color = term.correlation), size = 12) +
+  geom_point(aes(color = term.correlation), size = 5) +
   scale_color_gradient(low = "#ad2a72", high = "#fcdac0") +
   scale_x_continuous(limits = c(-0.6, 0), breaks = seq(-0.6, 0, by = 0.2), expand = c(0, 0)) +
   scale_y_discrete(position = "right") +
@@ -984,10 +996,10 @@ BNC_neurosynth_plot <- ggplot(
   theme(
     panel.grid.major.y = element_blank(), panel.grid.minor = element_blank(),
     legend.position = "none", axis.title.y = element_blank(),
-    axis.title.x = element_text(size = 24, color = "black"),
-    axis.text.y = element_text(size = 24, color = "black"),
-    axis.text.x = element_text(size = 24, color = "black"),
-    plot.margin = unit(c(0, 1, 0, 0), "cm")
+    axis.title.x = element_text(size = 10, color = "black"),
+    axis.text.y = element_text(size = 10, color = "black"),
+    axis.text.x = element_text(size = 10, color = "black"),
+    plot.margin = unit(c(0, 0.5, 0, 0), "cm")
   )
 
 # WNC: positive correlations
@@ -997,9 +1009,9 @@ WNC_neurosynth_plot <- ggplot(
 ) +
   geom_segment(
     aes(x = 0, xend = term.correlation, yend = reorder(term, term.correlation)),
-    color = "gray80", linewidth = 0.9
+    color = "gray80", linewidth = 0.5
   ) +
-  geom_point(aes(color = term.correlation), size = 12) +
+  geom_point(aes(color = term.correlation), size = 5) +
   scale_color_gradient(low = "#fcdac0", high = "#ad2a72") +
   scale_x_continuous(limits = c(0, 0.6), breaks = seq(0, 0.6, by = 0.2), expand = c(0, 0)) +
   scale_y_discrete(position = "left") +
@@ -1009,37 +1021,41 @@ WNC_neurosynth_plot <- ggplot(
   theme(
     panel.grid.major.y = element_blank(), panel.grid.minor = element_blank(),
     legend.position = "none", axis.title.y = element_blank(),
-    axis.title.x = element_text(size = 24, color = "black"),
-    axis.text.y = element_text(size = 24, color = "black"),
-    axis.text.x = element_text(size = 24, color = "black"),
-    plot.margin = unit(c(0, 0, 0, 1), "cm")
+    axis.title.x = element_text(size = 10, color = "black"),
+    axis.text.y = element_text(size = 10, color = "black"),
+    axis.text.x = element_text(size = 10, color = "black"),
+    plot.margin = unit(c(0, 0, 0, 0.5), "cm")
   )
 ```
 
 
 
-```{r overlap neurosynth figure, fig.height = 12, fig.width = 15}
-neurosynth_plots_row1 <- plot_grid(BNC_overlap_RESI_plot, WNC_overlap_RESI_plot, ncol = 2)
-neurosynth_plots_row1 <- ggdraw(neurosynth_plots_row1) + draw_label("A", x = -0.02, y = 0.99, size = 24, fontface = "bold", hjust = 0, vjust = 1) + draw_label("B", x = 0.5, y = 0.99, size = 24, fontface = "bold", hjust = 0, vjust = 1)
+```{r overlap neurosynth figure, fig.width = 6.5, fig.height = 6}
+neurosynth_plots_row1 <- plot_grid(BNC_overlap_RESI_plot, blank_space, WNC_overlap_RESI_plot, ncol = 3, rel_widths = c(1, 0.1, 1))
+neurosynth_plots_row1 <- ggdraw(neurosynth_plots_row1) + 
+  draw_label("A", x = -0.02, y = 0.981, size = 10, fontface = "bold", hjust = 0, vjust = 1) +
+  draw_label("B", x = 0.51, y = 0.981, size = 10, fontface = "bold", hjust = 0, vjust = 1)
 
 neurosynth_plots_row2 <- plot_grid(blank_space, blank_space, ncol = 2)
 
 BNC_neurosynth_panel <- plot_grid(BNC_neurosynth_plot, blank_space, ncol = 2, rel_widths = c(1, 0.1))
 WNC_neurosynth_panel <- plot_grid(blank_space, WNC_neurosynth_plot, ncol = 2, rel_widths = c(0.03, 1))
 neurosynth_plots_row3 <- plot_grid(BNC_neurosynth_panel, WNC_neurosynth_panel, ncol = 2)
-neurosynth_plots_row3 <- annotate_figure(neurosynth_plots_row3, left = text_grob("Neurosynth Term", size = 24, rot = 90, x = -0.5, y = 0.55))
-neurosynth_plots_row3 <- ggdraw(neurosynth_plots_row3) + draw_label("C", x = -0.02, y = 0.97, size = 24, fontface = "bold", hjust = 0, vjust = 1) + draw_label("D", x = 0.5, y = 0.97, size = 24, fontface = "bold", hjust = 0, vjust = 1)
+neurosynth_plots_row3 <- annotate_figure(neurosynth_plots_row3, left = text_grob("Neurosynth Term", size = 10, rot = 90, x = -0.35, y = 0.55))
+neurosynth_plots_row3 <- ggdraw(neurosynth_plots_row3) + 
+  draw_label("C", x = -0.02, y = 0.968, size = 10, fontface = "bold", hjust = 0, vjust = 1) + 
+  draw_label("D", x = 0.51, y = 0.968, size = 10, fontface = "bold", hjust = 0, vjust = 1)
 
-neurosynth_plots <- annotate_figure(plot_grid(blank_space, neurosynth_plots_row1, neurosynth_plots_row2, neurosynth_plots_row3, nrow = 4, rel_heights = c(0.05, 1, 0.1, 1)), top = text_grob("Overlap of Significant Effects Across Datasets (Average Sex Effect)", size = 24, face = "bold"))
+neurosynth_plots <- plot_grid(blank_space, neurosynth_plots_row1, neurosynth_plots_row2, neurosynth_plots_row3, nrow = 4, rel_heights = c(0.05, 1, 0.1, 1))
 
 neurosynth_plots_final <- plot_grid(blank_space, neurosynth_plots, blank_space, ncol = 3, rel_widths = c(0.07, 1, 0.07))
 neurosynth_plots_final
+
+#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig4.tiff", plot = neurosynth_plots_final, width = 6.5, height = 6, units = "in")
 ```
 
  
-# 3. Sex differences in network-level connectivity
-
-Given that males exhibit greater between-network connectivity across nearly all brain regions, and females exhibit greater within-network connectivity in select regions that appear to be a part of the DMN, we examined sex differences in connectivity between and within networks.
+# 5. Sex differences in network-level connectivity
 
 ```{r load networkpair sex for 17 networks}
 num_networks = 17
@@ -1080,194 +1096,51 @@ sex.main.NKI.networkpair.17 <- merge(sex.main.NKI.networkpair.17, resi.NKI.netwo
 sex.main.HCPD.networkpair.17 <- merge(sex.main.HCPD.networkpair.17, resi.HCPD.networkpair)
 sex.main.HBN.networkpair.17 <- merge(sex.main.HBN.networkpair.17, resi.HBN.networkpair)
 sex.main.all_datasets.networkpair.17 <- merge(sex.main.all_datasets.networkpair.17, resi.all_datasets.networkpair)
-
-
-#range(sex.main.PNC.networkpair.17$GAM.cov.tvalue)
-#range(sex.main.HCPD.networkpair.17$GAM.cov.tvalue)
-#range(sex.main.NKI.networkpair.17$GAM.cov.tvalue)
-#range(sex.main.HBN.networkpair.17$GAM.cov.tvalue)
-#range(sex.main.all_datasets.networkpair.17$GAM.cov.tvalue)
- 
 ```
-
-## sex effect with t-values
-
-```{r plot networkpair sex for 17 networks, fig.width = 25, fig.height = 15}
-
-# plot each dataset
-networkpair_PNC <- annotate_figure(
-  make_networkpair17_plot(sex.main.PNC.networkpair.17, dataset = "PNC", ylim1 = -10, ylim2 = 10, fontsize = 12, fontsize_label = 4, measure = "GAM.cov.tvalue"))
-
-networkpair_HCPD <- annotate_figure(
-  make_networkpair17_plot(sex.main.HCPD.networkpair.17, dataset = "HCP-D", ylim1 = -10, ylim2 = 10, fontsize = 12, fontsize_label = 4, measure = "GAM.cov.tvalue"))
-
-networkpair_NKI <- annotate_figure(
-  make_networkpair17_plot(sex.main.NKI.networkpair.17, dataset = "NKI", ylim1 = -10, ylim2 = 10, fontsize = 12, fontsize_label = 4, measure = "GAM.cov.tvalue"))
-
-networkpair_HBN <- annotate_figure(
-  make_networkpair17_plot(sex.main.HBN.networkpair.17, dataset = "HBN", ylim1 = -10, ylim2 = 10, fontsize = 12, fontsize_label = 4, measure = "GAM.cov.tvalue"))
-
-networkpair_all_datasets_plot <- annotate_figure(
-  make_networkpair17_plot(sex.main.all_datasets.networkpair.17, dataset = "Pooled Dataset", ylim1 = -10, ylim2 = 10, fontsize = 12, fontsize_label = 4, measure = "GAM.cov.tvalue"))
-
-combined_networkpair_temp_plots <- plot_grid(
-  networkpair_PNC,
-  networkpair_HCPD,
-  networkpair_NKI,
-  networkpair_HBN,
-  ncol = 2
-)
-
-
-# legend
-ylim1 = -10
-ylim2 = 10
-p <- ggplot() + 
-    geom_brain(data = sex.main.HBN.BNC, atlas = schaefer17_200, 
-               mapping=aes(fill=GAM.cov.tvalue), 
-               show.legend=TRUE) +
-     scale_fill_gradientn(colours = red_teal_white(256), 
-                          values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
-    theme_void()  +
-    theme(legend.title = element_blank(),
-          legend.text = element_text(size = 24),
-        legend.position = "bottom", 
-        legend.box = "horizontal", 
-        legend.key.height = unit(1, 'cm'),
-        legend.key.width = unit(3, 'cm'),
-        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
-  
-legend <- get_legend(p)
  
-```
-
-```{r plot networkpair overlap}
-
-# overlap of datasets:
-df_list_networkpair <- list(
-  PNC  = sex.main.PNC.networkpair.17[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_PNC = Anova.cov.pvalue.fdr),
-  HCPD = sex.main.HCPD.networkpair.17[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HCPD = Anova.cov.pvalue.fdr),
-  NKI  = sex.main.NKI.networkpair.17[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_NKI = Anova.cov.pvalue.fdr),
-  HBN  = sex.main.HBN.networkpair.17[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HBN = Anova.cov.pvalue.fdr)
-)
-
-sex.main.overlap.networkpair <- Reduce(function(x, y) full_join(x, y, by = "region"), df_list_networkpair)
-
-sex.main.overlap.networkpair <- sex.main.overlap.networkpair %>%
-  mutate(
-    signif_count = rowSums(across(starts_with("p_")) < 0.05, na.rm = TRUE),
-    signif_count_factor = factor(
-      signif_count,
-      levels = 0:4,
-      labels = c("0", "1", "2", "3", "4")
-    ),
-    signif_greater_than_one = ifelse(signif_count > 1, "1", "0")
-  )
-
-sex.main.overlap.networkpair <- sex.main.overlap.networkpair %>%
-  mutate(
-    network1 = str_extract(region, "^[[:alpha:]]+"),
-    network2 = str_extract(region, "(?<=_).*")
-  )
-
-
-# overlap legend
-legend_plot <- ggplot(data.frame(overlap = factor(names(count_colors_legend),
-                                                  levels = names(count_colors_legend))),
-                      aes(x = overlap, fill = overlap)) +
-  geom_bar() +
-  scale_fill_manual(values = count_colors_legend,
-                    guide = guide_legend(direction = "horizontal",
-                                         label.position = "bottom",
-                                         override.aes = list(colour = "black", size = 1))) +
-  theme_void() +
-  theme(
-    legend.title = element_blank(),
-    legend.text  = element_text(size = 18),
-    legend.key.size = unit(1.3, "cm"),
-    legend.position = "bottom"
-  )
-
-overlap_legend <- get_legend(legend_plot)
-networkpair_overlap_plot <-  annotate_figure(plot_networkpair_overlap(sex.main.overlap.networkpair), top = text_grob("Overlap of Significant Effects Across Datasets", size = 24, x = 0.55))
  
-```
-
-```{r plot networkpair, fig.height = 12, fig.width = 20}
-networkpair_col1 <- annotate_figure(
-  plot_grid(
-    combined_networkpair_temp_plots,
-    legend,
-    nrow = 2, rel_heights = c(1, 0.1)  ),
-  bottom = text_grob("Sex Effect (t-value)", size = 24, y = 1)
-)
-
-
-
-networkpair_col2 <- annotate_figure(plot_grid(networkpair_all_datasets_plot, networkpair_overlap_plot, overlap_legend, nrow = 3, rel_heights = c(1, 1, 0.2)), 
-                                     bottom = text_grob("Number of Datasets", size = 24, y = 0.1))
-
-
-
-networkpair_col2 <- plot_grid(networkpair_all_datasets_plot, networkpair_overlap_plot, nrow = 2)
-overlap_legend_layout <- plot_grid(blank_space, overlap_legend, ncol = 2, rel_widths = c(0.08, 1))
-overlap_legend_layout <- plot_grid(overlap_legend_layout, blank_space, nrow = 2, rel_heights = c(1, 0.1))
-
-networkpair_col2 <- annotate_figure(plot_grid(networkpair_col2, overlap_legend_layout, nrow = 2, rel_heights = c(1, 0.1)),  bottom = text_grob("Number of Datasets", size = 24, y = 0.9, x = 0.54))
-
-plot_grid(networkpair_col1, blank_space, networkpair_col2, blank_space, ncol = 4, rel_widths = c(2,0.1, 1, 0.1))
- 
-```
-
-## sex effect with RESI
-
-```{r plot networkpair sex for 17 networks with resi, fig.width = 25, fig.height = 15}
-
+```{r plot networkpair sex for 17 networks with resi, fig.width = 6.5, fig.height = 7.5}
 # plot each dataset
 networkpair_resi_PNC <- annotate_figure(
-  make_networkpair17_plot(sex.main.PNC.networkpair.17, dataset = "PNC", ylim1 = -0.3, ylim2 = 0.3, fontsize = 12, fontsize_label = 4, measure = "RESI"))
+  make_networkpair17_plot(sex.main.PNC.networkpair.17, dataset = "PNC", ylim1 = -0.3, ylim2 = 0.3, fontsize = 7, fontsize_label = 2.4, measure = "RESI"))
  
 networkpair_resi_HCPD <- annotate_figure(
-  make_networkpair17_plot(sex.main.HCPD.networkpair.17, dataset = "HCP-D", ylim1 = -0.3, ylim2 = 0.3, fontsize = 12, fontsize_label = 4, measure = "RESI"))
+  make_networkpair17_plot(sex.main.HCPD.networkpair.17, dataset = "HCP-D", ylim1 = -0.3, ylim2 = 0.3, fontsize = 7, fontsize_label = 2.4, measure = "RESI"))
 
 networkpair_resi_NKI <- annotate_figure(
-  make_networkpair17_plot(sex.main.NKI.networkpair.17, dataset = "NKI", ylim1 = -0.3, ylim2 = 0.3, fontsize = 12, fontsize_label = 4, measure = "RESI"))
+  make_networkpair17_plot(sex.main.NKI.networkpair.17, dataset = "NKI", ylim1 = -0.3, ylim2 = 0.3, fontsize = 7, fontsize_label = 2.4, measure = "RESI"))
 
 networkpair_resi_HBN <- annotate_figure(
-  make_networkpair17_plot(sex.main.HBN.networkpair.17, dataset = "HBN", ylim1 = -0.3, ylim2 = 0.3, fontsize = 12, fontsize_label = 4, measure = "RESI"))
+  make_networkpair17_plot(sex.main.HBN.networkpair.17, dataset = "HBN", ylim1 = -0.3, ylim2 = 0.3, fontsize = 7, fontsize_label = 2.4, measure = "RESI"))
 
-networkpair_resi_all_datasets_plot <- annotate_figure(
-  make_networkpair17_plot(sex.main.all_datasets.networkpair.17, dataset = "Pooled Dataset", ylim1 = -0.3, ylim2 = 0.3, fontsize = 12, fontsize_label = 4, measure = "RESI"))
+networkpair_resi_all_datasets_plot_tmp <- annotate_figure(
+  make_networkpair17_plot(sex.main.all_datasets.networkpair.17, dataset = "Pooled Dataset", ylim1 = -0.3, ylim2 = 0.3, fontsize = 7, fontsize_label = 2.4, measure = "RESI"))
 
-combined_networkpair_resi_temp_plots <- plot_grid(
-  networkpair_resi_PNC,
-  networkpair_resi_HCPD,
-  networkpair_resi_NKI,
-  networkpair_resi_HBN,
-  ncol = 2
-)
-
+networkpair_row1 <- plot_grid(blank_space, networkpair_resi_PNC, blank_space, networkpair_resi_HCPD, ncol = 4, 
+                              rel_widths = c(0.03, 1, 0.1, 1))
+networkpair_row2 <- plot_grid(blank_space, networkpair_resi_NKI, blank_space, networkpair_resi_HBN, ncol = 4, 
+                              rel_widths = c(0.03, 1, 0.1, 1))
+networkpair_datasets_plot <- plot_grid(networkpair_row1, networkpair_row2, nrow = 2)
 
 # legend
 ylim1 = -0.3
 ylim2 = 0.3
 p <- ggplot() + 
     geom_brain(data = sex.main.HBN.BNC, atlas = schaefer17_200, 
-               mapping=aes(fill=GAM.cov.tvalue), 
+               mapping=aes(fill=RESI), 
                show.legend=TRUE) +
      scale_fill_gradientn(colours = red_teal_white(256), 
                           values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
     theme_void()  +
     theme(legend.title = element_blank(),
-          legend.text = element_text(size = 24),
+          legend.text = element_text(size = 10),
         legend.position = "bottom", 
         legend.box = "horizontal", 
-        legend.key.height = unit(1, 'cm'),
-        legend.key.width = unit(3, 'cm'),
-        plot.margin = unit(c(0, 1, 0, -0.5), "cm"))
+        legend.key.height = unit(0.4, 'cm'),
+        legend.key.width = unit(0.9, 'cm'),
+        plot.margin = unit(c(0, 0.5, 0, 0.5), "cm"))
   
 legend <- get_legend(p)
- 
 ```
 
 ```{r plot networkpair overlap with resi}
@@ -1293,7 +1166,7 @@ sex.main.overlap.networkpair <- sex.main.overlap.networkpair %>%
     signif_greater_than_one = ifelse(signif_count > 1, "1", "0")
   )
 
-sex.main.overlap.networkpair <- sex.main.overlap.networkpair %>%
+sex.main.overlap.networkpair_plot_df <- sex.main.overlap.networkpair %>%
   mutate(
     network1 = str_extract(region, "^[[:alpha:]]+"),
     network2 = str_extract(region, "(?<=_).*")
@@ -1312,114 +1185,135 @@ legend_plot <- ggplot(data.frame(overlap = factor(names(count_colors_legend),
   theme_void() +
   theme(
     legend.title = element_blank(),
-    legend.text  = element_text(size = 18),
-    legend.key.size = unit(1.3, "cm"),
+    legend.text  = element_text(size = 10),
+    legend.key.size = unit(0.6, "cm"),
     legend.position = "bottom"
   )
 
-overlap_legend <- get_legend(legend_plot)
-networkpair_resi_overlap_plot <-  annotate_figure(plot_networkpair_overlap(sex.main.overlap.networkpair), top = text_grob("Overlap of Significant Effects Across Datasets", size = 24, x = 0.55))
+overlap_legend_tmp <- get_legend(legend_plot)
+networkpair_resi_overlap_plot_tmp <-  plot_networkpair_overlap(sex.main.overlap.networkpair_plot_df)
  
 ```
 
-```{r plot networkpair with resi, fig.height = 12, fig.width = 20}
-networkpair_resi_col1 <- annotate_figure(
-  plot_grid(
-    combined_networkpair_resi_temp_plots,
-    legend,
-    nrow = 2, rel_heights = c(1, 0.1)  ),
-  bottom = text_grob("Sex Effect (RESI)", size = 24, y = 1)
-)
 
+```{r plot networkpair with resi, fig.width = 6.2, fig.height = 8}
+# pnc, nki, hcpd, hbn
+networkpair_resi_row1 <- networkpair_datasets_plot
 
-
-networkpair_resi_col2 <- annotate_figure(plot_grid(networkpair_resi_all_datasets_plot, networkpair_resi_overlap_plot, overlap_legend, nrow = 3, rel_heights = c(1, 1, 0.2)), 
-                                     bottom = text_grob("Number of Datasets", size = 24, y = 0.1))
-
-
-
-networkpair_resi_col2 <- plot_grid(networkpair_resi_all_datasets_plot, networkpair_resi_overlap_plot, nrow = 2)
-overlap_legend_layout <- plot_grid(blank_space, overlap_legend, ncol = 2, rel_widths = c(0.08, 1))
-overlap_legend_layout <- plot_grid(overlap_legend_layout, blank_space, nrow = 2, rel_heights = c(1, 0.1))
-
-networkpair_resi_col2 <- annotate_figure(plot_grid(networkpair_resi_col2, overlap_legend_layout, nrow = 2, rel_heights = c(1, 0.1)),  bottom = text_grob("Number of Datasets", size = 24, y = 0.9, x = 0.54))
-
-plot_grid(networkpair_resi_col1, blank_space, networkpair_resi_col2, blank_space, ncol = 4, rel_widths = c(2,0.1, 1, 0.1))
- 
-ggsave(
-  paste0("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/Conferences/SOBP2026/", "fig_networkpair.png"),
-  plot_grid(networkpair_resi_col1, blank_space, networkpair_resi_col2, blank_space,
-            ncol = 4, rel_widths = c(2, 0.1, 1, 0.1)),
-  height = 12, width = 20, units = "in", 
-  bg = "white"
-)
+# all datasets + legend
+resi_legend <- annotate_figure(plot_grid(
+  NULL, legend,
+  ncol = 2,
+  rel_widths = c(0.2, 0.75)), bottom = text_grob("Sex Effect (RESI)", size = 10, y = -0.3, x = 0.6))
+networkpair_resi_all_datasets_plot <- plot_grid(networkpair_resi_all_datasets_plot_tmp, blank_space, resi_legend, blank_space, 
+                                                nrow = 4, rel_heights = c(1, 0.05, 0.1,  0.05))
+# overlap + legend
+overlap_legend <- annotate_figure(plot_grid(
+  NULL, overlap_legend_tmp,
+  ncol = 2,
+  rel_widths = c(0.2, 0.75)), bottom = text_grob("Number of Datasets", size = 10, y = -0.3, x = 0.6))
+networkpair_overlap_plot <- plot_grid(networkpair_resi_overlap_plot_tmp, blank_space, overlap_legend, blank_space, 
+                                      nrow = 4, rel_heights = c(1, 0.05, 0.1,  0.05))
 
  
 
+networkpair_resi_row2 <- plot_grid(blank_space, networkpair_resi_all_datasets_plot, blank_space, networkpair_overlap_plot, ncol = 4, 
+                              rel_widths = c(0.03, 1, 0.1, 1))
+ 
+networkpair_plot_final <- plot_grid(networkpair_resi_row1, networkpair_resi_row2, nrow = 2, rel_heights = c(1.2, 0.72))
+
+networkpair_plot_final <- ggdraw(networkpair_plot_final) +
+  draw_label("A", x = 0.03, y = 0.989, fontface = "bold", size = 10) +
+  draw_label("B", x = 0.53, y = 0.364, fontface = "bold", size = 10)
+
+networkpair_plot_final
+#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig5.tiff", plot = networkpair_plot_final, width = 6.2, height = 8, units = "in")
 ```
+ 
 
-Network enrichment significance testing showed that default mode subnetwork A within-network connectivity is indeed more enriched in females than in males in all 4 datasets.\
-- may need to run this for all datasets
-
-```{r NEST DMN A table}
-PNC_NEST_DMNA <- readRDS(file.path(root, "covariate_analyses", "sex_diff", "output", "PNC", "NEST", "WNC", "NEST_DefaultA_WNC.RData"))
-HCPD_NEST_DMNA <- readRDS(file.path(root, "covariate_analyses", "sex_diff", "output", "HCPD", "NEST", "WNC", "NEST_DefaultA_WNC.RData"))
-NKI_NEST_DMNA <- readRDS(file.path(root, "covariate_analyses", "sex_diff", "output", "NKI", "NEST", "WNC", "NEST_DefaultA_WNC.RData"))
-HBN_NEST_DMNA <- readRDS(file.path(root, "covariate_analyses", "sex_diff", "output", "HBN", "NEST", "WNC", "NEST_DefaultA_WNC.RData"))
-
-NEST_results <- data.frame(
-  Dataset = c("PNC", "HCP-D", "NKI", "HBN"),
-  `NEST p-value` = c(
-    as.numeric(PNC_NEST_DMNA$pval),
-    as.numeric(HCPD_NEST_DMNA$pval),
-    as.numeric(NKI_NEST_DMNA$pval),
-    as.numeric(HBN_NEST_DMNA$pval)
-  )
+```{r table of largest network pair effects}
+networkpair_list <- list(
+  PNC = sex.main.PNC.networkpair.17, NKI = sex.main.NKI.networkpair.17,
+  `HCP-D` = sex.main.HCPD.networkpair.17, HBN = sex.main.HBN.networkpair.17,
+  `Pooled Dataset` = sex.main.all_datasets.networkpair.17
 )
 
-NEST_results %>%
-  kbl(format = "html", align = "lcccc", digits = 4,
-      caption = "Network enrichment significance testing for Default Mode Subnetwork A (female > male).") %>%
-  add_header_above(c(" " = 1, "Default Mode Subnetwork A" = 1), bold = TRUE) %>%
-  kable_styling(full_width = FALSE, position = "center") %>%
-  kable_classic(full_width = FALSE, html_font = "Arial") %>%
-  row_spec(0:nrow(NEST_results), extra_css = "line-height: 0.7;") %>%
-  column_spec(2, background = "gray90", include_thead = TRUE)
+pretty_network <- c(
+  defaultA = "default mode A", defaultB = "default mode B", defaultC = "default mode C",
+  frontoparietalControlA = "control A", frontoparietalControlB = "control B", frontoparietalControlC = "control C",
+  dorsalAttentionA = "dorsal attention A", dorsalAttentionB = "dorsal attention B",
+  salienceVentralAttentionA = "salience/ventral attention A", salienceVentralAttentionB = "salience/ventral attention B",
+  limbicOrbitofrontal = "limbic orbitofrontal", limbicTemporopolar = "limbic temporal pole",
+  somatomotorA = "somatomotor A", somatomotorB = "somatomotor B",
+  visualCentral = "visual central", visualPeripheral = "visual peripheral", temporalParietal = "temporal parietal"
+)
+
+pretty_pair <- function(region) {
+  nets <- strsplit(region, "_")[[1]]
+  nets <- ifelse(nets %in% names(pretty_network), unname(pretty_network[nets]), nets)
+  if (nets[1] == nets[2]) paste(nets[1], "within") else paste(nets[1], "with", nets[2])
+}
+
+fmt <- function(region, resi) sprintf("%s (%.2f)", pretty_pair(region), resi)
+
+summarise_dataset <- function(df, dataset_name) {
+  sig <- df %>% filter(significant_status == "Sig")
+  female <- sig %>% filter(RESI > 0) %>% arrange(desc(RESI)) %>% mutate(rank = row_number())
+  male <- sig %>% filter(RESI < 0) %>% arrange(RESI)
+
+  female_cell <- fmt(female$region[1], female$RESI[1])
+  dmnA <- female %>% filter(region == "defaultA_defaultA")
+
+  if (female$region[1] != "defaultA_defaultA" && nrow(dmnA) == 1)
+    female_cell <- paste0(female_cell, "; ", pretty_pair(dmnA$region), sprintf(" (%.2f; rank %d)", dmnA$RESI, dmnA$rank))
+
+  tibble(Dataset = dataset_name, `Female > Male` = female_cell, `Male > Female` = fmt(male$region[1], male$RESI[1]))
+}
+
+networkpair_summary <- imap_dfr(networkpair_list, summarise_dataset)
+
+networkpair_summary %>%
+  kbl(caption = "Largest significant sex effects (RESI) on network-pair connectivity",
+      col.names = c("Dataset", "Female > Male", "Male > Female"), align = c("l", "l", "l"), booktabs = TRUE, escape = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE, position = "center", font_size = 20) %>%
+  column_spec(1, bold = TRUE, width = "8em") %>%
+  column_spec(2, width = "28em") %>%
+  column_spec(3, width = "28em") %>%
+  row_spec(0, bold = TRUE)
 
 ```
+ 
+ 
+```{r dmnA male partner network effects}
 
-```{r NEST Limbic A table, echo=FALSE, include=FALSE}
-#Network enrichment significance testing showed that limbic subnetwork A within-network connectivity is indeed more enriched in male than in females in all 4 datasets.  
+partners <- c("dorsalAttentionA", "dorsalAttentionB",
+              "salienceVentralAttentionA", "salienceVentralAttentionB",
+              "visualCentral", "visualPeripheral", "frontoparietalControlA")
 
-#PNC_NEST_LimbA <- readRDS(file.path(root, "covariate_analyses", "sex_diff", "output", "PNC", "NEST", "WNC", "NEST_LimbicA_TempPole_WNC.RData"))
-#HCPD_NEST_LimbA <- readRDS(file.path(root, "covariate_analyses", "sex_diff", "output", "HCPD", "NEST", "WNC", "NEST_LimbicA_TempPole_WNC.RData"))
-#NKI_NEST_LimbA <- readRDS(file.path(root, "covariate_analyses", "sex_diff", "output", "NKI", "NEST", "WNC", "NEST_LimbicA_TempPole_WNC.RData"))
-#HBN_NEST_LimbA <- readRDS(file.path(root, "covariate_analyses", "sex_diff", "output", "HBN", "NEST", "WNC", "NEST_LimbicA_TempPole_WNC.RData"))
+dmnA_partner_table <- imap_dfr(networkpair_list, function(df, dataset_name) {
+  df %>%
+    mutate(net1 = sub("_.*", "", region), net2 = sub(".*_", "", region)) %>%
+    filter((net1 == "defaultA" & net2 %in% partners) | (net2 == "defaultA" & net1 %in% partners)) %>%
+    transmute(
+      Dataset = dataset_name,
+      Partner = ifelse(net1 == "defaultA", net2, net1),
+      cell = ifelse(significant_status == "Sig", sprintf("%.2f", RESI), "n.s.")
+    )
+}) %>%
+  mutate(Partner = factor(Partner, levels = partners, labels = unname(pretty_network[partners]))) %>%
+  arrange(Partner) %>%
+  pivot_wider(names_from = Dataset, values_from = cell)
 
-#NEST_results <- data.frame(
-#  Dataset = c("PNC", "HCP-D", "NKI", "HBN"),
-#  `NEST p-value` = c(
-#    as.numeric(PNC_NEST_LimbA$pval),
-#    as.numeric(HCPD_NEST_LimbA$pval),
-#    as.numeric(NKI_NEST_LimbA$pval),
-#    NA
-    #as.numeric(HBN_NEST_LimbA$pval)
-#  )
-#)
-
-#NEST_results %>%
-#  kbl(format = "html", align = "lcccc", digits = 4,
-#      caption = "Network enrichment significance testing for LimbicA Temporal Pole (male > female).") %>%
-#  add_header_above(c(" " = 1, "Limbic Subnetwork A" = 1), bold = TRUE) %>%
-#  kable_styling(full_width = FALSE, position = "center") %>%
-#  kable_classic(full_width = FALSE, html_font = "Arial") %>%
-#  row_spec(0:nrow(NEST_results), extra_css = "line-height: 0.7;") %>%
-#  column_spec(2, background = "gray90", include_thead = TRUE)
-
+dmnA_partner_table %>%
+  kbl(caption = "Sex effects (RESI) on connectivity between default mode A and attention, visual, and control A networks (negative = male > female; n.s. = not significant)",
+      align = c("l", rep("c", length(networkpair_list))), booktabs = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE, position = "center", font_size = 20) %>%
+  column_spec(1, bold = TRUE) %>%
+  row_spec(0, bold = TRUE)
 ```
-
-# 4. Sex differences in edge-level connectivity vary with hierarchical span of functional connections
-
+ 
+ 
+# 6. Sex differences in edge-level connectivity vary with hierarchical span of functional connections
 ```{r load edge sex main effect}
 # edge gam output
 sex.main.PNC.edge <- read.csv(sprintf("%1$s/%2$s/GAM/%3$s/%2$s_GAM_sex_maineffects_schaefer200x17.csv", output_root, "PNC", "edge"))
@@ -1707,7 +1601,7 @@ ggplot(RESI_all_datasets, aes(Dataset, RESI, fill = Dataset, color = Dataset)) +
     axis.title.x = element_text(size = 20),
     axis.title.y = element_text(size = 20),
     axis.line = element_line(color = "black"),
-    axis.text = element_text(size = 24, color = "black")
+    axis.text = element_text(size = 10, color = "black")
   )
 
 
@@ -1736,7 +1630,7 @@ global_disp_p3 <- plot_grid(blank_space, global_disp_p2, nrow = 2, rel_heights =
 
 annotate_figure(global_disp_p3,
       top = text_grob("Global Dispersion", size = 30), 
-      left = text_grob("Dispersion", size = 24, rot = 90))
+      left = text_grob("Dispersion", size = 10, rot = 90))
 ```
 
 ```{r within network dispersion, fig.height = 12, fig.width = 20}
@@ -1818,7 +1712,7 @@ between_dispersion_figure <- plot_grid(blank_space, plot_grid(between_col1, betw
                                        ncol = 3, rel_widths = c(2, 1, 0.1)), nrow = 2, rel_heights = c(0.01, 1))
 
 annotate_figure(between_dispersion_figure,
-                top = text_grob("Between-Network Dispersion", size = 24))
+                top = text_grob("Between-Network Dispersion", size = 10))
 
 ```
 
@@ -1885,8 +1779,8 @@ pc1_density_figure <- plot_grid(pc1_density_p2, sex_legend, nrow = 2, rel_height
 
 pc1_density_figure <- annotate_figure(pc1_density_figure,
                                       top = text_grob("PC1 Distribution", size = 30),
-                                      left = text_grob("Density", size = 24, rot = 90),
-                                      bottom = text_grob("PC1 Loading", size = 24))
+                                      left = text_grob("Density", size = 10, rot = 90),
+                                      bottom = text_grob("PC1 Loading", size = 10))
 
 pc1_density_figure
 
@@ -2114,15 +2008,15 @@ WNC_hist <- plot_grid(blank_space, plot_grid(make_hist_plot(PNC_WNC_subxparcel, 
                       nrow = 2, rel_heights = c(0.03, 1))
 
 
-BNC_hist_plots <- annotate_figure(BNC_hist, bottom = text_grob("Between-Network Connectivity", size = 24),
-                left = text_grob("Count", size = 24, rot = 90),
-                top = text_grob("Distribution of BNC", size = 24))
+BNC_hist_plots <- annotate_figure(BNC_hist, bottom = text_grob("Between-Network Connectivity", size = 10),
+                left = text_grob("Count", size = 10, rot = 90),
+                top = text_grob("Distribution of BNC", size = 10))
 
 
 
-WNC_hist_plots <- annotate_figure(WNC_hist, bottom = text_grob("Within-Network Connectivity", size = 24),
-                left = text_grob("Count", size = 24, rot = 90),
-                top = text_grob("Distribution of WNC", size = 24))
+WNC_hist_plots <- annotate_figure(WNC_hist, bottom = text_grob("Within-Network Connectivity", size = 10),
+                left = text_grob("Count", size = 10, rot = 90),
+                top = text_grob("Distribution of WNC", size = 10))
 
 
 plot_grid(BNC_hist_plots, blank_space, WNC_hist_plots, ncol = 3, rel_widths = c(1, 0.1, 1))
@@ -2172,7 +2066,7 @@ p <- ggplot() +
     scale_colour_manual(values = c("Sig" = "black", "Nonsig" = "grey50")) + 
     theme_void() +
     theme(legend.title = element_blank(),
-          legend.text = element_text(size = 24),
+          legend.text = element_text(size = 10),
         legend.position = "bottom", 
         legend.box = "horizontal", 
         legend.key.height = unit(1, 'cm'),
@@ -2191,13 +2085,13 @@ annotate_figure(
         sex.int.all_dataset.WNC_rh,
         ncol = 2
       ),
-      top = text_grob("WNC age-by-sex all datasets (Schaefer 200x17)", size = 24)
+      top = text_grob("WNC age-by-sex all datasets (Schaefer 200x17)", size = 10)
     ),
     legend,
     ncol = 1,
     rel_heights = c(1, 0.2)
   ),
-  bottom = text_grob("Interaction (F-value)", size = 24)
+  bottom = text_grob("Interaction (F-value)", size = 10)
 )
 
  print(WNC_schaefer17 %>% arrange(desc(int_sig_effect)) %>% filter(significant_status == "Sig") %>% pull(region))
@@ -2248,9 +2142,9 @@ dev_traj_legend <- get_legend(plot)
 
 
 WNC.interaction.all_datasets.plots.combined <- plot_grid(blank_space, plot_grid(plotlist = WNC.interaction.all_datasets.plots), nrow = 2, rel_heights = c(0.03, 1))
-WNC.interaction.all_datasets.plots.text <- annotate_figure(WNC.interaction.all_datasets.plots.combined, bottom = text_grob("Age (years)", size = 24),
-                left = text_grob("Within Network Connectivity", size = 24, rot = 90),
-                top = text_grob("Developmental Patterns of Within Network Connectivity by Sex", size = 24))
+WNC.interaction.all_datasets.plots.text <- annotate_figure(WNC.interaction.all_datasets.plots.combined, bottom = text_grob("Age (years)", size = 10),
+                left = text_grob("Within Network Connectivity", size = 10, rot = 90),
+                top = text_grob("Developmental Patterns of Within Network Connectivity by Sex", size = 10))
 
 
 plot_grid(WNC.interaction.all_datasets.plots.text, dev_traj_legend, nrow = 2, rel_heights = c(1, 0.05))
@@ -2296,9 +2190,9 @@ dev_traj_legend <- get_legend(plot)
 
 
 netpair.interaction.all_datasets.plots.combined <- plot_grid(blank_space, plot_grid(plotlist = netpair.interaction.all_datasets.plots, ncol = 2), nrow = 2, rel_heights = c(0.03, 1))
-netpair.interaction.all_datasets.plots.text <- annotate_figure(netpair.interaction.all_datasets.plots.combined, bottom = text_grob("Age (years)", size = 24),
-                left = text_grob("Connectivity between Pairs of Networks", size = 24, rot = 90),
-                top = text_grob("Developmental Patterns of Within Network Connectivity by Sex", size = 24))
+netpair.interaction.all_datasets.plots.text <- annotate_figure(netpair.interaction.all_datasets.plots.combined, bottom = text_grob("Age (years)", size = 10),
+                left = text_grob("Connectivity between Pairs of Networks", size = 10, rot = 90),
+                top = text_grob("Developmental Patterns of Within Network Connectivity by Sex", size = 10))
 
 
 plot_grid(plot_grid(netpair.interaction.all_datasets.plots.text, dev_traj_legend, nrow = 2, rel_heights = c(1, 0.05)), blank_space, ncol = 2, rel_widths = c(1, 0.05))
