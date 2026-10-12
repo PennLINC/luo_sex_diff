@@ -482,7 +482,7 @@ if (metric == "FC_strength"){
   
   # load edge labels
   edge <- read.csv(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/edge/%1$s_edge.csv", atlas))
-  edge <- edge[,2]
+  edge <- edge[,1]
   names(subxedge) <- edge # columns = names of edges
   
   # format subxedge df
