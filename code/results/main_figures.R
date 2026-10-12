@@ -8,45 +8,20 @@ library(gridExtra)
 library(gratia) 
 library(knitr)
 library(mgcv)
+library(pammtools)
 library(RColorBrewer)
+library(rjson)
 library(scales)
 library(stringr)
-library(rjson)
 library(tidyr)
 
-# "#C75DAAFF", "#FFFFFF","#00A3A7FF"
-######################################
+
 # set color palette
-######################################
-red_teal_white_base <- c( "#A51122FF","#E14C21FF", "#F8A86BFF", "#FFFFFFFF","#ACDFD3FF", "#0B8CACFF","#324DA0FF")
+red_teal_white_base <- rev(c( "#A51122FF","#E14C21FF", "#F8A86BFF", "#FFFFFFFF","#ACDFD3FF", "#0B8CACFF","#324DA0FF"))
 red_teal_white <- colorRampPalette(red_teal_white_base)
 
-######################################
-# Figures 
-######################################
 
-# format mean matrix
-format_mean_matrix <- function(mat) {
-  # rename schaefer 200x17 to be schaefer 200x7
-  rownames(mat) <- schaefer200.labels
-  colnames(mat) <- schaefer200.labels 
-  return(mat)
-}
-
-# map parcels to network names for heatmap
-map_network7 <- function(x) {
-  dplyr::case_when(
-    str_detect(x, "Vis") ~ "Visual",
-    str_detect(x, "SomMot") ~ "SomMot",
-    str_detect(x, "DorsAttn") ~ "DorsAttn",
-    str_detect(x, "SalVentAttn") ~ "SalVentAttn",
-    str_detect(x, "Cont") ~ "Frontoparietal",
-    str_detect(x, "Limb") ~ "Limbic",
-    str_detect(x, "Default") ~ "Default",
-    TRUE ~ x
-  )
-}
-
+# function for formatting network names
 map_network17 <- function(x) {
   dplyr::case_when(
     stringr::str_detect(x, "VisCent")           ~ "visualCentral",
@@ -69,137 +44,7 @@ map_network17 <- function(x) {
     TRUE                                  ~ x     # pass through original label if no match
   )
 }
-# helper function for plot_mean_matrix - compute network block boundaries/centers for lines + labels
-runs_info <- function(groups) {
-  r <- rle(groups)
-  ends <- cumsum(r$lengths)
-  starts <- c(1, head(ends, -1) + 1)
-  centers <- starts + (r$lengths - 1) / 2
-  list(starts = starts, ends = ends, centers = centers, labels = r$values)
-}
-
-# plot mean matrix heatmap
-plot_mean_matrix <- function(mat, ylim1, ylim2, sex) {
-  
-  # save parcel names in a variable
-  orig_rows <- rownames(mat)
-  orig_cols <- colnames(mat)
-  
-  # map parcel labels to network names 
-  row_net <- map_network7(orig_rows)
-  col_net <- map_network7(orig_cols)    
-  
-  # set display order of networks  
-  net_order <- c("Visual","SomMot","DorsAttn","SalVentAttn", "Frontoparietal","Default", "Limbic")
-  
-  # build ordering indices: first by network, then keep original within-network order
-  row_order <- order(factor(row_net, levels = net_order), seq_along(row_net))
-  col_order <- order(factor(col_net, levels = net_order), seq_along(col_net))
-  
-  # reorder matrix and corresponding network vectors
-  mat_ord <- mat[row_order, col_order]
-  row_net_o <- row_net[row_order]
-  col_net_o <- col_net[col_order]
-  
-  # compute network block boundaries/centers for lines + labels
-  r_rows <- runs_info(row_net_o)
-  r_cols <- runs_info(col_net_o)
-  y_bounds <- r_rows$ends + 0.5
-  x_bounds <- r_cols$ends + 0.5
-  
-  # plot full 200x200 heatmap with network blocks
-  df <- expand.grid(Col = seq_len(ncol(mat_ord)), Row = seq_len(nrow(mat_ord)))
-  df$Value <- as.vector(mat_ord)
-  
-  heatmap <- ggplot(df, aes(x = Col, y = Row, fill = Value)) +
-    geom_tile() +
-    geom_hline(yintercept = y_bounds, linewidth = 0.4, color = "black") +
-    geom_vline(xintercept = x_bounds, linewidth = 0.4, color = "black") +
-    scale_y_continuous(breaks = r_rows$centers, labels = r_rows$labels, expand = c(0,0)) +
-    scale_x_continuous(breaks = r_cols$centers, labels = r_cols$labels, expand = c(0,0), position = "bottom") +
-    scale_fill_gradientn(colours = c("#6200D9", "white", "#FF681C"), values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
-    coord_equal() +
-    theme_classic() + 
-    theme(plot.title = element_text(size = 20, hjust = 0.5),
-          axis.text.x = element_text(size = 12, angle = 45, vjust = 1.1, hjust = 1, margin = margin(t = 10)),
-          axis.text.y = element_text(size = 12),
-          axis.title.x = element_blank(),
-          axis.title.y = element_blank(),
-          legend.position = 'none') + ggtitle(sex)  
-  
-  return(heatmap)
-}
-
-
-# prep for network x network difference heatmap: collapse a parcel-level matrix to a network x network matrix
-collapse_to_network <- function(mat, map_network7, net_order = NULL) {
-  row_net <- map_network7(rownames(mat))
-  col_net <- map_network7(colnames(mat))
-  
-  # indices per network
-  row_idx <- split(seq_len(nrow(mat)), row_net)
-  col_idx <- split(seq_len(ncol(mat)), col_net)
-  
-  # pick an order
-  if (is.null(net_order)) {
-    net_order <- union(names(row_idx), names(col_idx)) |> unique()
-  }
-  row_idx <- row_idx[net_order]
-  col_idx <- col_idx[net_order]
-  
-  # mean across all parcel pairs for each network pair
-  net_mat <- matrix(NA_real_, nrow = length(row_idx), ncol = length(col_idx),
-                    dimnames = list(names(row_idx), names(col_idx)))
-  for (i in seq_along(row_idx)) {
-    for (j in seq_along(col_idx)) {
-      net_mat[i, j] <- mean(mat[row_idx[[i]], col_idx[[j]]], na.rm = TRUE)
-    }
-  }
-  net_mat
-}
-
-# plot network x network difference heatmap (Female – Male)
-plot_network_diff <- function(female_mat, male_mat, map_network7,
-                              net_order = c("Default","DorsAttn","Frontoparietal",
-                                            "Limbic","SalVentAttn","SomMot","Visual"),
-                              triangle = c("upper","lower","full"),
-                              limits, title) {
-  
-  triangle <- match.arg(triangle)
-  
-  female_net <- collapse_to_network(female_mat, map_network7, net_order)
-  male_net   <- collapse_to_network(male_mat, map_network7, net_order)
-  diff_net   <- female_net - male_net
-  
-  # Melt to long format for ggplot
-  df <- melt(diff_net, varnames = c("Row","Col"), value.name = "diff")
-  
-  # keep one triangle if requested
-  df$Ri <- as.integer(factor(df$Row, levels = rownames(diff_net)))
-  df$Ci <- as.integer(factor(df$Col, levels = colnames(diff_net)))
-  if (triangle == "upper") df <- df[df$Ri <= df$Ci,]
-  if (triangle == "lower") df <- df[df$Ri >= df$Ci,]
-  
-  ggplot(df, aes(x = Col, y = Row, fill = diff)) +
-    geom_tile() +
-    coord_fixed() +
-    scale_fill_gradientn(
-      colours = red_teal_white(256),
-      values  = rescale(c(limits[1], 0, limits[2])),
-      limits  = limits,
-      oob     = squish,
-      na.value = "white") +
-    scale_x_discrete(position = "bottom") +
-    ggtitle(title) +
-    theme_classic(base_size = 20) +
-    theme(plot.title = element_text(size = 20, hjust = 0.5),
-      axis.text.x = element_text(angle = 45, hjust = 1),
-      axis.title.x = element_blank(),
-      axis.title.y = element_blank(),
-      legend.position = "none")
-}
-
-
+ 
 # function for calculating number of significant regions (FDR corrected)
 # @param df A dataframe with GAM results
 # @param fc_measure, A string for FC measure (i.e. "GBC")
@@ -217,7 +62,7 @@ sig.effects <- function(df, fc_measure, covariate, dataset){
   return(df)
 }
  
-# function for calculating number of significant regions (FDR corrected) - for analysis with aggregated datasets
+# function for calculating number of significant regions (FDR corrected) - for analysis with pooled datasets
 sig.effects.all_datasets <- function(df, fc_measure, covariate, dataset, pvalue_colname, effect_colname){
   df$Anova.int.pvalue.fdr <- p.adjust(df[[pvalue_colname]], method = c("fdr")) 
   df$significant.fdr <- df$Anova.int.pvalue.fdr < 0.05
@@ -231,25 +76,7 @@ sig.effects.all_datasets <- function(df, fc_measure, covariate, dataset, pvalue_
   return(df)
 }
 
-
-# function for calculating number of significant interactions (FDR corrected)
-# @param df A dataframe with GAM results
-# @param fc_measure, A string for FC measure (i.e. "GBC")
-# @param covariate, A string for covariate of interest (i.e. "sex_diff")
-sig.effects.interaction <- function(df, measure, covariate, dataset){
-  df$Anova.int.pvalue.fdr <- p.adjust(df$GAM.int.pvalue, method = c("fdr")) 
-  df$significant.fdr <- df$Anova.int.pvalue.fdr < 0.05
-  df$significant.fdr[df$significant.fdr == TRUE] <- 1
-  df$significant.fdr[df$significant.fdr == FALSE] <- 0
-  df <- df %>% mutate(significant_status = ifelse(significant.fdr == 1, "Sig", "Nonsig"))
-  df <- df %>% mutate(int_sig_effect = ifelse(significant.fdr == 1, GAM.int.Fvalue, NA))
-  sigeffect.totaln <- sum(df$significant.fdr)
-  sigeffect.percent <- round(sigeffect.totaln/length(df$significant.fdr)*100, 2)
-  print(sprintf("%s: %s regions (%s percent) show a significant interaction between %s and %s", dataset, sigeffect.totaln, sigeffect.percent, measure, covariate))
-  return(df)
-}
-
-
+ 
 # plot covariate effects on cortical surface
 plot_cortex <- function(df, hemi, measure, ylim1, ylim2, atlas, horizontal_layout = NULL) {
   
@@ -333,47 +160,7 @@ plot_cortex_overlap <- function(df, hemi, atlas, horizontal_layout = NULL) {
   }
   
 }
-
-# plot values on cortical surface (for interaction plot - temporary)
-plot_cortex_int <- function(df, hemi, measure, ylim1, ylim2, atlas) {
-  
-  if(hemi == "left") {
-    cortical_pos1 <- "left lateral" 
-    cortical_pos2 <- "left medial"
-  } else{
-    cortical_pos1 <- "right lateral" 
-    cortical_pos2 <- "right medial"
-  }
-  plot_lateral <- ggplot() + 
-    geom_brain(data = df, atlas = get(atlas), 
-               mapping=aes(fill=get(measure), colour=significant_status, size=I(0.7)), 
-               show.legend=TRUE, 
-               hemi = hemi,
-               position = position_brain(cortical_pos1)) +
-    scale_fill_paletteer_c("ggthemes::Blue-Green Sequential", na.value = "white") + 
-    scale_colour_manual(values = c("Sig" = "black", "Nonsig" = "grey50")) + 
-    theme_void() +
-    theme(legend.position = "none",
-          legend.title = element_blank(),
-          plot.margin = unit(c(0.1, -1, 0.1, -1), "cm"),
-          plot.title = element_blank()) 
-  
-  plot_medial <- ggplot() + 
-    geom_brain(data = df, atlas= get(atlas), 
-               mapping=aes(fill=get(measure), colour=significant_status, size=I(0.7)), 
-               show.legend=TRUE, 
-               hemi = hemi,
-               position = position_brain(cortical_pos2)) +
-    scale_fill_paletteer_c("ggthemes::Blue-Green Sequential", na.value = "white") + 
-    scale_colour_manual(values = c("Sig" = "black", "Nonsig" = "grey50")) + 
-    theme_void() +
-    theme(legend.position = "none",
-          legend.title = element_blank(),
-          plot.margin = unit(c(0.1, -1, 0.1, -1), "cm"),
-          plot.title = element_blank())
-  return(plot_grid(plot_lateral, plot_medial, ncol = 1, rel_heights = c(1, 1), align = "v", axis = "lr"))
-}
-
+ 
 
 
 # make df for plotting: need to switch network 1 and 2 ordering for salience-dorsalattn and limbic-dorsal for visualization purposes
@@ -502,7 +289,7 @@ make_networkpair17_plot <- function(df, dataset, ylim1, ylim2, fontsize, fontsiz
       axis.title.y = element_blank(),
       plot.title = element_text(hjust = 0.5, size = 10, face = "bold"),
       legend.position = "none",
-      plot.margin = margin(0.1, -0.1, 0.5, -0.1, "cm")
+      plot.margin = margin(0.1, -0.1, 0, -0.1, "cm")
     ) +
     scale_fill_gradientn(
       colours = red_teal_white(256),
@@ -566,7 +353,7 @@ plot_networkpair_overlap <- function(df, num_networks = 17, fontsize = 7, fontsi
       axis.title.y = element_blank(),
       plot.title = element_text(hjust = 0.5, size = 10, face = "bold"),
       legend.position = "none",
-      plot.margin = margin(0.1, -0.1, 0.5, -0.1, "cm")
+      plot.margin = margin(0.1, -0.1, 0, -0.1, "cm")
     ) + ggtitle("Overlap of Significant Effects")
 }
 
@@ -600,7 +387,13 @@ make_surface_plot <- function(double_SA.diff, dataset, measure, ylim1, ylim2, p_
   
  
   if (!significant_only) {
-      surface.plot.fig <- gg_tensor(g2)
+    tensor_surface <- pammtools::tidy_smooth2d(g2, ci = FALSE)
+    
+    surface.plot.fig <- ggplot(tensor_surface, aes(x = x, y = y)) +
+      geom_raster(aes(fill = fit)) +
+      geom_contour(aes(z = fit), color = "grey30", linewidth = 0.25) +
+      scale_x_continuous(expand = c(0, 0)) +
+      scale_y_continuous(expand = c(0, 0))
   } else {
     
     # Significant-only plot: show only the edges that survive FDR correction
@@ -621,41 +414,43 @@ make_surface_plot <- function(double_SA.diff, dataset, measure, ylim1, ylim2, p_
     # build plot
     tensor_surface <- pammtools::tidy_smooth2d(g2, ci = FALSE)
     surface.plot.fig <- ggplot() + geom_raster(data = sig_data, aes(x = parcel2_SA, y = parcel1_SA, fill = tensor_fit)) +
-      geom_contour(data = tensor_surface, aes(x = x, y = y, z = fit), color = "grey30", linewidth = 0.4) +
+      geom_contour(data = tensor_surface, aes(x = x, y = y, z = fit), color = "grey30", linewidth = 0.01) +
       scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0))
   }
   
   surface.plot.fig <- surface.plot.fig + theme_classic() + 
     scale_fill_gradientn(colours = red_teal_white(256), values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = scales::squish, na.value = "white") +
-    geom_vline(xintercept = mean(range(double_SA.diff$parcel2_SA, na.rm = TRUE)), linetype = "dashed", size = 1) + 
-    geom_hline(yintercept = mean(range(double_SA.diff$parcel1_SA, na.rm = TRUE)), linetype = "dashed", size = 1)
+    geom_vline(xintercept = mean(range(double_SA.diff$parcel2_SA, na.rm = TRUE)), linetype = "dashed", size = 0.25) + 
+    geom_hline(yintercept = mean(range(double_SA.diff$parcel1_SA, na.rm = TRUE)), linetype = "dashed", size = 0.25)
   
   if (is.null(legend)) {
     surface.plot.fig <- surface.plot.fig + labs(title = dataset, subtitle = p_label) +
       theme(legend.position = "none", 
             strip.background = element_blank(), 
-            plot.margin = margin(0, 0, -0.1, 0.5, "cm"), 
-            axis.text.y = element_text(size = 20, color = "black"), 
-            axis.text.x = element_text(size = 20, color = "black"),
-            plot.title = element_text(size = 20, hjust = 0.5),
-        plot.subtitle = element_text(size = 18, hjust = 0.5),
+            strip.text = element_blank(),
+            plot.margin = margin(0, 0.2, -0.1, 0.15, "cm"), 
+            axis.text.y = element_text(size = 10, color = "black"), 
+            axis.text.x = element_text(size = 10, color = "black"),
+            plot.title = element_text(size = 10, hjust = 0.5, face = "bold", margin = margin(b = -0.05)),
+        plot.subtitle = element_text(size = 10, hjust = 0.5, margin = margin(t = -0.05, b = -1)),
         axis.title.x = element_blank(),
         axis.title.y = element_blank(),
-        axis.line = element_line(color = "black"))
+        axis.line = element_line(color = "black", linewidth = 0.25))
     } else {
     surface.plot.fig <- surface.plot.fig + labs(title = dataset, x = "S-A Axis Rank", y = "S-A Axis Rank") +
       theme(legend.position = "bottom", 
             legend.key.height = unit(0.5,"cm"), 
             legend.key.width = unit(1.5, "cm"), 
             legend.title = element_blank(),
-            legend.text = element_text(size = 20),
+            legend.text = element_text(size = 10),
             strip.background = element_blank(),
+            strip.text = element_blank(),
             plot.margin = margin(0, 0, 1, 0.5, "cm"),
-            axis.title = element_text(size = 20),
-            axis.text.y = element_text(size = 20, color = "black"),
-            axis.text.x = element_text(size = 20, color = "black"),
-            plot.title = element_text(size = 20, hjust = 0.5),
-            plot.subtitle = element_text(size = 18, hjust = 0.5),
+            axis.title = element_text(size = 10),
+            axis.text.y = element_text(size = 10, color = "black"),
+            axis.text.x = element_text(size = 10, color = "black"),
+            plot.title = element_text(size = 10, hjust = 0.5),
+            plot.subtitle = element_text(size = 10, hjust = 0.5),
             axis.line = element_line(color = "black"))
     }
   return(surface.plot.fig)
@@ -663,50 +458,7 @@ make_surface_plot <- function(double_SA.diff, dataset, measure, ylim1, ylim2, p_
  
 
 
-# extract and format correlation estimate
-get_corr <- function(x, y) {
-  round(cor.test(x, y, complete.obs = T)$estimate, 3)
-}
-
-
-# plot S-A scatterplot
-plot_corr_SA <- function(df, measure, annot_text, title, ylim1, ylim2, y_label) {
-  SA_plot <- ggplot(df, aes(x = SA.axis_rank, y = get(measure), fill = SA.axis_rank_sig)) +
-    geom_point(color = "gray", shape = 21, size=3.5) + 
-    paletteer::scale_fill_paletteer_c("grDevices::RdYlBu", direction = -1, limits = c(min(df$SA.axis_rank), max(df$SA.axis_rank)), oob = squish) +
-    paletteer::scale_color_paletteer_c("grDevices::RdYlBu", direction = -1, limits = c(min(df$SA.axis_rank), max(df$SA.axis_rank)), oob = squish) +
-    
-    geom_smooth(data = df, method='lm', se=TRUE, fill=alpha(c("gray70"),.9), col="black") + 
-    labs(title = title) + theme_classic() +
-    theme(legend.position = "none",
-          plot.title = element_text(hjust = 0.5, size = 20, color = "black"),
-          axis.title = element_blank(),
-          axis.text.x = element_text(size = 20, color = "black"),
-          axis.text.y = element_text(size = 20, color = "black")) + 
-    annotate(geom="text", x=100, y=y_label, label=annot_text, color="black", size=7) +
-    ylim(ylim1, ylim2)
   
-  return(SA_plot)
-}
- 
-
-# developmental trajectories by sex_diff: for male and female  
-plot_trajectories_bycov <- function(region_name, df, covariate, y.limits, color){
-  
-  df_plot <- df %>% filter(region %in% region_name)
-  plot <- ggplot(df_plot, aes(x = age, y = fitted, group = interaction(sex, region))) + 
-    geom_line(color = color, linewidth = 1, aes(linetype = sex)) +
-    theme_classic() +
-    scale_y_continuous(limits = y.limits) +
-    theme_classic() + 
-    theme(plot.title = element_text(hjust = 0.5, size = 20),
-          legend.position = "none",
-          axis.text.x = element_text(size = 20, color = "black"),
-          axis.text.y = element_text(size = 20, color = "black"),
-          axis.title = element_blank()) + ggtitle(gsub("[A-Z0-9]+Networks ", "", gsub("_", " ", region_name)))
-  return(plot)  
-}
-
 # format edge GAM output for sex effect seed based maps 
 prep_edge_dfs <- function(df, fc_measure, covariate, dataset) {
   df <- sig.effects(df, fc_measure, covariate, dataset)
@@ -718,119 +470,7 @@ prep_edge_dfs <- function(df, fc_measure, covariate, dataset) {
   
   return(df)
 }
-
-# sex effect maps for a seed region
-view_age_effect <- function(df, parcel, measure, legend_title, dataset){
-  gam.edge <- df
   
-  parcel_df <- gam.edge %>% 
-    filter(network1 == parcel | network2 == parcel) %>% 
-    arrange(network2)
-  parcel_df$region <- ifelse(parcel_df$network1 == parcel, parcel_df$network2, parcel_df$network1) # get regions that parcel is connected to 
-  
-  parcel_df[nrow(parcel_df) + 1,] <- c(rep(NA, ncol(parcel_df)-4), "Sig", c(0,0), parcel)
-  parcel_df$region <- ifelse(str_detect(parcel_df$region, "LH"), paste0("lh_7", parcel_df$region), paste0("rh_7", parcel_df$region)) # reformat 'region' to match ggseg schaefer 'label'
-  
-  
-  # add lh_Background+FreeSurfer_Defined_Medial_Wall and rh_Background+FreeSurfer_Defined_Medial_Wall
-  parcel_df <- rbind(parcel_df, data.frame(region = "rh_Background+FreeSurfer_Defined_Medial_Wall",
-                              GAM.cov.tvalue = 0,
-                              GAM.cov.pvalue = 0,
-                              ANOVA.cov.pvalue = 0,
-                              Effectsize.cov.AdjRsq = 0,
-                              Effectsize.cov.partialRsq = 0,
-                              Anova.cov.pvalue.fdr = 0,
-                              significant.fdr = "Sig",
-                              significant_status = "Sig",
-                              cov_sig_effect = 0,
-                              network1 = "rh_Background+FreeSurfer_Defined_Medial_Wall",
-                              network2 = "rh_Background+FreeSurfer_Defined_Medial_Wall"))
-  parcel_df <- rbind(parcel_df, data.frame(region = "lh_Background+FreeSurfer_Defined_Medial_Wall",
-                                           GAM.cov.tvalue = 0,
-                                           GAM.cov.pvalue = 0,
-                                           ANOVA.cov.pvalue = 0,
-                                           Effectsize.cov.AdjRsq = 0,
-                                           Effectsize.cov.partialRsq = 0,
-                                           Anova.cov.pvalue.fdr = 0,
-                                           significant.fdr = "Sig",
-                                           significant_status = "Sig",
-                                           cov_sig_effect = 0,
-                                           network1 = "lh_Background+FreeSurfer_Defined_Medial_Wall",
-                                           network2 = "lh_Background+FreeSurfer_Defined_Medial_Wall"))
-   
-  # need to make a label column for the medial wall - a weird ggseg thing
-  parcel_df$label <- parcel_df$region 
-  
-  parcel_df <- parcel_df %>% select(-region)
-  
-  parcel_df[[measure]] <- as.numeric(parcel_df[[measure]])
-  
-  plot <- ggplot() + geom_brain(data=parcel_df,   
-                                atlas=schaefer7_200, 
-                                mapping=aes(fill=get(measure), 
-                                            colour=significant.fdr, 
-                                            size=I(0.3)), 
-                                show.legend=TRUE, 
-                                position = position_brain(side ~ hemi)) + 
-    theme_void() + 
-    scale_colour_manual(values = c(Sig = "black", Non_Sig = "grey84"), guide = "none") + 
-    scale_fill_gradientn(colours = red_teal_white(256),, na.value="red", 
-                         limits = c(min(parcel_df[[measure]]), max(parcel_df[[measure]])), 
-                         oob = squish,
-                         values=rescale(c(min(parcel_df[[measure]], na.rm=T), 0, max(parcel_df[[measure]], na.rm=T)))) + ggtitle(dataset) +
-    labs(fill = legend_title) + 
-    theme(plot.title=element_text(hjust=0.5))
-  return(plot)
-}
-
-
-# visualize schaefer 17 network on the cortical surface for reference
-visualize_schaefer17_network <- function(df, network_to_plot, color1) {
-  df <- df %>% mutate(network_of_interest = ifelse(network == network_to_plot, "Yes", "No"))
-  
-  ggplot() + geom_brain(data=df, atlas=schaefer17_200, 
-                        mapping=aes(fill= network_of_interest,
-                                    size=I(0.3)), position = position_brain(side ~ hemi)) + theme_void() + theme(plot.title = element_text(hjust = 0.5, size = 20)) +
-    scale_fill_manual(values = c(Yes = color1, No = "white"), guide = "none") + ggtitle(network_to_plot)
-}
-
-
-
-# load pfactor data and merge with demographics
-load_pfactor_data <- function(file_path) {
-  pfactor <- fread(file_path)
-  pfactor <- pfactor %>% rename(sub = participant_id)
-  pfactor$sub <- paste0("sub-", pfactor$sub)
-  pfactor <- pfactor %>% select(sub, p_factor_mcelroy_harmonized_all_samples, internalizing_mcelroy_harmonized_all_samples, externalizing_mcelroy_harmonized_all_samples, attention_mcelroy_harmonized_all_samples)
-  pfactor <- pfactor[!duplicated(pfactor), ]
-  pfactor <- pfactor[complete.cases(pfactor), ]
-  return(pfactor)
-}
-
-
-# hex plot function for pfactor vs sex edges
-hex_plot <- function(df, x, y, text, ylim1, ylim2, xlim1, xlim2, x_text, y_text, x_axis, y_axis, bin_size) {
-  plot <- ggplot(df, aes_string(x = x, y = y)) +
-    geom_hex(bins = bin_size) +
-    paletteer::scale_fill_paletteer_c("grDevices::RdPu", direction = 1) +
-    geom_smooth(method = "lm", color = "black", se = FALSE) +   
-    annotate("text", x = x_text, y = y_text, 
-             label = text, 
-             hjust = 0, vjust = 1, size = 6, color = "black") + theme_classic() +
-    theme(legend.position = "bottom", 
-          legend.key.width = unit(1, 'cm'), legend.key.height = unit(0.5, 'cm'),
-          legend.text = element_text(size = 20),
-          legend.title = element_text(size = 20),
-          axis.text.x = element_text(size = 20),
-          axis.text.y = element_text(size = 20),
-          axis.title.x = element_text(size = 20),
-          axis.title.y = element_text(size = 20),
-          plot.margin = unit(c(1, 0.5, 0.2, 1), "cm")) +
-    labs(x = x_axis, y = y_axis, fill = "Count") + ylim(ylim1, ylim2) + xlim(xlim1, xlim2)
-  return(plot)
-}
-
- 
 
 # identify overlapping WNC and BNC regions for sex effect and get average RESI effect size
 identify_sexeffect_overlap <- function(metric = c("WNC", "BNC"), p_thresh = 0.05) {
@@ -879,184 +519,11 @@ identify_sexeffect_overlap <- function(metric = c("WNC", "BNC"), p_thresh = 0.05
   
   return(overlap_df)
 }
-
-# developmental trajectories by sex_diff: for male and female  
-plot_trajectories_bycov <- function(region_name, df, covariate, y.limits, colorF, colorM, margin){
-  
-  df_plot <- df %>% filter(region %in% region_name)
-  plot <- ggplot(df_plot, aes(x = age, y = fitted, group = interaction(sex, region))) + 
-    geom_line(aes(color = sex), linewidth = 2) +
-    theme_classic() +
-    scale_y_continuous(limits = y.limits) +
-    scale_color_manual(values = c("Female" = colorF, "Male" = colorM)) +
-    theme_classic() + 
-    theme(plot.title = element_text(hjust = 0.5, size = 20),
-          legend.position = "none",
-          axis.text.x = element_text(size = 20, color = "black"),
-          axis.text.y = element_text(size = 20, color = "black"),
-          axis.title = element_blank(), 
-          plot.margin = unit(c(0, margin, 1, margin), "cm")) + ggtitle(gsub("[A-Z0-9]+Networks ", "", gsub("_", " ", region_name)))
-  return(plot)  
-}
  
 
-# gradients analysis figures
-##################
-# Global dispersion
-##################
-
-plot_global_dispersion <- function(dataset, title) {
-  
-  outputs_root <- sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/%s/gradient_dispersion", dataset)
-  resi_outputs_dir <- paste0(outputs_root, "/resi")
-  
-  global_result <- read.csv(sprintf("%s/%s_resi_sex_dispersion_global.csv", resi_outputs_dir, dataset))
-  gam_df <- read.csv(sprintf("%s/dispersion_global_%s.csv", outputs_root, dataset))
-  
-  gam_df <- gam_df %>% drop_na(sex)
-  gam_df$sex <- factor(gam_df$sex, levels = c("Male", "Female"))
-  
-  p_val <- global_result$p
-  
-  p_label <- case_when(
-    p_val < 0.0001 ~ "p < 0.0001",
-    p_val < 0.001  ~ "p < 0.001",
-    p_val < 0.01   ~ "p < 0.01",
-    p_val < 0.05   ~ "p < 0.05",
-    TRUE           ~ "p = N.S."
-  )
-  
-  # adjust dispersion for covariates
-  gam_df$resid_adj <- residuals(mgcv::gam(dispersion ~ s(age, k = 3) + meanFD_avgSes, data = gam_df))
-  
-  p_global <- ggplot(gam_df, aes(x = sex, y = resid_adj, fill = sex, color = sex)) +
-    geom_boxplot(width = 0.5, outlier.shape = NA, alpha = 0.6) +
-    geom_jitter(width = 0.1, alpha = 0.15, size = 0.8) +
-    scale_fill_manual(values = c(Female = "#C53121", Male = "#0B8CACFF")) +
-    scale_color_manual(values = c(Female = "#C53121", Male = "#0B8CACFF")) +
-    labs(title = title, y = "", x = NULL,
-         subtitle = sprintf("RESI = %.3f, %s", global_result$RESI_Xinyu, p_label)) +
-    theme_classic(base_size = 20) +
-    theme(legend.position = "none",
-          plot.subtitle = element_text(size = 20, color = "grey30", hjust = 0.5),
-          plot.title = element_text(hjust = 0.5),
-          axis.text.x = element_text(size = 20, color = "black"),
-          axis.text.y = element_text(size = 20, color = "black"),
-          axis.title.y = element_blank()) + ylim(-600, 1500)
-  
-  return(p_global)
-}
-
-
-##################
-# Within-network dispersion
-##################
-
-plot_within_dispersion <- function(dataset, title) {
-  
-  resi_outputs_dir <- sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/%s/gradient_dispersion/resi", dataset)
-  wn_results <- read.csv(sprintf("%s/%s_resi_sex_dispersion_within_network.csv", resi_outputs_dir, dataset))
-  
-  wn_results$significant <- wn_results$p_fdr < 0.05
-  
-  net_label_map <- function(x) {
-    case_when(
-      str_detect(x, "visualCentral") ~ "VisCent",
-      str_detect(x, "visualPeripheral") ~ "VisPeri",
-      str_detect(x, "somatomotorA") ~ "SM A",
-      str_detect(x, "somatomotorBAuditory") ~ "SM B Aud",
-      str_detect(x, "dorsalAttentionA") ~ "DorsAttn A",
-      str_detect(x, "dorsalAttentionB") ~ "DorsAttn B",
-      str_detect(x, "salienceVentralAttentionA") ~ "SalVentAttn A",
-      str_detect(x, "salienceVentralAttentionB") ~ "SalVentAttn B",
-      str_detect(x, "limbicTemporopolar") ~ "LimbTempPolar",
-      str_detect(x, "limbicOrbitofrontal") ~ "LimbOFC",
-      str_detect(x, "frontoparietalControlA") ~ "FPN A",
-      str_detect(x, "frontoparietalControlB") ~ "FPN B",
-      str_detect(x, "frontoparietalControlC") ~ "FPN C",
-      str_detect(x, "defaultA") ~ "DMN A",
-      str_detect(x, "defaultB") ~ "DMN B",
-      str_detect(x, "defaultC") ~ "DMN C",
-      str_detect(x, "temporoparietal") ~ "TempParietal",
-      TRUE ~ x
-    )
-  }
-  
-  wn_plot_df <- wn_results %>%
-    mutate(net_label = net_label_map(gsub("^wn_", "", outcome)))
-  
-  p_within <- ggplot(wn_plot_df, aes(x = RESI_Xinyu, y = reorder(net_label, RESI_Xinyu))) +
-    geom_vline(xintercept = 0, linetype = "dashed", color = "grey20") +
-    geom_errorbarh(aes(xmin = LCI, xmax = UCI, color = significant), height = 0.18, linewidth = 1.2, alpha = 0.7) +
-    geom_point(aes(fill = significant, color = significant), shape = 21, size = 4.5, stroke = 1.2, alpha = 0.7) +
-    scale_color_manual(values = c(`TRUE` = "#e87b96", `FALSE` = "grey50")) +
-    scale_fill_manual(values = c(`TRUE` = "#e87b96", `FALSE` = "grey50")) +
-    labs(title = title,  x = NULL, y = NULL) +
-    theme_classic(base_size = 20) +
-    theme(plot.title = element_text(hjust = 0.5, size = 20),
-          axis.text.x = element_text(size = 20, color = "black"),
-          axis.text.y = element_text(size = 20, color = "black"),
-          legend.position = "none") + xlim(-0.25, 0.17)
-  
-  return(p_within)
-}
-
-plot_within_overlap <- function() {
-  datasets <- c("PNC", "HCPD", "NKI", "HBN")
-  
-  net_label_map <- function(x) {
-    case_when(
-      str_detect(x, "visualCentral") ~ "VisCent",
-      str_detect(x, "visualPeripheral") ~ "VisPeri",
-      str_detect(x, "somatomotorA") ~ "SM A",
-      str_detect(x, "somatomotorBAuditory") ~ "SM B Aud",
-      str_detect(x, "dorsalAttentionA") ~ "DorsAttn A",
-      str_detect(x, "dorsalAttentionB") ~ "DorsAttn B",
-      str_detect(x, "salienceVentralAttentionA") ~ "SalVentAttn A",
-      str_detect(x, "salienceVentralAttentionB") ~ "SalVentAttn B",
-      str_detect(x, "limbicTemporopolar") ~ "LimbTempPolar",
-      str_detect(x, "limbicOrbitofrontal") ~ "LimbOFC",
-      str_detect(x, "frontoparietalControlA") ~ "FPN A",
-      str_detect(x, "frontoparietalControlB") ~ "FPN B",
-      str_detect(x, "frontoparietalControlC") ~ "FPN C",
-      str_detect(x, "defaultA") ~ "DMN A",
-      str_detect(x, "defaultB") ~ "DMN B",
-      str_detect(x, "defaultC") ~ "DMN C",
-      str_detect(x, "temporoparietal") ~ "TempParietal",
-      TRUE ~ x
-    )
-  }
-  
-  df <- bind_rows(lapply(datasets, function(d) {
-    path <- sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/%s/gradient_dispersion/resi/%s_resi_sex_dispersion_within_network.csv", d, d)
-    read.csv(path) %>% mutate(dataset = d)
-  })) %>%
-    mutate(net_label = net_label_map(gsub("^wn_", "", outcome)),
-           significant = p_fdr < 0.05) %>%
-    group_by(net_label) %>%
-    summarise(n_sig = sum(significant, na.rm = TRUE), .groups = "drop") %>%
-    arrange(desc(n_sig), net_label) %>%
-    mutate(net_label = factor(net_label, levels = net_label))
-  
-  ggplot(df, aes(x = n_sig, y = net_label)) +
-    geom_segment(aes(x = 0, xend = n_sig-0.05, yend = net_label),
-                 color = "#ad2a72", linewidth = 1.2) +
-    geom_point(shape = 21, size = 5, stroke = 1.2, fill = "#ad2a72", color = "#ad2a72", alpha = 0.8) +
-    scale_x_continuous(breaks = 0:4, limits = c(0, 4.2)) +
-    labs(title = "Overlap of Significant Effects Across Datasets",
-         x = "Number of Datasets", y = NULL) +
-    theme_classic(base_size = 20) +
-    theme(plot.title = element_text(hjust = 0.5, size = 20),
-          axis.text.x = element_text(size = 20, color = "black"),
-          axis.text.y = element_text(size = 20, color = "black"))
-}
-
- 
-##################
 # Between-network dispersion
-##################
-plot_between_dispersion <- function(dataset, title, fontsize = 12, fontsize_label = 4) {
-  resi_outputs_dir <- sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/%s/gradient_dispersion/resi", dataset)
+plot_between_dispersion <- function(dataset, title, fontsize = 7, fontsize_label = 2.4) {
+  resi_outputs_dir <- sprintf("%s/covariate_analyses/sex_diff/output/%s/gradient_dispersion/resi", root, dataset)
   bn_results <- read.csv(sprintf("%s/%s_resi_sex_dispersion_between_network.csv", resi_outputs_dir, dataset))
   
   net_label_map <- function(x) {
@@ -1099,24 +566,25 @@ plot_between_dispersion <- function(dataset, title, fontsize = 12, fontsize_labe
   
   ggplot(bn_plot_df, aes(x = x, y = y, fill = RESI_Xinyu)) +
     geom_tile() +
-    geom_text(aes(label = sig_label), colour = "black", size = fontsize_label) +
+    geom_text(aes(label = sig_label), colour = "black", size = fontsize_label, nudge_y = -0.2) +
     scale_x_discrete(limits = net_levels, drop = FALSE) +
     scale_y_discrete(limits = net_levels, drop = FALSE) +
-    coord_fixed() +
+    coord_fixed(ratio = 0.7) +
     scale_fill_gradientn(colours = red_teal_white(256), values = scales::rescale(c(-0.22, 0, 0.2)),
                          limits = c(-0.2, 0.2), oob = squish, na.value = "white") +
     labs(title = title, x = NULL, y = NULL) +
     theme_classic(base_size = fontsize) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, size = fontsize),
           axis.text.y = element_text(size = fontsize),
-          plot.title = element_text(hjust = 0.5, size = 20),
+          plot.title = element_text(hjust = 0.5, size = 10, face = "bold"),
           legend.position = "none",
           panel.grid = element_blank(),
-          plot.margin = margin(0.1, -0.1, 0.5, -0.1, "cm"))
+          plot.margin = margin(0.1, -0.1, 0, -0.1, "cm"))
 }
 
 
-plot_between_overlap <- function(fontsize = 12) {
+# plot between network dispersion overlap
+plot_between_overlap <- function(fontsize = 7) {
   datasets <- c("PNC", "HCPD", "NKI", "HBN")
   
   net_label_map <- function(x) {
@@ -1147,7 +615,7 @@ plot_between_overlap <- function(fontsize = 12) {
                   "SM A","SM B Aud","VisCent","VisPeriph")
   
   df <- bind_rows(lapply(datasets, function(d) {
-    path <- sprintf("/cbica/projects/network_replication/covariate_analyses/sex_diff/output/%s/gradient_dispersion/resi/%s_resi_sex_dispersion_between_network.csv", d, d)
+    path <- sprintf("%s/covariate_analyses/sex_diff/output/%s/gradient_dispersion/resi/%s_resi_sex_dispersion_between_network.csv", root, d, d)
     read.csv(path) %>% mutate(dataset = d)
   })) %>%
     mutate(pair = gsub("^bn_", "", outcome)) %>%
@@ -1176,13 +644,13 @@ plot_between_overlap <- function(fontsize = 12) {
     scale_fill_manual(values = count_colors, na.value = "white") +
     scale_x_discrete(limits = net_levels, drop = FALSE) +
     scale_y_discrete(limits = net_levels, drop = FALSE) +
-    coord_fixed() +
-    labs(title = "Overlap of Significant Effects Across Datasets", x = NULL, y = NULL) +
+    coord_fixed(ratio = 0.7) +
+    labs(title = "Overlap of Significant Effects", x = NULL, y = NULL) +
     theme_classic(base_size = fontsize) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, size = fontsize),
           axis.text.y = element_text(size = fontsize),
-          plot.title = element_text(hjust = 0.5, size = 20),
+          plot.title = element_text(hjust = 0.5, size = 10, face = "bold"),
           legend.position = "none",
           panel.grid = element_blank(),
-          plot.margin = margin(0.1, -0.1, 0.5, -0.1, "cm"))
+          plot.margin = margin(0.1, -0.1, 0, -0.1, "cm"))
 }
