@@ -4,7 +4,7 @@ library(ggplot2)
 library(rjson)
 library(stringr)
 library(tidyr)
-source("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/results/sex_diff_draft_figures.R")
+source("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/results/main_figures.R")
 
 # a script to run spin test how much of the variance in 
 # edgewise sex effects is captured by that smooth hierarchical organization -- 

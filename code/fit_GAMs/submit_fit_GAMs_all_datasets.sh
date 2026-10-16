@@ -25,7 +25,7 @@ for metric in "${metrics[@]}"; do
             time_limit="02:00:00"
         else
             cpus=4
-            time_limit="00:30:00"   
+            time_limit="01:00:00"   
         fi
         
         if sbatch \

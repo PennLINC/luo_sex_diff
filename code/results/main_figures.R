@@ -122,6 +122,8 @@ plot_cortex <- function(df, hemi, measure, ylim1, ylim2, atlas, horizontal_layou
   
 }
 
+
+
 # plot cortex overlap in datasets that are significant
 plot_cortex_overlap <- function(df, hemi, atlas, horizontal_layout = NULL) {
   
@@ -302,7 +304,7 @@ make_networkpair17_plot <- function(df, dataset, ylim1, ylim2, fontsize, fontsiz
 }
 
 # make network pair overlap plot
-plot_networkpair_overlap <- function(df, num_networks = 17, fontsize = 7, fontsize_label = 2.4) {
+plot_networkpair_overlap <- function(df, num_networks = 17, fontsize = 7, fontsize_label = 2.6) {
   
   # use your lab_map and net_levels logic from make_networkpair17_plot()
   lab_map <- c(
@@ -429,10 +431,10 @@ make_surface_plot <- function(double_SA.diff, dataset, measure, ylim1, ylim2, p_
             strip.background = element_blank(), 
             strip.text = element_blank(),
             plot.margin = margin(0, 0.2, -0.1, 0.15, "cm"), 
-            axis.text.y = element_text(size = 10, color = "black"), 
-            axis.text.x = element_text(size = 10, color = "black"),
-            plot.title = element_text(size = 10, hjust = 0.5, face = "bold", margin = margin(b = -0.05)),
-        plot.subtitle = element_text(size = 10, hjust = 0.5, margin = margin(t = -0.05, b = -1)),
+            axis.text.y = element_text(size = 9, color = "black"), 
+            axis.text.x = element_text(size = 9, color = "black"),
+            plot.title = element_text(size = 9, hjust = 0.5, face = "bold", margin = margin(b = -0.05)),
+        plot.subtitle = element_text(size = 9, hjust = 0.5, margin = margin(t = -0.05, b = -1)),
         axis.title.x = element_blank(),
         axis.title.y = element_blank(),
         axis.line = element_line(color = "black", linewidth = 0.25))
@@ -442,15 +444,15 @@ make_surface_plot <- function(double_SA.diff, dataset, measure, ylim1, ylim2, p_
             legend.key.height = unit(0.5,"cm"), 
             legend.key.width = unit(1.5, "cm"), 
             legend.title = element_blank(),
-            legend.text = element_text(size = 10),
+            legend.text = element_text(size = 9),
             strip.background = element_blank(),
             strip.text = element_blank(),
             plot.margin = margin(0, 0, 1, 0.5, "cm"),
-            axis.title = element_text(size = 10),
-            axis.text.y = element_text(size = 10, color = "black"),
-            axis.text.x = element_text(size = 10, color = "black"),
-            plot.title = element_text(size = 10, hjust = 0.5),
-            plot.subtitle = element_text(size = 10, hjust = 0.5),
+            axis.title = element_text(size = 9),
+            axis.text.y = element_text(size = 9, color = "black"),
+            axis.text.x = element_text(size = 9, color = "black"),
+            plot.title = element_text(size = 9, hjust = 0.5),
+            plot.subtitle = element_text(size = 9, hjust = 0.5),
             axis.line = element_line(color = "black"))
     }
   return(surface.plot.fig)
@@ -522,7 +524,7 @@ identify_sexeffect_overlap <- function(metric = c("WNC", "BNC"), p_thresh = 0.05
  
 
 # Between-network dispersion
-plot_between_dispersion <- function(dataset, title, fontsize = 7, fontsize_label = 2.4) {
+plot_between_dispersion <- function(dataset, title, fontsize = 7, fontsize_label = 2.6) {
   resi_outputs_dir <- sprintf("%s/covariate_analyses/sex_diff/output/%s/gradient_dispersion/resi", root, dataset)
   bn_results <- read.csv(sprintf("%s/%s_resi_sex_dispersion_between_network.csv", resi_outputs_dir, dataset))
   

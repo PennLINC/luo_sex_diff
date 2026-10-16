@@ -347,7 +347,7 @@ gam.smooth.predict.covariateinteraction <- function(gam.data, region, smooth_var
   return(predicted.smooth)
 }
 
-# for sex - start here
+# for sex  
 ## Function to predict fitted values of a measure for a given value of a covariate, using a varying coefficients smooth-by-factor covariate interaction
 gam.smooth.predict.covariateinteraction.factor <- function(gam.data, region, smooth_var, int_var, int_var.predict, covariates, knots, set_fx = FALSE, increments, age1, age2){
   # Ensure int_var is a factor if not already
