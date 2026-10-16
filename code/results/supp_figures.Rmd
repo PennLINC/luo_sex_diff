@@ -51,8 +51,7 @@ source(file.path(proj_root, "code", "results", "supp_figures.R"))
 ```
  
  
-Fig. S1. Sex effects on region-level connectivity are spatially correlated across datasets. Pearson correlations between regional sex-effect maps (RESI) for each pair of datasets are shown for (A) functional connectivity strength, (B) between-network connectivity, and (C) within-network connectivity. All correlations were significant as assessed by spin-based spatial permutation tests (10,000 rotations; all pspin < 0.001).
-
+# Fig. S1. Sex effects on region-level connectivity are spatially correlated across datasets.
 ```{r load files}
 # load parcel labels
 schaefer200x17.labels <- read.csv(file.path(root, "atlases", "parcellations", "schaefer200x17_regionlist_final.csv"))
@@ -224,9 +223,7 @@ ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_dif
 
 ```
     
-Fig. S2. Age-by-sex interactions in within-network connectivity. Developmental trajectories of within-network connectivity for females (red) and males (blue) are shown for the 17 regions with a significant age-by-sex interaction in the pooled dataset (QFDR < 0.05). Interactions were tested with generalized additive models fit to harmonized data that included a smooth term for age, an age-by-sex factor-smooth interaction, and sex and in-scanner motion as covariates. Lines show model-predicted values from ages 5 to 23, with in-scanner motion held at its median. Regions are grouped by network, ordered from the association to the sensorimotor end of the hierarchy. No region showed a significant age-by-sex interaction for FC strength or between-network connectivity. LH, left hemisphere; RH, right hemisphere; IPL, inferior parietal lobule; PFCm, medial prefrontal cortex; pCunPCC, precuneus/posterior cingulate cortex; AntTemp, anterior temporal cortex; PostC, postcentral cortex; Ins, insula; TempPole, temporal pole; OFC, orbitofrontal cortex.
-
-  
+# Fig. S2. Age-by-sex interactions in within-network connectivity.
 ```{r supp age by sex int helpers}
 # panel order: association -> sensorimotor, using the same network keys
 network_order <- c("defaultA", "defaultB", "defaultC",
@@ -299,7 +296,7 @@ ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_dif
 ```
 
 
-Fig. S3. Age-by-sex interactions in network-pair connectivity. Developmental trajectories of network-pair connectivity for females (red) and males (blue) are shown for the 6 of 153 network pairs with a significant age-by-sex interaction in the pooled dataset (QFDR < 0.05). Models and predicted values are as in fig. S3. Greater connectivity within default mode subnetwork A in females, the most consistent network-level sex difference across datasets (Fig. 5), emerged during adolescence.
+# Fig. S3. Age-by-sex interactions in network-pair connectivity. 
 
 ```{r network-pair age-by-sex trajectories, fig.height = 4, fig.width = 5}
 traj_netpair <- read.csv(sprintf("%1$s/all_datasets/GAM/networkpair/all_datasets_GAM_agebysex_fitted_schaefer200x17.csv", output_root)) %>%
@@ -321,8 +318,7 @@ netpair_traj_final
 ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/supplement/figS3_netpair_agebysex.tiff", plot = netpair_traj_final, width = 127, height = 92, units = "mm", dpi = 500, bg = "white")
 ```
 
-Fig. S4. The principal gradient of functional connectivity in females and males. Mean regional loadings on the first principal component (PC1) of functional connectivity are shown separately for females and males in the PNC, NKI, HCP-D, HBN, and the pooled dataset. In all datasets and in both sexes, the principal gradient spans from sensorimotor and visual cortices (negative loadings) to association cortices, including the default mode network (positive loadings).
- 
+# Fig. S4. The principal gradient of functional connectivity in females and males. 
 ```{r PC1 mean in males and females, fig.width = 7.2, fig.height = 6.7}
 
 datasets <- c("PNC", "NKI", "HCPD", "HBN", "all_datasets")
@@ -385,8 +381,7 @@ pc1_brain_figure
 ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/supplement/figS4_pc1_by_sex.tiff", plot = pc1_brain_figure, width = 184, height = 170, units = "mm", dpi = 500, bg = "white")
 ```
  
-Fig. S5. Global dispersion along the principal gradient is greater in females. Global dispersion, the overall spread of regions along the principal functional connectivity gradient, is shown for females and males in the PNC, NKI, HCP-D, HBN, and the pooled dataset. Values are residualized for [[age and in-scanner motion]]. Sex effects (RESI) and p values from generalized additive models are shown above each panel. Global dispersion is greater in females in all datasets except HBN. Boxes indicate the median and interquartile range; points represent individual participants.
- 
+# Fig. S5. Global dispersion along the principal gradient is greater in females.  
 ```{r supp fig global dispersion, fig.width = 7.25, fig.height = 4.7}
 global_PNC    <- plot_global_dispersion("PNC", "PNC")
 global_NKI    <- plot_global_dispersion("NKI", "NKI")

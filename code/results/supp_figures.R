@@ -68,6 +68,46 @@ panel_header <- function(letter, title) {
 ################
 # Supp Fig. 2 and 3
 ################
+# Schaefer region label -> network key (your mapping)
+region_to_network <- function(x) {
+  dplyr::case_when(
+    stringr::str_detect(x, "VisCent")          ~ "visualCentral",
+    stringr::str_detect(x, "VisPeri")          ~ "visualPeripheral",
+    stringr::str_detect(x, "SomMotA")          ~ "somatomotorA",
+    stringr::str_detect(x, "SomMotB")          ~ "somatomotorBAuditory",
+    stringr::str_detect(x, "DorsAttnA")        ~ "dorsalAttentionA",
+    stringr::str_detect(x, "DorsAttnB")        ~ "dorsalAttentionB",
+    stringr::str_detect(x, "SalVentAttnA")     ~ "salienceVentralAttentionA",
+    stringr::str_detect(x, "SalVentAttnB")     ~ "salienceVentralAttentionB",
+    stringr::str_detect(x, "LimbicA_TempPole") ~ "limbicTemporopolar",
+    stringr::str_detect(x, "LimbicB_OFC")      ~ "limbicOrbitofrontal",
+    stringr::str_detect(x, "ContA")            ~ "frontoparietalControlA",
+    stringr::str_detect(x, "ContB")            ~ "frontoparietalControlB",
+    stringr::str_detect(x, "ContC")            ~ "frontoparietalControlC",
+    stringr::str_detect(x, "DefaultA")         ~ "defaultA",
+    stringr::str_detect(x, "DefaultB")         ~ "defaultB",
+    stringr::str_detect(x, "DefaultC")         ~ "defaultC",
+    stringr::str_detect(x, "TempPar")          ~ "temporoparietal",
+    TRUE                                       ~ x
+  )
+}
+
+# "17Networks_LH_DefaultA_pCunPCC_1" -> "LH default mode A\npCunPCC 1"
+pretty_region <- function(region) {
+  parts <- strsplit(sub("^17Networks_", "", region), "_")[[1]]
+  hemi <- parts[1]
+  net_label <- unname(pretty_network[region_to_network(region)])
+  sub_region <- paste(parts[-(1:2)], collapse = " ")
+  paste0(hemi, " ", net_label, "\n", sub_region)
+}
+
+# panel order: association -> sensorimotor, using the same network keys
+network_order <- c("defaultA", "defaultB", "defaultC",
+                   "frontoparietalControlA", "frontoparietalControlB", "frontoparietalControlC",
+                   "dorsalAttentionA", "dorsalAttentionB",
+                   "salienceVentralAttentionA", "salienceVentralAttentionB",
+                   "limbicOrbitofrontal", "limbicTemporopolar", "temporoparietal",
+                   "somatomotorA", "somatomotorBAuditory", "visualCentral", "visualPeripheral")
 pretty_network <- c(
   defaultA = "Default Mode A", defaultB = "Default Mode B", defaultC = "Default Mode C",
   frontoparietalControlA = "Control A", frontoparietalControlB = "Control B", frontoparietalControlC = "Control C",
