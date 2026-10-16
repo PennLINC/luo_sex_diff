@@ -18,7 +18,7 @@ print(paste("Computing", metric, atlas))
 ################## 
 # Set Directories 
 ################## 
-config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", dataset))
+config_data <- fromJSON(file=sprintf("~/parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", dataset))
 outputs_root <- config_data$covariate_output_root
 metric_output_dir <- paste0(outputs_root, "/", metric)
 
@@ -115,7 +115,7 @@ computeFC_strength <- function(subject, atlas, dataset){
   
   #read in connectivity matrix
   if(dataset == "PNC" | dataset == "HCPD" | dataset == "HBN") {
-    connect.matrix <- readRDS(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/manuscript/input/%1$s/connMatricesData/connectivity_matrices/%2$s_ConnMatrices.RData", dataset, subject))
+    connect.matrix <- readRDS(sprintf("~/parcc/network_replication/manuscript/input/%1$s/connMatricesData/connectivity_matrices/%2$s_ConnMatrices.RData", dataset, subject))
     if(str_detect(atlas, "schaefer200") | str_detect(atlas, "schaefer400")) {
       atlas_name <- paste0(str_extract(atlas, "schaefer[0-9]"), "17")
     } else {
@@ -123,7 +123,7 @@ computeFC_strength <- function(subject, atlas, dataset){
     } 
     connect.matrix <- connect.matrix[[paste0(atlas_name, "_conn")]]
   } else if(dataset == "NKI") {  
-    connect.matrix <- readRDS(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/manuscript/input/NKI/connMatricesData/connectivity_matrices/%1$s_ConnMatrices.RData", subject))
+    connect.matrix <- readRDS(sprintf("~/parcc/network_replication/manuscript/input/NKI/connMatricesData/connectivity_matrices/%1$s_ConnMatrices.RData", subject))
     ses_name <- str_extract(names(connect.matrix), "[A-Z]{3}1")[1]
     if(str_detect(atlas, "schaefer200") | str_detect(atlas, "schaefer400")) {
       atlas_name <- paste0(str_extract(atlas, "schaefer[0-9]"), "17")
@@ -157,7 +157,7 @@ computeBNC_WNC <- function(subject, atlas, metric, dataset) {
   # read in connectivity matrix
   #read in connectivity matrix 
   if (dataset == "PNC" | dataset == "HCPD" | dataset == "HBN") { 
-    connect.matrix <- readRDS(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/manuscript/input/%1$s/connMatricesData/connectivity_matrices/%2$s_ConnMatrices.RData",dataset, subject)) 
+    connect.matrix <- readRDS(sprintf("~/parcc/network_replication/manuscript/input/%1$s/connMatricesData/connectivity_matrices/%2$s_ConnMatrices.RData",dataset, subject)) 
     if (str_detect(atlas, "schaefer200") | str_detect(atlas, "schaefer400")) {
       atlas_name <- paste0(str_extract(atlas, "schaefer[0-9]"), "17") 
     } else { 
@@ -165,7 +165,7 @@ computeBNC_WNC <- function(subject, atlas, metric, dataset) {
     } 
     connect.matrix <- connect.matrix[[paste0(atlas_name, "_conn")]] 
   } else if(dataset == "NKI") { 
-      connect.matrix <- readRDS(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/manuscript/input/NKI/connMatricesData/connectivity_matrices/%1$s_ConnMatrices.RData", subject)) 
+      connect.matrix <- readRDS(sprintf("~/parcc/network_replication/manuscript/input/NKI/connMatricesData/connectivity_matrices/%1$s_ConnMatrices.RData", subject)) 
       ses_name <- str_extract(names(connect.matrix), "[A-Z]{3}1")[1] 
       if(str_detect(atlas, "schaefer200") | str_detect(atlas, "schaefer400")) { 
         atlas_name <- paste0(str_extract(atlas, "schaefer[0-9]"), "17") 
@@ -233,7 +233,7 @@ extractParcel2ParcelConn <- function(subject, atlas, dataset){
   
   #read in connectivity matrix  
   if(dataset == "PNC" | dataset=="HCPD" | dataset=="HBN") {
-    connect.matrix <- readRDS(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/manuscript/input/%1$s/connMatricesData/connectivity_matrices/%2$s_ConnMatrices.RData", dataset, subject))
+    connect.matrix <- readRDS(sprintf("~/parcc/network_replication/manuscript/input/%1$s/connMatricesData/connectivity_matrices/%2$s_ConnMatrices.RData", dataset, subject))
     if(str_detect(atlas, "schaefer200") | str_detect(atlas, "schaefer400")) {
       atlas_name <- paste0(str_extract(atlas, "schaefer[0-9]"), "17")
     } else {
@@ -241,7 +241,7 @@ extractParcel2ParcelConn <- function(subject, atlas, dataset){
     } 
     connect.matrix <- connect.matrix[[paste0(atlas_name, "_conn")]]
   } else if(dataset == "NKI") { #check if BAS1 exists for subject
-    connect.matrix <- readRDS(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/manuscript/input/NKI/connMatricesData/connectivity_matrices/%1$s_ConnMatrices.RData", subject))
+    connect.matrix <- readRDS(sprintf("~/parcc/network_replication/manuscript/input/NKI/connMatricesData/connectivity_matrices/%1$s_ConnMatrices.RData", subject))
     ses_name <- str_extract(names(connect.matrix), "[A-Z]{3}1")[1]
     if(str_detect(atlas, "schaefer")) {
       atlas_name <- str_extract(atlas, "schaefer[0-9]")
@@ -254,17 +254,17 @@ extractParcel2ParcelConn <- function(subject, atlas, dataset){
   }  
     
   if (atlas == "glasser"){
-    edge <- read.csv("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/edge/glasser_edge.csv")
+    edge <- read.csv("~/parcc/network_replication/atlases/edge/glasser_edge.csv")
   } else if (atlas == "gordon"){
-    edge <- read.csv("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/edge/gordon_edge.csv")
+    edge <- read.csv("~/parcc/network_replication/atlases/edge/gordon_edge.csv")
   }  else if(atlas == "schaefer200x7"){
-    edge <- read.csv("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/edge/schaefer200x7_edge.csv")
+    edge <- read.csv("~/parcc/network_replication/atlases/edge/schaefer200x7_edge.csv")
   } else if(atlas == "schaefer400x7"){
-    edge <- read.csv("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/edge/schaefer400x7_edge.csv")
+    edge <- read.csv("~/parcc/network_replication/atlases/edge/schaefer400x7_edge.csv")
   } else if(atlas == "schaefer200x17"){
-    edge <- read.csv("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/edge/schaefer200x17_edge.csv")
+    edge <- read.csv("~/parcc/network_replication/atlases/edge/schaefer200x17_edge.csv")
   } else if(atlas == "schaefer400x17"){
-    edge <- read.csv("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/edge/schaefer400x17_edge.csv")
+    edge <- read.csv("~/parcc/network_replication/atlases/edge/schaefer400x17_edge.csv")
   } else {
     print("Please provide valid atlas (glasser, gordon, schaefer200, or schaefer400")
   } 
@@ -371,7 +371,7 @@ wrapper_compute_mean_networkpair <- function(subject, atlas) {
   
   # read in connectivity matrix (unchanged from your code)
   if (dataset == "PNC" | dataset == "HCPD" | dataset == "HBN") {
-    connect.matrix <- readRDS(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/manuscript/input/%1$s/connMatricesData/connectivity_matrices/%2$s_ConnMatrices.RData", dataset, subject))
+    connect.matrix <- readRDS(sprintf("~/parcc/network_replication/manuscript/input/%1$s/connMatricesData/connectivity_matrices/%2$s_ConnMatrices.RData", dataset, subject))
     
     if (str_detect(atlas, "schaefer200") | str_detect(atlas, "schaefer400")) {
       atlas_name <- paste0(stringr::str_extract(atlas, "schaefer[0-9]"), "17")
@@ -381,7 +381,7 @@ wrapper_compute_mean_networkpair <- function(subject, atlas) {
     connect.matrix <- connect.matrix[[paste0(atlas_name, "_conn")]]
     
   } else if (dataset == "NKI") {
-    connect.matrix <- readRDS(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/manuscript/input/NKI/connMatricesData/connectivity_matrices/%1$s_ConnMatrices.RData", subject))
+    connect.matrix <- readRDS(sprintf("~/parcc/network_replication/manuscript/input/NKI/connMatricesData/connectivity_matrices/%1$s_ConnMatrices.RData", subject))
     ses_name <- stringr::str_extract(names(connect.matrix), "[A-Z]{3}1")[1]
     if (str_detect(atlas, "schaefer200") | str_detect(atlas, "schaefer400")) {
       atlas_name <- paste0(stringr::str_extract(atlas, "schaefer[0-9]"), "17")
@@ -415,12 +415,12 @@ wrapper_compute_mean_networkpair <- function(subject, atlas) {
 # Read files 
 ################## 
 # load atlases (for extractParcel2ParcelConn)
-glasser.parcel.labels <- read.csv("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/glasser360_regionlist_final.csv")
-gordon.parcel.labels <- read.csv("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/gordon_regionlist_final.csv")
-schaefer200x7.parcel.labels <- read.csv("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/schaefer200x7_regionlist_final.csv")
-schaefer200x17.parcel.labels <- read.csv("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/schaefer200x17_regionlist_final.csv") # the atlas used in this project
-schaefer400x7.parcel.labels <- read.csv("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/schaefer400x7_regionlist_final.csv")
-schaefer400x17.parcel.labels <- read.csv("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/schaefer400x17_regionlist_final.csv")
+glasser.parcel.labels <- read.csv("~/parcc/network_replication/atlases/parcellations/glasser360_regionlist_final.csv")
+gordon.parcel.labels <- read.csv("~/parcc/network_replication/atlases/parcellations/gordon_regionlist_final.csv")
+schaefer200x7.parcel.labels <- read.csv("~/parcc/network_replication/atlases/parcellations/schaefer200x7_regionlist_final.csv")
+schaefer200x17.parcel.labels <- read.csv("~/parcc/network_replication/atlases/parcellations/schaefer200x17_regionlist_final.csv") # the atlas used in this project
+schaefer400x7.parcel.labels <- read.csv("~/parcc/network_replication/atlases/parcellations/schaefer400x7_regionlist_final.csv")
+schaefer400x17.parcel.labels <- read.csv("~/parcc/network_replication/atlases/parcellations/schaefer400x17_regionlist_final.csv")
 
 # load participant list
 participants <- read.table(config_data$subject_list)[[1]]
@@ -481,7 +481,7 @@ if (metric == "FC_strength"){
   subxedge <- as.data.frame(t(columns_extractEdge)) # transpose dataframe
   
   # load edge labels
-  edge <- read.csv(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/edge/%1$s_edge.csv", atlas))
+  edge <- read.csv(sprintf("~/parcc/network_replication/atlases/edge/%1$s_edge.csv", atlas))
   edge <- edge[,1]
   names(subxedge) <- edge # columns = names of edges
   

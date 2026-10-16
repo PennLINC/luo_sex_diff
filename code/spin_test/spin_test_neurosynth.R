@@ -10,8 +10,8 @@ library(tidyr)
 ##################
 
 # Set project root depending on whether code is running on PARCC or locally
-if (dir.exists("/ceph/projects/sattertt/pennlinc-parcc/network_replication")) {
-  root <- "/ceph/projects/sattertt/pennlinc-parcc/network_replication"
+if (dir.exists("~/parcc/network_replication")) {
+  root <- "~/parcc/network_replication"
 } else if (dir.exists("~/parcc/network_replication")) {
   root <- path.expand("~/parcc/network_replication")
 } else {

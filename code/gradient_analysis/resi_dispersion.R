@@ -3,7 +3,7 @@ library(tidyr)
 library(mgcv)
 library(RESI)
 library(parallel)
-source("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/compute_effect_size/resiPEse_Th1_functions.R")
+source("~/parcc/network_replication/covariate_analyses/sex_diff/code/compute_effect_size/resiPEse_Th1_functions.R")
 
 ##################
 # This script computes RESI effect size for global, within- and between-network dispersion
@@ -21,7 +21,7 @@ source("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_ana
 args <- commandArgs(trailingOnly = TRUE)
 dataset <- args[1]        # PNC, NKI, HCPD, HBN, all_datasets
 
-outputs_root <- sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/output/%s/gradient_dispersion", dataset)
+outputs_root <- sprintf("~/parcc/network_replication/covariate_analyses/sex_diff/output/%s/gradient_dispersion", dataset)
 resi_outputs_dir <- paste0(outputs_root, "/resi")
 if (!dir.exists(resi_outputs_dir)) dir.create(resi_outputs_dir, recursive = TRUE)
 

@@ -18,7 +18,7 @@ print(paste("Processing", dataset, metric))
 ################## 
 # Set Directories 
 ################## 
-config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", dataset))
+config_data <- fromJSON(file=sprintf("~/parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", dataset))
 outputs_root <- config_data$covariate_output_root
 metric_outputs_dir <- paste0(outputs_root, "/", metric)
 

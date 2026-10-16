@@ -31,7 +31,7 @@ from nilearn.datasets import fetch_atlas_schaefer_2018
 ##########################
 
 root = Path(
-    "/ceph/projects/sattertt/pennlinc-parcc/network_replication/"
+    "~/parcc/network_replication/"
     "covariate_analyses/sex_diff/input"
 )
 

@@ -5,7 +5,7 @@ library(parallel)
 library(rjson)
 library(stringr)
 library(tidyr)
-source("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/fit_GAMs/gam_functions/GAM_functions_covariates.R")
+source("~/parcc/network_replication/covariate_analyses/sex_diff/code/fit_GAMs/gam_functions/GAM_functions_covariates.R")
 
 # This script fits developmental regionwise GAMs on functional connectivity data using functions from GAM_functions_covariates.R for each dataset.
 # fyi: GAMs are fit for 1 specified metric (i.e. FC_strength)
@@ -32,7 +32,7 @@ print(paste("metric:", metric))
 ################## 
 # Set directories  
 ################## 
-config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", dataset))
+config_data <- fromJSON(file=sprintf("~/parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", dataset))
 outputs_root <- config_data$covariate_output_root
 GAM_outputs_dir <- paste0(outputs_root, "/GAM/", metric)
 metric_outputs_dir <- paste0(outputs_root, "/", metric)
@@ -113,18 +113,18 @@ run_gam.smooth.predict.sexinteraction <- function(gam_df, smooth_var, int_var, c
 # load atlas labels for the relevant metric
 if (metric %in% c("FC_strength", "BNC", "WNC")) {
   # load parcel labels
-  parcel.labels <- read.csv(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/%1$s_regionlist_final.csv", atlas))
+  parcel.labels <- read.csv(sprintf("~/parcc/network_replication/atlases/parcellations/%1$s_regionlist_final.csv", atlas))
   parcel.labels <- parcel.labels$label
   
 } else if (metric == "edge") {
   # load edge labels 
-  parcel.labels <- read.csv(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/edge/%1$s_edge.csv", atlas))
+  parcel.labels <- read.csv(sprintf("~/parcc/network_replication/atlases/edge/%1$s_edge.csv", atlas))
   parcel.labels <- parcel.labels[,1] 
   parcel.labels <- gsub("[0-9]+Networks", "Networks", parcel.labels)
   
 } else { # network pairs
   # load network-pair labels
-  parcel.labels <- read.csv(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/%1$s_netpair_labels_noduplicates.csv", atlas))
+  parcel.labels <- read.csv(sprintf("~/parcc/network_replication/atlases/parcellations/%1$s_netpair_labels_noduplicates.csv", atlas))
   parcel.labels <- parcel.labels[,1]
 }
 

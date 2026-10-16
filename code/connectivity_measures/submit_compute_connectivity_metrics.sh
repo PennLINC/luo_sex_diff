@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ROOT="/ceph/projects/sattertt/pennlinc-parcc/network_replication"
+ROOT="~/parcc/network_replication"
 PROJDIR="$ROOT/covariate_analyses/sex_diff"
 APPTAINER="/vast/parcc/spack/sw/apps/linux-sapphirerapids/apptainer-1.4.1-qpr4lterya7ontg7pkqrx7b3jkab3lcw/bin/apptainer"
 SIF="$PROJDIR/software/r_packages/r-packages-for-parcc_0.0.1.sif"

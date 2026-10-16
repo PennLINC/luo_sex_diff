@@ -18,7 +18,7 @@ import statsmodels.formula.api as smf
 DATASET = sys.argv[1]
 N_PARCELS = 200
 
-ROOT = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff"
+ROOT = "~/parcc/network_replication/covariate_analyses/sex_diff"
 CACHE_DIR = f"{ROOT}/cache"
 OUTPUT_DIR = f"{ROOT}/output/{DATASET}/gradient_dispersion"
 
@@ -39,7 +39,7 @@ PC1_LONG_OUT = f"{OUTPUT_DIR}/pc1_loadings_long_{DATASET}.csv"
 PC1_SUBJECT_SUMMARY_OUT = f"{OUTPUT_DIR}/pc1_subject_summary_{DATASET}.csv"
 PC1_SEX_BRAIN_OUT = f"{OUTPUT_DIR}/pc1_parcel_by_sex_{DATASET}.csv"
 
-SA_PARCEL_LABELS = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/schaefer200x17_regionlist_final.csv"
+SA_PARCEL_LABELS = "~/parcc/network_replication/atlases/parcellations/schaefer200x17_regionlist_final.csv"
 
 NET_MAP_17 = [
     ("VisCent", "visualCentral"), ("VisPeri", "visualPeripheral"),

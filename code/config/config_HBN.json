@@ -1,14 +1,14 @@
 {
 	"dataset": "HBN",
-	"demographics": "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/input/HBN/sample_info/HBN_demographics_finalsample.csv",
-	"subject_list": "/ceph/projects/sattertt/pennlinc-parcc/network_replication/input/HBN/sample_selection/HBN_final_subjectlist.txt",
-	"covariate_input_root": "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/input/HBN",
-	"covariate_output_root": "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/output/HBN",
-	"GBC_dir": "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/output/HBN/GBC/",
-	"BNC_dir": "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/output/HBN/BNC/",
-	"WNC_dir": "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/output/HBN/WNC/",
-	"edge_dir": "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/output/HBN/edge/",
-	"networkpair_dir": "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/output/HBN/networkpair/",
-	"conn_matrices_dir": "/ceph/projects/sattertt/pennlinc-parcc/network_replication/manuscript/input/HBN/connMatricesData/connectivity_matrices"
+	"demographics": "~/parcc/network_replication/covariate_analyses/sex_diff/input/HBN/sample_info/HBN_demographics_finalsample.csv",
+	"subject_list": "~/parcc/network_replication/input/HBN/sample_selection/HBN_final_subjectlist.txt",
+	"covariate_input_root": "~/parcc/network_replication/covariate_analyses/sex_diff/input/HBN",
+	"covariate_output_root": "~/parcc/network_replication/covariate_analyses/sex_diff/output/HBN",
+	"GBC_dir": "~/parcc/network_replication/covariate_analyses/sex_diff/output/HBN/GBC/",
+	"BNC_dir": "~/parcc/network_replication/covariate_analyses/sex_diff/output/HBN/BNC/",
+	"WNC_dir": "~/parcc/network_replication/covariate_analyses/sex_diff/output/HBN/WNC/",
+	"edge_dir": "~/parcc/network_replication/covariate_analyses/sex_diff/output/HBN/edge/",
+	"networkpair_dir": "~/parcc/network_replication/covariate_analyses/sex_diff/output/HBN/networkpair/",
+	"conn_matrices_dir": "~/parcc/network_replication/manuscript/input/HBN/connMatricesData/connectivity_matrices"
 
 }

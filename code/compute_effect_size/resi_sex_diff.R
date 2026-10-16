@@ -6,7 +6,7 @@ library(rjson)
 library(RESI)
 library(stringr)
 library(tidyr)
-source("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/compute_effect_size/resiPEse_Th1_functions.R")
+source("~/parcc/network_replication/covariate_analyses/sex_diff/code/compute_effect_size/resiPEse_Th1_functions.R")
 
 
 # This script fits developmental edge-, region-, and network-level GAMs on functional connectivity data 
@@ -28,14 +28,14 @@ print(paste("metric:", metric))
 # Set directories  
 ################## 
 if (dataset != "all_datasets") {
-  config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", dataset)) 
+  config_data <- fromJSON(file=sprintf("~/parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", dataset)) 
   outputs_root <- config_data$covariate_output_root
 } else if (dataset == "all_datasets") {
-  PNC_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "PNC"))
-  HCPD_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HCPD"))
-  NKI_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "NKI"))
-  HBN_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HBN"))
-  outputs_root <- "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/output/all_datasets"
+  PNC_config_data <- fromJSON(file=sprintf("~/parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "PNC"))
+  HCPD_config_data <- fromJSON(file=sprintf("~/parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HCPD"))
+  NKI_config_data <- fromJSON(file=sprintf("~/parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "NKI"))
+  HBN_config_data <- fromJSON(file=sprintf("~/parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HBN"))
+  outputs_root <- "~/parcc/network_replication/covariate_analyses/sex_diff/output/all_datasets"
   
 }
 
@@ -125,18 +125,18 @@ fit_and_t2S <- function(region) {
 # load atlas labels for the relevant metric
 if (metric %in% c("FC_strength", "BNC", "WNC")) {
   # load parcel labels
-  parcel.labels <- read.csv(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/%1$s_regionlist_final.csv", atlas))
+  parcel.labels <- read.csv(sprintf("~/parcc/network_replication/atlases/parcellations/%1$s_regionlist_final.csv", atlas))
   parcel.labels <- parcel.labels$label
   
 } else if (metric == "edge") {
   # load edge labels 
-  parcel.labels <- read.csv(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/edge/%1$s_edge.csv", atlas))
+  parcel.labels <- read.csv(sprintf("~/parcc/network_replication/atlases/edge/%1$s_edge.csv", atlas))
   parcel.labels <- parcel.labels[,1] 
   parcel.labels <- gsub("[0-9]+Networks", "Networks", parcel.labels)
   
 } else { # network pairs
   # load network-pair labels
-  parcel.labels <- read.csv(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/%1$s_netpair_labels_noduplicates.csv", atlas))
+  parcel.labels <- read.csv(sprintf("~/parcc/network_replication/atlases/parcellations/%1$s_netpair_labels_noduplicates.csv", atlas))
   parcel.labels <- parcel.labels[,1]
 }
 

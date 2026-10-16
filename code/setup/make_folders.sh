@@ -2,7 +2,7 @@
 
 # Create directory structure needed for sex-differences replication.
 
-ROOT="/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff"
+ROOT="~/parcc/network_replication/covariate_analyses/sex_diff"
 
 mkdir -p \
     "$ROOT/input/PNC/sample_info" \

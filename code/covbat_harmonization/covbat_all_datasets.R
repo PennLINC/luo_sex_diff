@@ -19,13 +19,13 @@ print(paste("Harmonizing across datasets for", metric, atlas))
 ################## 
 # Set Directories 
 ################## 
-PNC_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "PNC"))
-HCPD_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HCPD"))
-NKI_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "NKI"))
-HBN_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HBN"))
+PNC_config_data <- fromJSON(file=sprintf("~/parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "PNC"))
+HCPD_config_data <- fromJSON(file=sprintf("~/parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HCPD"))
+NKI_config_data <- fromJSON(file=sprintf("~/parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "NKI"))
+HBN_config_data <- fromJSON(file=sprintf("~/parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HBN"))
 
 
-outputs_root <- "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/output/all_datasets"
+outputs_root <- "~/parcc/network_replication/covariate_analyses/sex_diff/output/all_datasets"
 metric_outputs_dir <- paste0(outputs_root, "/", metric)
 PNC_outputs_dir <- paste0(PNC_config_data$covariate_output_root, "/", metric)
 HCPD_outputs_dir <- paste0(HCPD_config_data$covariate_output_root, "/", metric)

@@ -3,7 +3,7 @@
 # Submit CovBat for functional connectivity metrics in HBN and HCP-D,
 # the multi-site datasets.
 
-ROOT="/ceph/projects/sattertt/pennlinc-parcc/network_replication"
+ROOT="~/parcc/network_replication"
 PROJDIR="$ROOT/covariate_analyses/sex_diff"
 
 APPTAINER="/vast/parcc/spack/sw/apps/linux-sapphirerapids/apptainer-1.4.1-qpr4lterya7ontg7pkqrx7b3jkab3lcw/bin/apptainer"

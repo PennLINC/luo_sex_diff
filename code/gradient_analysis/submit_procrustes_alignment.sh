@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # run AFTER group_template.py has completed for each dataset
 
-ROOT="/ceph/projects/sattertt/pennlinc-parcc/network_replication"
+ROOT="~/parcc/network_replication"
 PROJDIR="$ROOT/covariate_analyses/sex_diff"
 
 PYTHON="$ROOT/.conda/envs/sex_diff_py311/bin/python"

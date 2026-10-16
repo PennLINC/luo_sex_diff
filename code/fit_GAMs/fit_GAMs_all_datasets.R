@@ -5,7 +5,7 @@ library(parallel)
 library(rjson)
 library(stringr)
 library(tidyr)
-source("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/fit_GAMs/gam_functions/GAM_functions_covariates.R")
+source("~/parcc/network_replication/covariate_analyses/sex_diff/code/fit_GAMs/gam_functions/GAM_functions_covariates.R")
 
 # This script fits developmental regionwise GAMs on functional connectivity data using functions from GAM_functions_covariates.R 
 # for the aggregated dataset that includes PNC, HCPD, NKI, and HBN. 
@@ -34,7 +34,7 @@ print(paste("metric:", metric))
 ################## 
 # Set directories  
 ################## 
-outputs_root <- "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/output/all_datasets/"
+outputs_root <- "~/parcc/network_replication/covariate_analyses/sex_diff/output/all_datasets/"
 GAM_outputs_dir <- paste0(outputs_root, "/GAM/", metric)
 metric_outputs_dir <- paste0(outputs_root, "/", metric)
 
@@ -45,10 +45,10 @@ if (dir.exists(GAM_outputs_dir)) {
   print(paste(GAM_outputs_dir, "created"))
 }
 
-PNC_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "PNC"))
-HCPD_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HCPD"))
-NKI_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "NKI"))
-HBN_config_data <- fromJSON(file=sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HBN"))
+PNC_config_data <- fromJSON(file=sprintf("~/parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "PNC"))
+HCPD_config_data <- fromJSON(file=sprintf("~/parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HCPD"))
+NKI_config_data <- fromJSON(file=sprintf("~/parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "NKI"))
+HBN_config_data <- fromJSON(file=sprintf("~/parcc/network_replication/covariate_analyses/sex_diff/code/config/config_%1$s.json", "HBN"))
 
 
 ################### 
@@ -120,18 +120,18 @@ run_gam.smooth.predict.sexinteraction <- function(gam_df, smooth_var, int_var, c
 # load atlas labels for the relevant metric
 if (metric %in% c("FC_strength", "BNC", "WNC")) {
   # load parcel labels
-  parcel.labels <- read.csv(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/%1$s_regionlist_final.csv", atlas))
+  parcel.labels <- read.csv(sprintf("~/parcc/network_replication/atlases/parcellations/%1$s_regionlist_final.csv", atlas))
   parcel.labels <- parcel.labels$label
   
 } else if (metric == "edge") {
   # load edge labels 
-  parcel.labels <- read.csv(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/edge/%1$s_edge.csv", atlas))
+  parcel.labels <- read.csv(sprintf("~/parcc/network_replication/atlases/edge/%1$s_edge.csv", atlas))
   parcel.labels <- parcel.labels[,1] 
   parcel.labels <- gsub("[A-Z0-9]+Networks", "Networks", parcel.labels)
   
 } else { # network pairs
   # load network-pair labels
-  parcel.labels <- read.csv(sprintf("/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/%1$s_netpair_labels_noduplicates.csv", atlas))
+  parcel.labels <- read.csv(sprintf("~/parcc/network_replication/atlases/parcellations/%1$s_netpair_labels_noduplicates.csv", atlas))
   parcel.labels <- parcel.labels[,1]
 }
 
@@ -162,7 +162,7 @@ names(data) <-  gsub("[A-Z0-9]+Networks", "Networks", names(data)) # remove lead
 # merge
 gam_df <- merge(data, demographics, by = "sub")
 gam_df <- gam_df %>% drop_na(sex) 
-write.table(gam_df$sub, paste0("/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff/input/all_datasets/sample_info/final_sex_diff_sample.txt"), col.names=F, row.names=F, quote = TRUE)
+write.table(gam_df$sub, paste0("~/parcc/network_replication/covariate_analyses/sex_diff/input/all_datasets/sample_info/final_sex_diff_sample.txt"), col.names=F, row.names=F, quote = TRUE)
 
 # check for sex diff in meanFD_avgSes (average mean_fd across concatenated sessions)
 print(t.test(gam_df$meanFD_avgSes[gam_df$sex=="Male"], gam_df$meanFD_avgSes[gam_df$sex=="Female"]))

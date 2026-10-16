@@ -23,7 +23,7 @@ CONFIG = dict(approach="pca", kernel="normalized_angle",
              n_components=10, random_state=0)
 SPARSITY = 0.0
 
-ROOT = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/covariate_analyses/sex_diff"
+ROOT = "~/parcc/network_replication/covariate_analyses/sex_diff"
 CACHE_DIR = f"{ROOT}/cache"
 OUTPUT_DIR = f"{ROOT}/output/{DATASET}/gradient_dispersion"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -35,8 +35,8 @@ GROUP_GRADIENTS_IN = f"{OUTPUT_DIR}/group_gradients_full_{DATASET}.npy"
 ALIGNED_PC1_OUT = f"{OUTPUT_DIR}/aligned_pc1_{DATASET}.npy"
 QC_OUT = f"{OUTPUT_DIR}/alignment_qc_{DATASET}.csv"
 
-SA_AXIS_CSV = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/SAaxis/schaefer200x17_SAaxis.csv"
-SA_PARCEL_LABELS = "/ceph/projects/sattertt/pennlinc-parcc/network_replication/atlases/parcellations/schaefer200x17_regionlist_final.csv"
+SA_AXIS_CSV = "~/parcc/network_replication/SAaxis/schaefer200x17_SAaxis.csv"
+SA_PARCEL_LABELS = "~/parcc/network_replication/atlases/parcellations/schaefer200x17_regionlist_final.csv"
 
 
 def load_sa_axis():
