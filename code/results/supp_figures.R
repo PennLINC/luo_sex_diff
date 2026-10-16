@@ -229,7 +229,8 @@ plot_global_dispersion <- function(dataset, title) {
   subtitle_expr <- bquote("RESI = " * .(resi_lab) * ", " * italic(p) * .(p_lab))
   
   # residualize dispersion for age and in-scanner motion
-  gam_df$resid_adj <- residuals(mgcv::gam(dispersion ~ s(age, k = 3) + meanFD_avgSes, data = gam_df))
+  gam_df$resid_adj <- residuals(mgcv::gam(dispersion ~ s(age, k = 3, fx = TRUE) + meanFD_avgSes,
+                                          data = gam_df, method = "REML"))
   
   ggplot(gam_df, aes(x = sex, y = resid_adj, fill = sex, color = sex)) +
     geom_boxplot(width = 0.5, outlier.shape = NA, alpha = 0.6, linewidth = 0.4) +

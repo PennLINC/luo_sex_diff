@@ -136,6 +136,17 @@ WNC_sexeffect_overlap <- identify_sexeffect_overlap("WNC")
 neurosynth_BNC <- merge(BNC_sexeffect_overlap, neurosynth.terms, by = "region")
 neurosynth_WNC <- merge(WNC_sexeffect_overlap, neurosynth.terms, by = "region")
 
+# perm.sphere.p() assumes rows are in atlas order; merge() sorts rows alphabetically
+schaefer200x17.labels <- read.csv(file.path(root, "atlases", "parcellations", "schaefer200x17_regionlist_final.csv"))$label
+reorder_to_atlas <- function(df) {
+  idx <- match(schaefer200x17.labels, df$region)
+  if (anyNA(idx)) idx <- match(paste0("17", schaefer200x17.labels), df$region)  # handles "17" prefix
+  stopifnot(!anyNA(idx), length(idx) == 200)
+  df[idx, ]
+}
+neurosynth_BNC <- reorder_to_atlas(neurosynth_BNC)
+neurosynth_WNC <- reorder_to_atlas(neurosynth_WNC)
+
 sexeffect.neurosynth.BNC <- map_dfr(neurosynth.termlist, function(t) {
   sexdiffmap_decoding(df = neurosynth_BNC, metric = "mean_resi_sig2", term = t, fc_measure = "BNC")
 }) %>% arrange(desc(term.correlation))

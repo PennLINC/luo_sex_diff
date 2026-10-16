@@ -66,7 +66,7 @@ make_double_df <- function(df, fc_measure, covariate, dataset) {
 # Fits a GAM relating edgewise sex effects to the S-A rank of both edge endpoints (using te())
 # Parcel-level S-A values are spatially rotated and reassigned to the fixed edge
 # endpoints to generate a spatially constrained null distribution of explained variance (R-sq).
-run_spin_test <- function(double_df, SA.vec, perm.id.full, measure = "GAM.cov.tvalue", k_basis = 3) {
+run_spin_test <- function(double_df, SA.vec, perm.id.full, measure = "RESI", k_basis = 3) {
   
   # Match edge endpoints to parcel-level S-A values (assumes SA.vec is ordered by parcel ID)
   p1_idx <- match(double_df$parcel1_id, seq_along(SA.vec))
@@ -134,12 +134,14 @@ perm.id.full <- readRDS(sprintf("~/parcc/network_replication/covariate_analyses/
 # load delta-SA rank for each edge
 SA.diff <- read.csv(sprintf("~/parcc/network_replication/atlases/edge/SA.diff_%s.csv", atlas))
 
-# load edges
-if(dataset != "all_datasets") {
-  sex.main.edge <- read.csv(sprintf("%1$s/GAM/%3$s/%2$s_GAM_sex_maineffects_%4$s.csv", outputs_root, dataset, metric, atlas))
-} else if (dataset == "all_datasets") {
-  sex.main.edge <- read.csv(sprintf("%1$s/GAM/%3$s/%2$s_GAM_sex_maineffects_%4$s.csv", outputs_root, dataset, metric, atlas))
-}
+# load edges: GAM output (for p-values) + RESI (t2S) for the spin test
+sex.main.edge <- read.csv(sprintf("%1$s/GAM/%3$s/%2$s_GAM_sex_maineffects_%4$s.csv", outputs_root, dataset, metric, atlas))
+resi.edge <- read.csv(sprintf("%1$s/resi/%3$s/%2$s_t2S_sex_maineffects_%4$s.csv", outputs_root, dataset, metric, atlas)) %>%
+  select(region, RESI)
+
+# left_join keeps the GAM row order; make_double_df() cbinds SA.diff by row position
+sex.main.edge <- sex.main.edge %>% left_join(resi.edge, by = "region")
+stopifnot(nrow(sex.main.edge) == 19900, !anyNA(sex.main.edge$RESI))
 
 # make double df for symmetry 
 double_df <- make_double_df(df = sex.main.edge, fc_measure = metric, covariate = "sex", dataset = dataset)

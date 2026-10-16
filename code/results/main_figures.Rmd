@@ -178,14 +178,11 @@ FC_strength_all <- annotate_figure(
 )
 
 
-# blank plot for formatting
-blank_space <- ggplot() + theme_void()
-
 FC_strength_plots_row1 <- plot_grid(FC_strength_PNC, FC_strength_HCPD, ncol = 2)
 FC_strength_plots_row2 <- plot_grid(FC_strength_NKI, FC_strength_HBN, ncol = 2)
 FC_strength_plots_row1and2 <- plot_grid(FC_strength_plots_row1, FC_strength_plots_row2, nrow = 2)
 FC_strength_plots <- annotate_figure(
-  plot_grid(blank_space, FC_strength_plots_row1and2, FC_strength_all, legend, nrow = 4, rel_heights = c(0.05, 1.2, 0.35, 0.2)),
+  plot_grid(NULL, FC_strength_plots_row1and2, FC_strength_all, legend, nrow = 4, rel_heights = c(0.05, 1.2, 0.35, 0.2)),
   top = text_grob("Functional Connectivity Strength", size = 12, face = "bold"),
   bottom = text_grob("Sex Effect (RESI)", size = 12, y = 1)
 )
@@ -266,10 +263,10 @@ legend_plot <- ggplot(data.frame(overlap = factor(names(count_colors_legend),
 # Extract the horizontal legend
 overlap_legend <- get_legend(legend_plot)
 
-overlap_FC_strength_plots <- annotate_figure(plot_grid(FC_strength_overlap, blank_space, overlap_legend, nrow = 3, rel_heights = c(1, 0.25, 0.1)), bottom = text_grob("Number of Datasets", size = 12, y = -0.4))
+overlap_FC_strength_plots <- annotate_figure(plot_grid(FC_strength_overlap, NULL, overlap_legend, nrow = 3, rel_heights = c(1, 0.25, 0.1)), bottom = text_grob("Number of Datasets", size = 12, y = -0.4))
 
 FC_strength_plots_final <- plot_grid(
-  FC_strength_plots, overlap_FC_strength_plots, blank_space,
+  FC_strength_plots, overlap_FC_strength_plots, NULL,
   nrow = 3, rel_heights = c(1, 0.277, 0.05),
   labels = c("A", "B", ""), label_size = 12,
   label_x = 0.015, label_y = c(0.99, 0.967, 1),
@@ -438,15 +435,11 @@ BNC_all <- annotate_figure(
   top = text_grob("Pooled Dataset", size = 12, face = "bold")
 )
 
-
-# blank plot for formatting
-blank_space <- ggplot() + theme_void()
-
 BNC_plots_row1 <- plot_grid(BNC_PNC, BNC_HCPD, ncol = 2)
 BNC_plots_row2 <- plot_grid(BNC_NKI, BNC_HBN, ncol = 2)
 BNC_plots_row1and2 <- plot_grid(BNC_plots_row1, BNC_plots_row2, nrow = 2)
 BNC_plots <- annotate_figure(
-  plot_grid(blank_space, BNC_plots_row1and2, BNC_all, legend, nrow = 4, rel_heights = c(0.05, 1.2, 0.35, 0.2)),
+  plot_grid(NULL, BNC_plots_row1and2, BNC_all, legend, nrow = 4, rel_heights = c(0.05, 1.2, 0.35, 0.2)),
   top = text_grob("Between-Network Connectivity", size = 12, face = "bold"),
   bottom = text_grob("Sex Effect (RESI)", size = 12, y = 1)
 )
@@ -527,10 +520,10 @@ legend_plot <- ggplot(data.frame(overlap = factor(names(count_colors_legend),
 # Extract the horizontal legend
 overlap_legend <- get_legend(legend_plot)
 
-overlap_BNC_plots <- annotate_figure(plot_grid(BNC_overlap, blank_space, overlap_legend, nrow = 3, rel_heights = c(1, 0.25, 0.1)), bottom = text_grob("Number of Datasets", size = 12, y = -0.4))
+overlap_BNC_plots <- annotate_figure(plot_grid(BNC_overlap, NULL, overlap_legend, nrow = 3, rel_heights = c(1, 0.25, 0.1)), bottom = text_grob("Number of Datasets", size = 12, y = -0.4))
 
 BNC_plots_final <- plot_grid(
-  BNC_plots, overlap_BNC_plots, blank_space,
+  BNC_plots, overlap_BNC_plots, NULL,
   nrow = 3, rel_heights = c(1, 0.277, 0.05),
   labels = c("A", "B", ""), label_size = 12,
   label_x = 0.015, label_y = c(0.99, 0.967, 1),
@@ -701,14 +694,11 @@ WNC_all <- annotate_figure(
 )
 
 
-# blank plot for formatting
-blank_space <- ggplot() + theme_void()
-
 WNC_plots_row1 <- plot_grid(WNC_PNC, WNC_HCPD, ncol = 2)
 WNC_plots_row2 <- plot_grid(WNC_NKI, WNC_HBN, ncol = 2)
 WNC_plots_row1and2 <- plot_grid(WNC_plots_row1, WNC_plots_row2, nrow = 2)
 WNC_plots <- annotate_figure(
-  plot_grid(blank_space, WNC_plots_row1and2, WNC_all, legend, nrow = 4, rel_heights = c(0.05, 1.2, 0.35, 0.2)),
+  plot_grid(NULL, WNC_plots_row1and2, WNC_all, legend, nrow = 4, rel_heights = c(0.05, 1.2, 0.35, 0.2)),
   top = text_grob("Within-Network Connectivity", size = 12, face = "bold"),
   bottom = text_grob("Sex Effect (RESI)", size = 12, y = 1)
 )
@@ -789,10 +779,10 @@ legend_plot <- ggplot(data.frame(overlap = factor(names(count_colors_legend),
 # Extract the horizontal legend
 overlap_legend <- get_legend(legend_plot)
 
-overlap_WNC_plots <- annotate_figure(plot_grid(WNC_overlap, blank_space, overlap_legend, nrow = 3, rel_heights = c(1, 0.25, 0.1)), bottom = text_grob("Number of Datasets", size = 12, y = -0.4))
+overlap_WNC_plots <- annotate_figure(plot_grid(WNC_overlap, NULL, overlap_legend, nrow = 3, rel_heights = c(1, 0.25, 0.1)), bottom = text_grob("Number of Datasets", size = 12, y = -0.4))
 
 WNC_plots_final <- plot_grid(
-  WNC_plots, overlap_WNC_plots, blank_space,
+  WNC_plots, overlap_WNC_plots, NULL,
   nrow = 3, rel_heights = c(1, 0.277, 0.05),
   labels = c("A", "B", ""), label_size = 12,
   label_x = 0.015, label_y = c(0.99, 0.967, 1),
@@ -855,27 +845,37 @@ neurosynth.termlist <- names(neurosynth.terms)[-1] #list of terms
 ```
 
 We examined the 10 most negatively correlated Neurosynth terms with the BNC sex difference map, focusing on negative correlations because they indicate cognitive domains whose spatial patterns overlap with regions showing greater BNC in males relative to females. In contrast, we examined the ten most positively correlated Neurosynth terms with the WNC sex difference map, focusing on positively correlations because they indicate cognitive domains whose spatial patterns overlap with regions showing greater WNC in females relative to males.
+ 
 
 ```{r overlapping effects neurosynth decoding of sex differences, fig.height = 7, fig.width = 7}
 # identify overlapping significant effects across datasets (2 or more datasets), and get avg RESI for each of those parcels
 BNC_sexeffect_overlap <- identify_sexeffect_overlap("BNC") %>% mutate(significant_status = ifelse(signif_2plus == 1, "Sig", "Nonsig"))
 WNC_sexeffect_overlap <- identify_sexeffect_overlap("WNC") %>% mutate(significant_status = ifelse(signif_2plus == 1, "Sig", "Nonsig"))
- 
-# fdr correction of neurosynth terms correlations with BNC and WNC sex effect maps
+
+# max number of terms to display per panel (10 = all significant terms in the hypothesized direction)
+top_n_terms <- 10
+
+# BNC: FDR across all 125 terms, look at most negative correlations
+# (negative = terms aligned with regions showing greater BNC in males; male > female)
 BNC_neurosynth <- read.csv(file.path(root, "covariate_analyses", "sex_diff", "output", "all_datasets", "spin_test", "neurosynth", "BNC_neurosynth_spin_test_results_overlap.csv"))
-BNC_neurosynth$pvalue.fdr <- p.adjust(BNC_neurosynth$p_spin, method = c("fdr")) 
-BNC_neurosynth_fdr <- BNC_neurosynth %>% filter(pvalue.fdr < 0.05)  
-BNC_neurosynth_top10 <- rbind(slice_min(BNC_neurosynth_fdr, order_by = term.correlation, n = 10)) # 10 most negatively correlated neurosynth terms with the sex diff map. Looking at negative correlations because they reflect cognitive terms that spatially align with regions showing higher BNC in males (male > female).
+BNC_neurosynth$pvalue.fdr <- p.adjust(BNC_neurosynth$p_spin, method = "fdr")
+BNC_neurosynth_fdr <- BNC_neurosynth %>% filter(pvalue.fdr < 0.05)
+BNC_neurosynth_top10 <- BNC_neurosynth_fdr %>%
+  filter(term.correlation < 0) %>%
+  slice_min(order_by = term.correlation, n = top_n_terms)
 BNC_neurosynth_top10$term <- tools::toTitleCase(gsub("_", " ", BNC_neurosynth_top10$term))
 
+# WNC: FDR across all 125 terms, look at top positive correlations
+# (positive = terms aligned with regions showing greater WNC in females; female > male)
 WNC_neurosynth <- read.csv(file.path(root, "covariate_analyses", "sex_diff", "output", "all_datasets", "spin_test", "neurosynth", "WNC_neurosynth_spin_test_results_overlap.csv"))
-WNC_neurosynth$pvalue.fdr <- p.adjust(WNC_neurosynth$p_spin, method = c("fdr")) 
-WNC_neurosynth_fdr <- WNC_neurosynth %>% filter(pvalue.fdr < 0.05)  
-WNC_neurosynth_top10 <- rbind(slice_max(WNC_neurosynth_fdr, order_by = term.correlation, n = 10)) # 10 most positively correlated neurosynth terms with the sex diff map. Looking at positive correlations because they reflect cognitive terms that spatially align with regions showing higher WNC in females (female > male).
+WNC_neurosynth$pvalue.fdr <- p.adjust(WNC_neurosynth$p_spin, method = "fdr")
+WNC_neurosynth_fdr <- WNC_neurosynth %>% filter(pvalue.fdr < 0.05)
+WNC_neurosynth_top10 <- WNC_neurosynth_fdr %>%
+  filter(term.correlation > 0) %>%
+  slice_max(order_by = term.correlation, n = top_n_terms)
 WNC_neurosynth_top10$term <- tools::toTitleCase(gsub("_", " ", WNC_neurosynth_top10$term))
 WNC_neurosynth_top10$term <- gsub("Autobiographical Memory", "Autobio. Memory", WNC_neurosynth_top10$term)
 
- 
 ```
 
 ```{r overlap RESI plots}
@@ -930,11 +930,11 @@ legend_WNC_overlap <- get_legend(p_WNC)
 # arrange plots 
 BNC_overlap_RESI_plot <- annotate_figure(
   plot_grid(
-    blank_space,
+    NULL,
     annotate_figure(plot_grid(BNC_overlap_RESI_plot_lh, BNC_overlap_RESI_plot_rh, ncol = 2)),
-    blank_space,
+    NULL,
     legend_BNC_overlap,
-    blank_space,
+    NULL,
     nrow = 5,
     rel_heights = c(0.05, 2.2, 0.3, 0.1, 0.05)
   ),
@@ -946,11 +946,11 @@ BNC_overlap_RESI_plot <- annotate_figure(
  
 WNC_overlap_RESI_plot <- annotate_figure(
   plot_grid(
-    blank_space,
+    NULL,
     annotate_figure(plot_grid(WNC_overlap_RESI_plot_lh, WNC_overlap_RESI_plot_rh, ncol = 2)),
-    blank_space,
+    NULL,
     legend_WNC_overlap,
-    blank_space,
+    NULL,
     nrow = 5,
     rel_heights = c(0.05, 2.2, 0.3, 0.1, 0.05)
   ),
@@ -1015,24 +1015,24 @@ WNC_neurosynth_plot <- ggplot(
 
 
 ```{r overlap neurosynth figure, fig.width = 5.51, fig.height = 5.09}
-neurosynth_plots_row1 <- plot_grid(BNC_overlap_RESI_plot, blank_space, WNC_overlap_RESI_plot, ncol = 3, rel_widths = c(1, 0.1, 1))
+neurosynth_plots_row1 <- plot_grid(BNC_overlap_RESI_plot, NULL, WNC_overlap_RESI_plot, ncol = 3, rel_widths = c(1, 0.1, 1))
 neurosynth_plots_row1 <- ggdraw(neurosynth_plots_row1) + 
   draw_label("A", x = -0.02, y = 0.981, size = 9, fontface = "bold", hjust = 0, vjust = 1) +
   draw_label("B", x = 0.51, y = 0.981, size = 9, fontface = "bold", hjust = 0, vjust = 1)
 
-neurosynth_plots_row2 <- plot_grid(blank_space, blank_space, ncol = 2)
+neurosynth_plots_row2 <- plot_grid(NULL, NULL, ncol = 2)
 
-BNC_neurosynth_panel <- plot_grid(BNC_neurosynth_plot, blank_space, ncol = 2, rel_widths = c(1, 0.1))
-WNC_neurosynth_panel <- plot_grid(blank_space, WNC_neurosynth_plot, ncol = 2, rel_widths = c(0.03, 1))
+BNC_neurosynth_panel <- plot_grid(BNC_neurosynth_plot, NULL, ncol = 2, rel_widths = c(1, 0.1))
+WNC_neurosynth_panel <- plot_grid(NULL, WNC_neurosynth_plot, ncol = 2, rel_widths = c(0.03, 1))
 neurosynth_plots_row3 <- plot_grid(BNC_neurosynth_panel, WNC_neurosynth_panel, ncol = 2)
 neurosynth_plots_row3 <- annotate_figure(neurosynth_plots_row3, left = text_grob("Neurosynth Term", size = 9, rot = 90, x = -0.35, y = 0.55))
 neurosynth_plots_row3 <- ggdraw(neurosynth_plots_row3) + 
   draw_label("C", x = -0.02, y = 0.968, size = 9, fontface = "bold", hjust = 0, vjust = 1) + 
   draw_label("D", x = 0.51, y = 0.968, size = 9, fontface = "bold", hjust = 0, vjust = 1)
 
-neurosynth_plots <- plot_grid(blank_space, neurosynth_plots_row1, neurosynth_plots_row2, neurosynth_plots_row3, nrow = 4, rel_heights = c(0.05, 1, 0.1, 1))
+neurosynth_plots <- plot_grid(NULL, neurosynth_plots_row1, neurosynth_plots_row2, neurosynth_plots_row3, nrow = 4, rel_heights = c(0.05, 1, 0.1, 1))
 
-neurosynth_plots_final <- plot_grid(blank_space, neurosynth_plots, blank_space, ncol = 3, rel_widths = c(0.07, 1, 0.07))
+neurosynth_plots_final <- plot_grid(NULL, neurosynth_plots, NULL, ncol = 3, rel_widths = c(0.07, 1, 0.07))
 neurosynth_plots_final
 
 #ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig4.tiff", plot = neurosynth_plots_final, width = 140, height = 129.2, units = "mm", dpi = 500, bg = "white")
@@ -1100,9 +1100,9 @@ networkpair_resi_HBN <- annotate_figure(
 networkpair_resi_all_datasets_plot_tmp <- annotate_figure(
   make_networkpair17_plot(sex.main.all_datasets.networkpair.17, dataset = "Pooled Dataset", ylim1 = -0.3, ylim2 = 0.3, fontsize = 7, fontsize_label = 2.6, measure = "RESI"))
 
-networkpair_row1 <- plot_grid(blank_space, networkpair_resi_PNC, blank_space, networkpair_resi_HCPD, ncol = 4, 
+networkpair_row1 <- plot_grid(NULL, networkpair_resi_PNC, NULL, networkpair_resi_HCPD, ncol = 4, 
                               rel_widths = c(0.03, 1, 0.06, 1))
-networkpair_row2 <- plot_grid(blank_space, networkpair_resi_NKI, blank_space, networkpair_resi_HBN, ncol = 4, 
+networkpair_row2 <- plot_grid(NULL, networkpair_resi_NKI, NULL, networkpair_resi_HBN, ncol = 4, 
                               rel_widths = c(0.03, 1, 0.06, 1))
 networkpair_datasets_plot <- plot_grid(networkpair_row1, networkpair_row2, nrow = 2)
 
@@ -1194,19 +1194,19 @@ resi_legend <- annotate_figure(plot_grid(
   NULL, legend,
   ncol = 2,
   rel_widths = c(0.47, 0.75)), bottom = text_grob("Sex Effect (RESI)", size = 10, y = -0.3, x = 0.63))
-networkpair_resi_all_datasets_plot <- plot_grid(networkpair_resi_all_datasets_plot_tmp, blank_space, resi_legend, blank_space, 
+networkpair_resi_all_datasets_plot <- plot_grid(networkpair_resi_all_datasets_plot_tmp, NULL, resi_legend, NULL, 
                                                 nrow = 4, rel_heights = c(1, 0.1, 0.1,  0.05))
 # overlap + legend
 overlap_legend <- annotate_figure(plot_grid(
   NULL, overlap_legend_tmp,
   ncol = 2,
   rel_widths = c(0.2, 0.75)), bottom = text_grob("Number of Datasets", size = 10, y = -0.3, x = 0.6))
-networkpair_overlap_plot <- plot_grid(networkpair_resi_overlap_plot_tmp, blank_space, overlap_legend, blank_space, 
+networkpair_overlap_plot <- plot_grid(networkpair_resi_overlap_plot_tmp, NULL, overlap_legend, NULL, 
                                       nrow = 4, rel_heights = c(1, 0.1, 0.15,  0.05))
 
  
 
-networkpair_resi_row2 <- plot_grid(blank_space, networkpair_resi_all_datasets_plot, blank_space, networkpair_overlap_plot, ncol = 4, 
+networkpair_resi_row2 <- plot_grid(NULL, networkpair_resi_all_datasets_plot, NULL, networkpair_overlap_plot, ncol = 4, 
                               rel_widths = c(0.03, 1, 0.06, 1))
  
 networkpair_plot_final <- plot_grid(networkpair_resi_row1, networkpair_resi_row2, nrow = 2, rel_heights = c(1.2, 0.72))
@@ -1403,7 +1403,7 @@ row2 <- ggdraw() +
   draw_plot(HBN_surf_plot, x = 0.5, y = 0, width = 0.5, height = 1) +
   draw_plot(NKI_surf_plot, x = 0, y = 0, width = 0.5, height = 1)
 
-datasets_surf_plots <- plot_grid(row1, blank_space, row2, ncol = 1, nrow = 3, rel_heights = c(1, 0.1, 1))
+datasets_surf_plots <- plot_grid(row1, NULL, row2, ncol = 1, nrow = 3, rel_heights = c(1, 0.1, 1))
 
 
 all_datasets_surf_plot <-  make_surface_plot(double.all_datasets, dataset = "Pooled Dataset", measure = "RESI", ylim1 = -0.12, ylim2  = 0.12, 
@@ -1452,7 +1452,7 @@ combined_surf_plots <- annotate_figure(ggdraw() +
                                        left = text_grob("Sensorimotor-Association Axis Rank", size = 9, x = 0.5, rot = 90), 
                                        bottom = text_grob("Sensorimotor-Association Axis Rank", size = 9, x = 0.52, y = 0))
 
-final_surf_plots <- plot_grid(blank_space, combined_surf_plots, blank_space, legend_formatted, nrow = 4, rel_heights = c(0.05, 1, 0.03, 0.2))
+final_surf_plots <- plot_grid(NULL, combined_surf_plots, NULL, legend_formatted, nrow = 4, rel_heights = c(0.05, 1, 0.03, 0.2))
 final_surf_plots <- annotate_figure(final_surf_plots, 
                 bottom = text_grob("Sex Effect (RESI)", size = 9, x = 0.535, y = 1.05))
 
@@ -1556,21 +1556,32 @@ between_plot_final
 ```{r table of largest between network dispersion effects}
 top_n_female <- 3
 
-pretty_network_disp <- c(pretty_network, somatomotorBAuditory = "somatomotor B/auditory")
+# network labels (self-contained; keys match the dispersion file labels)
+pretty_network_disp <- c(
+  defaultA = "default mode A", defaultB = "default mode B", defaultC = "default mode C",
+  frontoparietalControlA = "control A", frontoparietalControlB = "control B", frontoparietalControlC = "control C",
+  dorsalAttentionA = "dorsal attention A", dorsalAttentionB = "dorsal attention B",
+  salienceVentralAttentionA = "salience/ventral attention A", salienceVentralAttentionB = "salience/ventral attention B",
+  limbicOrbitofrontal = "limbic orbitofrontal", limbicTemporopolar = "limbic temporal pole",
+  somatomotorA = "somatomotor A", somatomotorBAuditory = "somatomotor B/auditory",
+  visualCentral = "visual central", visualPeripheral = "visual peripheral", temporoparietal = "temporal parietal"
+)
 
-# networks ordered from the association end of the hierarchy to the sensorimotor end,
-# so the higher-order network is always named first in a pair
+# association -> sensorimotor, so the higher-order network is named first
 network_order <- c("defaultA", "defaultB", "defaultC",
                    "frontoparietalControlA", "frontoparietalControlB", "frontoparietalControlC",
-                   "limbicOrbitofrontal", "limbicTemporopolar", "temporalParietal",
+                   "limbicOrbitofrontal", "limbicTemporopolar", "temporoparietal",
                    "salienceVentralAttentionA", "salienceVentralAttentionB",
                    "dorsalAttentionA", "dorsalAttentionB",
                    "somatomotorA", "somatomotorBAuditory",
                    "visualCentral", "visualPeripheral")
 
+# FDR-corrected p-value: 3 decimals, or scientific notation below 0.001
+fmt_p <- function(p) ifelse(p < 0.001, formatC(p, format = "e", digits = 1), sprintf("%.3f", p))
+
 disp_list <- list(
-  PNC = between_net_disp_PNC, `HCP-D` = between_net_disp_HCPD,
-  NKI = between_net_disp_NKI, HBN = between_net_disp_HBN,
+  PNC = between_net_disp_PNC, NKI = between_net_disp_NKI,
+  `HCP-D` = between_net_disp_HCPD, HBN = between_net_disp_HBN,
   `Pooled Dataset` = between_net_disp_all_datasets
 )
 
@@ -1579,8 +1590,8 @@ pretty_disp_pair <- function(outcome) {
   rank <- match(nets, network_order)
   rank[is.na(rank)] <- length(network_order) + 1L
   nets <- nets[order(rank)]
-  nets <- ifelse(nets %in% names(pretty_network_disp), unname(pretty_network_disp[nets]), nets)
-  paste(nets[1], "with", nets[2])
+  labels <- ifelse(nets %in% names(pretty_network_disp), unname(pretty_network_disp[nets]), nets)
+  paste(labels[1], "with", labels[2])
 }
 
 fmt_disp <- function(outcome, resi, p) {
@@ -1588,12 +1599,15 @@ fmt_disp <- function(outcome, resi, p) {
 }
 
 summarise_disp <- function(df, dataset_name) {
-  female <- df %>% filter(p_fdr < 0.05, RESI > 0) %>% arrange(desc(RESI)) %>% slice_head(n = top_n_female)
+  female <- df %>%
+    filter(p_fdr < 0.05, RESI > 0) %>%
+    arrange(desc(RESI)) %>%
+    slice_head(n = top_n_female)
 
   cell <- if (nrow(female) == 0) {
     "none significant"
   } else {
-    items <- pmap_chr(list(female$outcome, female$RESI, female$p_fdr), fmt_disp)
+    items <- mapply(fmt_disp, female$outcome, female$RESI, female$p_fdr, USE.NAMES = FALSE)
     paste0("<ul style='margin:0; padding-left:1.1em;'><li>",
            paste(items, collapse = "</li><li>"), "</li></ul>")
   }
@@ -1601,7 +1615,7 @@ summarise_disp <- function(df, dataset_name) {
   tibble(Dataset = dataset_name, `Female > Male` = cell)
 }
 
-disp_summary <- imap_dfr(disp_list, summarise_disp)
+disp_summary <- bind_rows(lapply(names(disp_list), function(ds) summarise_disp(disp_list[[ds]], ds)))
 
 disp_summary %>%
   kbl(caption = sprintf("The %d largest significant female > male sex effects (RESI) on between-network dispersion", top_n_female),
@@ -1612,6 +1626,8 @@ disp_summary %>%
   column_spec(2, width = "36em") %>%
   row_spec(0, bold = TRUE)
 ```
+ 
+ 
  
  
   

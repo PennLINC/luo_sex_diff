@@ -43,17 +43,22 @@ run_resi <- function(outcome_var, data, covariates.noninterest = covariates.prim
   formula <- as.formula(paste0("`", outcome_var, "` ~ s(age, k = ", k, ", fx = ", set.fx,
                                ") + ", covariates.noninterest, " + ", covariate.interest))
   mod <- mgcv::gam(formula, data = data, method = "REML")
-  
+
+  # model-based GAM test for the sex term (same as region/network/edge analyses)
+  gam_t <- summary(mod)$p.table["sexFemale", "t value"]
+  gam_p <- summary(mod)$p.table["sexFemale", "Pr(>|t|)"]
+
+  # RESI + robust CI (unchanged)
   th1 <- resiPEse_Th1(mod, variable = "sexFemale", unsigned = FALSE, torz = "t", type = "HC0")
-  
   t_robust <- th1$Estimate / th1$Std.Error
   p_robust <- 2 * pt(-abs(t_robust), df = mod$df.residual)
   t2s <- RESI::t2S(t_robust, rdf = mod$df.residual, n = nrow(data), unbiased = TRUE)
-  
+
   data.frame(outcome = outcome_var, covariates = covariates.noninterest,
              RESI_Xinyu = th1$RESI_Xinyu, LCI = th1$LCI, UCI = th1$UCI,
              RESI_t2S = as.numeric(t2s), beta = th1$Estimate, se = th1$Std.Error,
-             t = t_robust, p = p_robust)
+             t = gam_t, p = gam_p,                      # primary: GAM test
+             t_robust = t_robust, p_robust = p_robust)  # kept for the robustness check
 }
 
 ##################
