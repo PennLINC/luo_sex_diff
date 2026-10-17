@@ -50,17 +50,19 @@ make_double_df <- function(df, fc_measure, covariate, dataset) {
   age_SA.diff <- cbind(df, SA.diff)
   age_SA.diff <- sig.effects(age_SA.diff, fc_measure, covariate, dataset) 
   
-  # make a double df for symmetry - parcel1 and parcel2.SA.vec repeated in opposite ordering (see lines 500-510 in Adam's Edge-level-Age.md)
-  age_SA.diff2 <- age_SA.diff 
-  age_SA.diff2$parcel1.SA.vec <- age_SA.diff$parcel2.SA.vec
-  age_SA.diff2$parcel2.SA.vec <- age_SA.diff$parcel1.SA.vec
+  # make a double df for symmetry: each edge entered twice with its two endpoints swapped
+  # (run_spin_test() looks up S-A ranks by parcel1_id / parcel2_id, so the IDs must be swapped)
+  age_SA.diff2 <- age_SA.diff
+  age_SA.diff2$parcel1_id <- age_SA.diff$parcel2_id
+  age_SA.diff2$parcel2_id <- age_SA.diff$parcel1_id
+  age_SA.diff2$parcel1_SA <- age_SA.diff$parcel2_SA
+  age_SA.diff2$parcel2_SA <- age_SA.diff$parcel1_SA
   
   # "stacked" df
-  double_age_SA.diff <- rbind(age_SA.diff2,age_SA.diff)
+  double_age_SA.diff <- rbind(age_SA.diff2, age_SA.diff)
   
   return(double_age_SA.diff)
 }
-
  
 # Spin test of the relationship between S-A axis and edgewise sex effects:
 # Fits a GAM relating edgewise sex effects to the S-A rank of both edge endpoints (using te())

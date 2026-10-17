@@ -216,7 +216,7 @@ matrix_row <- plot_grid(NULL, corr_FC, corr_BNC, corr_WNC, NULL,
                         ncol = 5, rel_widths = c(0.03, 1, 1, 1, 0.03))
 
 corr_plots_final <- plot_grid(header_row, matrix_row, NULL, corr_legend, NULL,
-                              nrow = 5, rel_heights = c(0.2, 1, 0.01, 0.3, 0.01))
+                              nrow = 5, rel_heights = c(0.2, 1, 0.05, 0.3, 0.01))
 corr_plots_final
 
 ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/supplement/figS1_sexeffect_corr.tiff", plot = corr_plots_final, width = 184, height = 72, units = "mm", dpi = 500,bg = "white")
@@ -298,7 +298,7 @@ ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_dif
 
 # Fig. S3. Age-by-sex interactions in network-pair connectivity. 
 
-```{r network-pair age-by-sex trajectories, fig.height = 4, fig.width = 5}
+```{r network-pair age-by-sex trajectories, fig.height = 5.2, fig.width = 7.25}
 traj_netpair <- read.csv(sprintf("%1$s/all_datasets/GAM/networkpair/all_datasets_GAM_agebysex_fitted_schaefer200x17.csv", output_root)) %>%
   rename(age = smooth_var) %>%
   mutate(sex = factor(sex, levels = c("Female", "Male")))
@@ -311,11 +311,11 @@ y_lim_netpair <- range(traj_netpair_sig$fitted)
 netpair_traj_plots <- lapply(netpair_int_pairs, function(r)
   plot_traj(r, traj_netpair_sig, str_wrap(pretty_pair(r), width = 22), y_lim_netpair))
 
-netpair_traj_final <- assemble_traj(netpair_traj_plots, ncol = 3, y_label = "Network-Pair Connectivity",
+netpair_traj_final <- assemble_traj(netpair_traj_plots, ncol = 5, y_label = "Network-Pair Connectivity",
                                     legend_height = 0.12)
 netpair_traj_final
 
-ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/supplement/figS3_netpair_agebysex.tiff", plot = netpair_traj_final, width = 127, height = 92, units = "mm", dpi = 500, bg = "white")
+ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/supplement/figS3_netpair_agebysex.tiff", plot = netpair_traj_final, width = 184, height = 132, units = "mm", dpi = 500, bg = "white")
 ```
 
 # Fig. S4. The principal gradient of functional connectivity in females and males. 

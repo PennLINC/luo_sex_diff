@@ -23,6 +23,7 @@ if sbatch \
     --ntasks=1 \
     --cpus-per-task="$cpus" \
     --time="$time_limit" \
+    --exclude=epyc-lg-3 \
     --output="${logs_dir}/${job_name}_%j.out" \
     --error="${logs_dir}/${job_name}_%j.err" \
     --wrap="$APPTAINER exec --cleanenv --bind \"$ROOT:$ROOT\" \"$SIF\" Rscript \"$r_script\""
