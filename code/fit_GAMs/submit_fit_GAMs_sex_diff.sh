@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ROOT="~/parcc/network_replication"
+ROOT="/ceph/projects/sattertt/pennlinc-parcc/network_replication"
 PROJDIR="$ROOT/covariate_analyses/sex_diff"
 
 APPTAINER="/vast/parcc/spack/sw/apps/linux-sapphirerapids/apptainer-1.4.1-qpr4lterya7ontg7pkqrx7b3jkab3lcw/bin/apptainer"
@@ -9,8 +9,6 @@ r_script="$PROJDIR/code/fit_GAMs/fit_GAMs_sex_diff.R"
 
 datasets=("PNC" "HCPD" "HBN" "NKI")
 metrics=("FC_strength" "WNC" "BNC" "edge" "networkpair")
-metrics=("FC_strength" "WNC" "BNC" "networkpair")
-
 atlases=("schaefer200x17")
 
 # Loop through each dataset, atlas, and metric
@@ -47,8 +45,4 @@ for dataset in "${datasets[@]}"; do
                 echo "Submitted ${dataset} ${metric} ${atlas} (4 CPUs, ${time_limit})"
             else
                 echo "FAILED to submit ${dataset} ${metric} ${atlas}" >&2
-            fi
-
-        done
-    done
-done
+           
