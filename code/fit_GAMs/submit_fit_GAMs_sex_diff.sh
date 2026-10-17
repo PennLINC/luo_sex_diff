@@ -9,6 +9,8 @@ r_script="$PROJDIR/code/fit_GAMs/fit_GAMs_sex_diff.R"
 
 datasets=("PNC" "HCPD" "HBN" "NKI")
 metrics=("FC_strength" "WNC" "BNC" "edge" "networkpair")
+metrics=("FC_strength" "WNC" "BNC" "networkpair")
+
 atlases=("schaefer200x17")
 
 # Loop through each dataset, atlas, and metric
@@ -37,6 +39,7 @@ for dataset in "${datasets[@]}"; do
                 --ntasks=1 \
                 --cpus-per-task=4 \
                 --time="$time_limit" \
+                --exclude=epyc-lg-3 \
                 --output="${logs_dir}/${job_name}_%j.out" \
                 --error="${logs_dir}/${job_name}_%j.err" \
                 --wrap="$APPTAINER exec --cleanenv --bind \"$ROOT:$ROOT\" \"$SIF\" Rscript \"$r_script\" \"$dataset\" \"$metric\" \"$atlas\""

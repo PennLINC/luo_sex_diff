@@ -275,7 +275,7 @@ FC_strength_plots_final <- plot_grid(
 
 ```{r FC_strength_plots_final, fig.width = 5.51, fig.height = 8.82} 
 FC_strength_plots_final
-ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig1.tiff", plot = FC_strength_plots_final, width = 140, height = 224, units = "mm", dpi = 500,bg = "white")
+#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig1.tiff", plot = FC_strength_plots_final, width = 140, height = 224, units = "mm", dpi = 500,bg = "white")
 ```
 
 ### Regions showing significantly greater FC strength in females than males in one or more datasets.
@@ -533,7 +533,7 @@ BNC_plots_final <- plot_grid(
 
 ```{r BNC_plots_final, fig.width = 5.51, fig.height = 8.82} 
 BNC_plots_final
-ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig2.tiff", plot = BNC_plots_final, width = 140, height = 224, units = "mm", dpi = 500,bg = "white")
+#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig2.tiff", plot = BNC_plots_final, width = 140, height = 224, units = "mm", dpi = 500,bg = "white")
 ```
 
 ### Regions showing significantly greater BNC in females than males in more than one dataset.
@@ -791,7 +791,7 @@ WNC_plots_final <- plot_grid(
 
 ```{r WNC_plots_final, fig.width = 5.51, fig.height = 8.82} 
 WNC_plots_final
-ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig3.tiff", plot = WNC_plots_final, width = 140, height = 224, units = "mm", dpi = 500,bg = "white")
+#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig3.tiff", plot = WNC_plots_final, width = 140, height = 224, units = "mm", dpi = 500,bg = "white")
 ```
 
 ### Regions showing significantly greater WNC in males than females in two or more datasets.
@@ -1035,7 +1035,7 @@ neurosynth_plots <- plot_grid(NULL, neurosynth_plots_row1, neurosynth_plots_row2
 neurosynth_plots_final <- plot_grid(NULL, neurosynth_plots, NULL, ncol = 3, rel_widths = c(0.07, 1, 0.07))
 neurosynth_plots_final
 
-ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig4.tiff", plot = neurosynth_plots_final, width = 140, height = 129.2, units = "mm", dpi = 500, bg = "white")
+#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig4.tiff", plot = neurosynth_plots_final, width = 140, height = 129.2, units = "mm", dpi = 500, bg = "white")
 ```
 
  
@@ -1216,7 +1216,7 @@ networkpair_plot_final <- ggdraw(networkpair_plot_final) +
   draw_label("B", x = 0.53, y = 0.364, fontface = "bold", size = 10)
 
 networkpair_plot_final
-ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig5.tiff", plot = networkpair_plot_final, width = 184, height = 198, units = "mm", dpi = 500, bg = "white")
+#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig5.tiff", plot = networkpair_plot_final, width = 184, height = 198, units = "mm", dpi = 500, bg = "white")
 ```
  
  
@@ -1458,7 +1458,7 @@ final_surf_plots <- annotate_figure(final_surf_plots,
 
 final_surf_plots
 
-ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig6.tiff", plot = final_surf_plots, width = 140, height = 96.9, units = "mm", dpi = 500, bg = "white")
+#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig6.tiff", plot = final_surf_plots, width = 140, height = 96.9, units = "mm", dpi = 500, bg = "white")
 ```
 
 # 7. Females exhibit greater differentiation between association networks and lower-order networks along the principal gradient. 
@@ -1549,7 +1549,7 @@ between_plot_final <- ggdraw(between_plot_final) +
 
 between_plot_final
 
-ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig7.tiff", plot = between_plot_final, width = 184, height = 198, units = "mm", dpi = 500, bg = "white")
+#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig7.tiff", plot = between_plot_final, width = 184, height = 198, units = "mm", dpi = 500, bg = "white")
 ```
  
 

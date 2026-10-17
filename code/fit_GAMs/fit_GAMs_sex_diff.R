@@ -160,6 +160,7 @@ names(data) <-  gsub("[A-Z0-9]+Networks", "Networks", names(data)) # remove lead
 # merge
 gam_df <- merge(data, demographics, by = "sub")
 gam_df <- gam_df %>% drop_na(sex) 
+gam_df$sex <- ordered(gam_df$sex, levels = c("Male", "Female"))
 write.table(gam_df$sub, paste0(config_data$covariate_input_root, "/sample_info/final_sex_diff_sample.txt"), col.names=F, row.names=F, quote = TRUE)
 
 # check for sex diff in meanFD_avgSes (average average mean_fd across concatenated sessions)
