@@ -45,4 +45,8 @@ for dataset in "${datasets[@]}"; do
                 echo "Submitted ${dataset} ${metric} ${atlas} (4 CPUs, ${time_limit})"
             else
                 echo "FAILED to submit ${dataset} ${metric} ${atlas}" >&2
-           
+            fi
+
+        done
+    done
+done
