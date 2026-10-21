@@ -315,7 +315,7 @@ netpair_traj_final <- assemble_traj(netpair_traj_plots, ncol = 5, y_label = "Net
                                     legend_height = 0.12)
 netpair_traj_final
 
-#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/supplement/figS3_netpair_agebysex.tiff", plot = netpair_traj_final, width = 184, height = 132, units = "mm", dpi = 500, bg = "white")
+ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/supplement/figS3_netpair_agebysex.tiff", plot = netpair_traj_final, width = 184, height = 132, units = "mm", dpi = 500, bg = "white")
 ```
 
 # Fig. S4. The principal gradient of functional connectivity in females and males. 

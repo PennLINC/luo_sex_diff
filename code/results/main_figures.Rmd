@@ -192,10 +192,10 @@ FC_strength_plots <- annotate_figure(
 ```{r make FC_strength overlapping effects plot with resi}
 # overlap plots
 df_list_FC_strength <- list(
-  PNC  = sex.main.PNC.FC_strength[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_PNC = Anova.cov.pvalue.fdr),
-  HCPD = sex.main.HCPD.FC_strength[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HCPD = Anova.cov.pvalue.fdr),
-  NKI  = sex.main.NKI.FC_strength[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_NKI = Anova.cov.pvalue.fdr),
-  HBN  = sex.main.HBN.FC_strength[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HBN = Anova.cov.pvalue.fdr)
+  PNC  = sex.main.PNC.FC_strength[, c("region", "cov.pvalue.fdr")] |> rename(p_PNC = cov.pvalue.fdr),
+  HCPD = sex.main.HCPD.FC_strength[, c("region", "cov.pvalue.fdr")] |> rename(p_HCPD = cov.pvalue.fdr),
+  NKI  = sex.main.NKI.FC_strength[,  c("region", "cov.pvalue.fdr")] |> rename(p_NKI = cov.pvalue.fdr),
+  HBN  = sex.main.HBN.FC_strength[,  c("region", "cov.pvalue.fdr")] |> rename(p_HBN = cov.pvalue.fdr)
 )
 
 sex.main.overlap.FC_strength <- Reduce(function(x, y) full_join(x, y, by = "region"), df_list_FC_strength)
@@ -281,10 +281,10 @@ FC_strength_plots_final
 ### Regions showing significantly greater FC strength in females than males in one or more datasets.
 ```{r check-FC_strength-female-greater, echo=FALSE, message=FALSE, warning=FALSE}
 df_list_FC_strength <- list(
-  PNC  = sex.main.PNC.FC_strength[, c("region", "Anova.cov.pvalue.fdr", "RESI")] |> rename(p_PNC = Anova.cov.pvalue.fdr, RESI_PNC = RESI),
-  HCPD = sex.main.HCPD.FC_strength[, c("region", "Anova.cov.pvalue.fdr", "RESI")] |> rename(p_HCPD = Anova.cov.pvalue.fdr, RESI_HCPD = RESI),
-  NKI  = sex.main.NKI.FC_strength[, c("region", "Anova.cov.pvalue.fdr", "RESI")] |> rename(p_NKI = Anova.cov.pvalue.fdr, RESI_NKI = RESI),
-  HBN  = sex.main.HBN.FC_strength[, c("region", "Anova.cov.pvalue.fdr", "RESI")] |> rename(p_HBN = Anova.cov.pvalue.fdr, RESI_HBN = RESI)
+  PNC  = sex.main.PNC.FC_strength[, c("region", "cov.pvalue.fdr", "RESI")] |> rename(p_PNC = cov.pvalue.fdr, RESI_PNC = RESI),
+  HCPD = sex.main.HCPD.FC_strength[, c("region", "cov.pvalue.fdr", "RESI")] |> rename(p_HCPD = cov.pvalue.fdr, RESI_HCPD = RESI),
+  NKI  = sex.main.NKI.FC_strength[, c("region", "cov.pvalue.fdr", "RESI")] |> rename(p_NKI = cov.pvalue.fdr, RESI_NKI = RESI),
+  HBN  = sex.main.HBN.FC_strength[, c("region", "cov.pvalue.fdr", "RESI")] |> rename(p_HBN = cov.pvalue.fdr, RESI_HBN = RESI)
 )
 
 sex.main.overlap.FC_strength <- Reduce(function(x, y) full_join(x, y, by = "region"), df_list_FC_strength) %>%
@@ -449,10 +449,10 @@ BNC_plots <- annotate_figure(
 ```{r make BNC overlapping effects plot with resi}
 # overlap plots
 df_list_BNC <- list(
-  PNC  = sex.main.PNC.BNC[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_PNC = Anova.cov.pvalue.fdr),
-  HCPD = sex.main.HCPD.BNC[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HCPD = Anova.cov.pvalue.fdr),
-  NKI  = sex.main.NKI.BNC[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_NKI = Anova.cov.pvalue.fdr),
-  HBN  = sex.main.HBN.BNC[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HBN = Anova.cov.pvalue.fdr)
+  PNC  = sex.main.PNC.BNC[, c("region", "cov.pvalue.fdr")] |> rename(p_PNC = cov.pvalue.fdr),
+  HCPD = sex.main.HCPD.BNC[, c("region", "cov.pvalue.fdr")] |> rename(p_HCPD = cov.pvalue.fdr),
+  NKI  = sex.main.NKI.BNC[,  c("region", "cov.pvalue.fdr")] |> rename(p_NKI = cov.pvalue.fdr),
+  HBN  = sex.main.HBN.BNC[,  c("region", "cov.pvalue.fdr")] |> rename(p_HBN = cov.pvalue.fdr)
 )
 
 sex.main.overlap.BNC <- Reduce(function(x, y) full_join(x, y, by = "region"), df_list_BNC)
@@ -539,10 +539,10 @@ BNC_plots_final
 ### Regions showing significantly greater BNC in females than males in more than one dataset.
 ```{r check-BNC-female-greater, echo=FALSE, message=FALSE, warning=FALSE}
 df_list_BNC <- list(
-  PNC  = sex.main.PNC.BNC[, c("region", "Anova.cov.pvalue.fdr", "RESI")] |> rename(p_PNC = Anova.cov.pvalue.fdr, RESI_PNC = RESI),
-  HCPD = sex.main.HCPD.BNC[, c("region", "Anova.cov.pvalue.fdr", "RESI")] |> rename(p_HCPD = Anova.cov.pvalue.fdr, RESI_HCPD = RESI),
-  NKI  = sex.main.NKI.BNC[, c("region", "Anova.cov.pvalue.fdr", "RESI")] |> rename(p_NKI = Anova.cov.pvalue.fdr, RESI_NKI = RESI),
-  HBN  = sex.main.HBN.BNC[, c("region", "Anova.cov.pvalue.fdr", "RESI")] |> rename(p_HBN = Anova.cov.pvalue.fdr, RESI_HBN = RESI)
+  PNC  = sex.main.PNC.BNC[, c("region", "cov.pvalue.fdr", "RESI")] |> rename(p_PNC = cov.pvalue.fdr, RESI_PNC = RESI),
+  HCPD = sex.main.HCPD.BNC[, c("region", "cov.pvalue.fdr", "RESI")] |> rename(p_HCPD = cov.pvalue.fdr, RESI_HCPD = RESI),
+  NKI  = sex.main.NKI.BNC[, c("region", "cov.pvalue.fdr", "RESI")] |> rename(p_NKI = cov.pvalue.fdr, RESI_NKI = RESI),
+  HBN  = sex.main.HBN.BNC[, c("region", "cov.pvalue.fdr", "RESI")] |> rename(p_HBN = cov.pvalue.fdr, RESI_HBN = RESI)
 )
 
 sex.main.overlap.BNC <- Reduce(function(x, y) full_join(x, y, by = "region"), df_list_BNC) %>%
@@ -708,10 +708,10 @@ WNC_plots <- annotate_figure(
 ```{r make WNC overlapping effects plot with resi}
 # overlap plots
 df_list_WNC <- list(
-  PNC  = sex.main.PNC.WNC[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_PNC = Anova.cov.pvalue.fdr),
-  HCPD = sex.main.HCPD.WNC[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HCPD = Anova.cov.pvalue.fdr),
-  NKI  = sex.main.NKI.WNC[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_NKI = Anova.cov.pvalue.fdr),
-  HBN  = sex.main.HBN.WNC[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HBN = Anova.cov.pvalue.fdr)
+  PNC  = sex.main.PNC.WNC[, c("region", "cov.pvalue.fdr")] |> rename(p_PNC = cov.pvalue.fdr),
+  HCPD = sex.main.HCPD.WNC[, c("region", "cov.pvalue.fdr")] |> rename(p_HCPD = cov.pvalue.fdr),
+  NKI  = sex.main.NKI.WNC[,  c("region", "cov.pvalue.fdr")] |> rename(p_NKI = cov.pvalue.fdr),
+  HBN  = sex.main.HBN.WNC[,  c("region", "cov.pvalue.fdr")] |> rename(p_HBN = cov.pvalue.fdr)
 )
 
 sex.main.overlap.WNC <- Reduce(function(x, y) full_join(x, y, by = "region"), df_list_WNC)
@@ -797,10 +797,10 @@ WNC_plots_final
 ### Regions showing significantly greater WNC in males than females in two or more datasets.
 ```{r check-WNC-male-greater, echo=FALSE, message=FALSE, warning=FALSE}
 df_list_WNC <- list(
-  PNC  = sex.main.PNC.WNC[, c("region", "Anova.cov.pvalue.fdr", "RESI")] |> rename(p_PNC = Anova.cov.pvalue.fdr, RESI_PNC = RESI),
-  HCPD = sex.main.HCPD.WNC[, c("region", "Anova.cov.pvalue.fdr", "RESI")] |> rename(p_HCPD = Anova.cov.pvalue.fdr, RESI_HCPD = RESI),
-  NKI  = sex.main.NKI.WNC[, c("region", "Anova.cov.pvalue.fdr", "RESI")] |> rename(p_NKI = Anova.cov.pvalue.fdr, RESI_NKI = RESI),
-  HBN  = sex.main.HBN.WNC[, c("region", "Anova.cov.pvalue.fdr", "RESI")] |> rename(p_HBN = Anova.cov.pvalue.fdr, RESI_HBN = RESI)
+  PNC  = sex.main.PNC.WNC[, c("region", "cov.pvalue.fdr", "RESI")] |> rename(p_PNC = cov.pvalue.fdr, RESI_PNC = RESI),
+  HCPD = sex.main.HCPD.WNC[, c("region", "cov.pvalue.fdr", "RESI")] |> rename(p_HCPD = cov.pvalue.fdr, RESI_HCPD = RESI),
+  NKI  = sex.main.NKI.WNC[, c("region", "cov.pvalue.fdr", "RESI")] |> rename(p_NKI = cov.pvalue.fdr, RESI_NKI = RESI),
+  HBN  = sex.main.HBN.WNC[, c("region", "cov.pvalue.fdr", "RESI")] |> rename(p_HBN = cov.pvalue.fdr, RESI_HBN = RESI)
 )
 
 sex.main.overlap.WNC <- Reduce(function(x, y) full_join(x, y, by = "region"), df_list_WNC) %>%
@@ -1131,10 +1131,10 @@ legend_tmp <- get_legend(p)
 
 # overlap of datasets:
 df_list_networkpair <- list(
-  PNC  = sex.main.PNC.networkpair.17[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_PNC = Anova.cov.pvalue.fdr),
-  HCPD = sex.main.HCPD.networkpair.17[, c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HCPD = Anova.cov.pvalue.fdr),
-  NKI  = sex.main.NKI.networkpair.17[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_NKI = Anova.cov.pvalue.fdr),
-  HBN  = sex.main.HBN.networkpair.17[,  c("region", "Anova.cov.pvalue.fdr")] |> rename(p_HBN = Anova.cov.pvalue.fdr)
+  PNC  = sex.main.PNC.networkpair.17[, c("region", "cov.pvalue.fdr")] |> rename(p_PNC = cov.pvalue.fdr),
+  HCPD = sex.main.HCPD.networkpair.17[, c("region", "cov.pvalue.fdr")] |> rename(p_HCPD = cov.pvalue.fdr),
+  NKI  = sex.main.NKI.networkpair.17[,  c("region", "cov.pvalue.fdr")] |> rename(p_NKI = cov.pvalue.fdr),
+  HBN  = sex.main.HBN.networkpair.17[,  c("region", "cov.pvalue.fdr")] |> rename(p_HBN = cov.pvalue.fdr)
 )
 
 sex.main.overlap.networkpair <- Reduce(function(x, y) full_join(x, y, by = "region"), df_list_networkpair)
@@ -1257,19 +1257,19 @@ summarise_dataset <- function(df, dataset_name) {
   female <- sig %>% filter(RESI > 0) %>% arrange(desc(RESI)) %>% mutate(rank = row_number())
   male <- sig %>% filter(RESI < 0) %>% arrange(RESI)
 
-  female_cell <- fmt(female$region[1], female$RESI[1], female$Anova.cov.pvalue.fdr[1])
+  female_cell <- fmt(female$region[1], female$RESI[1], female$cov.pvalue.fdr[1])
   dmnA <- female %>% filter(region == "defaultA_defaultA")
 
   if (female$region[1] != "defaultA_defaultA" && nrow(dmnA) == 1)
     female_cell <- paste0(
       female_cell, "; ", pretty_pair(dmnA$region),
-      sprintf(" (RESI = %.2f, Q<sub>FDR</sub> = %s; rank %d)", dmnA$RESI, fmt_p(dmnA$Anova.cov.pvalue.fdr), dmnA$rank)
+      sprintf(" (RESI = %.2f, Q<sub>FDR</sub> = %s; rank %d)", dmnA$RESI, fmt_p(dmnA$cov.pvalue.fdr), dmnA$rank)
     )
 
   tibble(
     Dataset = dataset_name,
     `Female > Male` = female_cell,
-    `Male > Female` = fmt(male$region[1], male$RESI[1], male$Anova.cov.pvalue.fdr[1])
+    `Male > Female` = fmt(male$region[1], male$RESI[1], male$cov.pvalue.fdr[1])
   )
 }
 
@@ -1301,7 +1301,7 @@ dmnA_partner_table <- imap_dfr(networkpair_list, function(df, dataset_name) {
       Partner = ifelse(net1 == "defaultA", net2, net1),
       cell = ifelse(
         significant_status == "Sig",
-        sprintf("%.2f<br>(Q<sub>FDR</sub> = %s)", RESI, fmt_p(Anova.cov.pvalue.fdr)),
+        sprintf("%.2f<br>(Q<sub>FDR</sub> = %s)", RESI, fmt_p(cov.pvalue.fdr)),
         "n.s."
       )
     )
@@ -1327,8 +1327,8 @@ male_long <- imap_dfr(networkpair_list[c("PNC", "NKI", "HCP-D", "HBN")], functio
   df %>%
     filter(region %in% male_consistent_pairs) %>%
     mutate(Dataset = dataset_name,
-           cell = sprintf("%.2f (Q<sub>FDR</sub> = %s)", RESI, fmt_p(Anova.cov.pvalue.fdr))) %>%
-    select(region, Dataset, RESI, Anova.cov.pvalue.fdr, cell)
+           cell = sprintf("%.2f (Q<sub>FDR</sub> = %s)", RESI, fmt_p(cov.pvalue.fdr))) %>%
+    select(region, Dataset, RESI, cov.pvalue.fdr, cell)
 })
 
 ```

@@ -50,8 +50,8 @@ map_network17 <- function(x) {
 # @param fc_measure, A string for FC measure (i.e. "GBC")
 # @param covariate, A string for covariate of interest (i.e. "sex_diff")
 sig.effects <- function(df, fc_measure, covariate, dataset){
-  df$Anova.cov.pvalue.fdr <- p.adjust(df$GAM.cov.pvalue, method = c("fdr")) 
-  df$significant.fdr <- df$Anova.cov.pvalue.fdr < 0.05
+  df$cov.pvalue.fdr <- p.adjust(df$GAM.cov.pvalue, method = c("fdr")) 
+  df$significant.fdr <- df$cov.pvalue.fdr < 0.05
   df$significant.fdr[df$significant.fdr == TRUE] <- 1
   df$significant.fdr[df$significant.fdr == FALSE] <- 0
   df <- df %>% mutate(significant_status = ifelse(significant.fdr == 1, "Sig", "Nonsig"))
@@ -64,8 +64,8 @@ sig.effects <- function(df, fc_measure, covariate, dataset){
  
 # function for calculating number of significant regions (FDR corrected) - for analysis with pooled datasets
 sig.effects.all_datasets <- function(df, fc_measure, covariate, dataset, pvalue_colname, effect_colname){
-  df$Anova.int.pvalue.fdr <- p.adjust(df[[pvalue_colname]], method = c("fdr")) 
-  df$significant.fdr <- df$Anova.int.pvalue.fdr < 0.05
+  df$int.pvalue.fdr <- p.adjust(df[[pvalue_colname]], method = c("fdr")) 
+  df$significant.fdr <- df$int.pvalue.fdr < 0.05
   df$significant.fdr[df$significant.fdr == TRUE] <- 1
   df$significant.fdr[df$significant.fdr == FALSE] <- 0
   df <- df %>% mutate(significant_status = ifelse(significant.fdr == 1, "Sig", "Nonsig"))
@@ -275,9 +275,9 @@ make_networkpair17_plot <- function(df, dataset, ylim1, ylim2, fontsize, fontsiz
   ggplot(dfp, aes(x = x, y = y, fill = get(measure))) +
     geom_tile() +
     geom_text(aes(label = dplyr::case_when(
-      Anova.cov.pvalue.fdr < 1e-4 ~ "***",
-      Anova.cov.pvalue.fdr < 1e-3 ~ "**",
-      Anova.cov.pvalue.fdr < 0.05 ~ "*",
+      cov.pvalue.fdr < 1e-4 ~ "***",
+      cov.pvalue.fdr < 1e-3 ~ "**",
+      cov.pvalue.fdr < 0.05 ~ "*",
       TRUE ~ ""
     )), colour = "black", size = fontsize_label, nudge_y = -0.2) +
     scale_x_discrete(limits = net_levels, drop = FALSE) +
@@ -485,10 +485,10 @@ identify_sexeffect_overlap <- function(metric = c("WNC", "BNC"), p_thresh = 0.05
   
   # pvalues
   df_list_p <- list(
-    PNC  = pnc  |> dplyr::select(region, p_PNC  = Anova.cov.pvalue.fdr),
-    HCPD = hcpd |> dplyr::select(region, p_HCPD = Anova.cov.pvalue.fdr),
-    NKI  = nki  |> dplyr::select(region, p_NKI  = Anova.cov.pvalue.fdr),
-    HBN  = hbn  |> dplyr::select(region, p_HBN  = Anova.cov.pvalue.fdr)
+    PNC  = pnc  |> dplyr::select(region, p_PNC  = cov.pvalue.fdr),
+    HCPD = hcpd |> dplyr::select(region, p_HCPD = cov.pvalue.fdr),
+    NKI  = nki  |> dplyr::select(region, p_NKI  = cov.pvalue.fdr),
+    HBN  = hbn  |> dplyr::select(region, p_HBN  = cov.pvalue.fdr)
   )
   
   # RESI
