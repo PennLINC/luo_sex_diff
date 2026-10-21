@@ -1,15 +1,27 @@
 #!/usr/bin/env bash
+# Create directory structure needed for sex-differences project.
 
-# Create directory structure needed for sex-differences replication.
+set -euo pipefail  # stop on the first error
 
-ROOT="~/parcc/network_replication/covariate_analyses/sex_diff"
+ROOT="$HOME/parcc/network_replication/covariate_analyses/sex_diff"
 
-mkdir -p \
-    "$ROOT/input/PNC/sample_info" \
-    "$ROOT/input/HCPD/sample_info" \
-    "$ROOT/input/NKI/sample_info" \
-    "$ROOT/input/HBN/sample_info" \
-    "$ROOT/input/all_datasets/sample_info" \
+dirs=(
+    "$ROOT/input/PNC/sample_info"
+    "$ROOT/input/HCPD/sample_info"
+    "$ROOT/input/NKI/sample_info"
+    "$ROOT/input/HBN/sample_info"
+    "$ROOT/input/all_datasets/sample_info"
     "$ROOT/output"
+)
 
-echo "Folder setup complete."
+mkdir -p "${dirs[@]}"
+
+# confirm every folder exists before reporting success
+for d in "${dirs[@]}"; do
+    if [ ! -d "$d" ]; then
+        echo "ERROR: failed to create $d" >&2
+        exit 1
+    fi
+done
+
+echo "Folder setup complete under $ROOT"
