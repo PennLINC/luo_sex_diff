@@ -52,6 +52,7 @@ Sex differences in human functional connectivity remain debated, and it is uncle
 # III. Code Documentation
 
 ***Overview of Workflow***
+
 | **Step** | **Task** | **Notes** |
 | --- | --- | --- |
 | 0 | [Install required software and packages](#0-install-required-software-and-packages) | |
