@@ -1,4 +1,3 @@
-# Hierarchical Sex Differences: Reproducibility Guide 
 
 # I. Project Information
 
