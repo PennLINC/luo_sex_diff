@@ -286,7 +286,7 @@ compute_mean_networkpair <- function(
     mat,
     map_network,
     net_order    = NULL,
-    exclude_diag = FALSE,   # NOTE: default changed to match collapse_to_network()
+    exclude_diag = TRUE,  
     na_rm        = TRUE
 ) {
   stopifnot(is.matrix(mat),
@@ -402,7 +402,7 @@ wrapper_compute_mean_networkpair <- function(subject, atlas) {
   mean_network_conn <- compute_mean_networkpair(
     connect.matrix,
     map_network   = map_network,
-    exclude_diag  = FALSE,  # match collapse_to_network default
+    exclude_diag  = TRUE,  
     na_rm         = TRUE
   )
   

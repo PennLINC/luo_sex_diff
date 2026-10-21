@@ -10,6 +10,7 @@ r_script="$PROJDIR/code/compute_effect_size/resi_sex_diff.R"
 
 datasets=("PNC" "HCPD" "HBN" "NKI" "all_datasets")
 metrics=("FC_strength" "WNC" "BNC" "edge" "networkpair")
+metrics=("networkpair")
 atlases=("schaefer200x17")
 
 # Loop through each dataset, atlas, and metric

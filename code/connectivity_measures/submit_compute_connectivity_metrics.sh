@@ -10,7 +10,6 @@ datasets=("PNC" "HCPD" "HBN" "NKI")
 atlases=("schaefer200x17")
 metrics=("FC_strength" "BNC" "WNC" "edge" "networkpair")
 
-
 for dataset in "${datasets[@]}"; do
     for atlas in "${atlases[@]}"; do
         for metric in "${metrics[@]}"; do
