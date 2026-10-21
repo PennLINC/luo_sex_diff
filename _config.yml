@@ -1,0 +1,10 @@
+title: Hierarchical Sex Differences
+author: "Audrey C. Luo"
+theme: minima
+plugins:
+  - jekyll-seo-tag
+
+url: "https://pennlinc.github.io"
+baseurl: "/luo_sex_diff"
+header_pages:
+  - about.md
