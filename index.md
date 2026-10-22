@@ -16,7 +16,7 @@ Sex differences in human functional connectivity remain debated, and it is uncle
 | **Project Lead** | Audrey C. Luo |
 | **Faculty Lead** | Theodore D. Satterthwaite |
 | **Analytic Replicator** | Meike Hettwer |
-| **Collaborators** | Audrey Luo, Meike Hettwer, Aaron Alexander-Bloch, Joëlle Bagautdinova, Deanna Barch, Andrew Chen, Matthew Cieslak, Elizabeth Flook, Alexandre Franco, Raquel Gur, Ruben Gur, Gregory Kiar, Michael Milham, Laura Pritschet, Armin Raznahan, Taylor Salo, Giovanni Salum, Golia Shafiei, Russell Shinohara, Leah Somerville, Valerie Sydnor, Simon Vandekar, Xinyu Zhang, Sheila Shanmugan*, Theodore Satterthwaite* |
+| **Collaborators** | Audrey Luo, Meike Hettwer, Aaron Alexander-Bloch, Joëlle Bagautdinova, Deanna Barch, Andrew Chen, Matthew Cieslak, Elizabeth Flook, Alexandre Franco, Raquel Gur, Ruben Gur, Arielle Keller, Gregory Kiar, Michael Milham, Laura Pritschet, Armin Raznahan, Taylor Salo, Giovanni Salum, Golia Shafiei, Russell Shinohara, Leah Somerville, Valerie Sydnor, Simon Vandekar, Xinyu Zhang, Sheila Shanmugan*, Theodore Satterthwaite* |
 
 **Project Timeline**
 
