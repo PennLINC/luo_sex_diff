@@ -7,7 +7,7 @@ title: Reproducibility Guide
 
 **Abstract**
 
-Sex differences in human functional connectivity remain debated, and it is unclear whether reported differences follow a common organizing principle across the cortex. Here, we tested whether these differences align with the sensorimotor-association (S-A) axis, which spans unimodal sensorimotor to transmodal association cortices. We examined four large-scale, independent datasets of youth ages 5-23 years (total *N* = 3,355). Across datasets, males showed greater connectivity across the cortex, particularly between functional networks, whereas females showed greater connectivity within networks, most prominently within default mode subnetwork A. More broadly, the sensorimotor and association ends of the S-A axis were more segregated in females and more integrated in males. This difference extended to macroscale cortical organization: the cortical hierarchy was more expanded in females than in males along the principal gradient of functional connectivity. These replicable and generalizable results establish that sex differences in functional connectivity are organized along the cortical hierarchy.
+It remains unknown if sex differences in human functional connectivity follow a generalizable overarching principle. Here, we tested whether sex differences in functional connectivity during childhood and adolescence are organized along the sensorimotor-association (S-A) axis, a cortical hierarchy spanning unimodal sensorimotor to transmodal association cortex. We analyzed four large-scale, independent datasets of youth ages 5-23 years (total N = 3,355). Across datasets, males showed greater connectivity between functional networks, whereas females showed greater connectivity within networks, most prominently within default mode subnetwork A. More broadly, the sensorimotor and association ends of the S-A axis were more segregated in females and more integrated in males. This difference extended to macroscale cortical organization: the cortical hierarchy was expanded in females relative to males along the principal gradient of functional connectivity. Together, these findings identify the S-A axis as a generalizable organizing principle of sex differences in functional brain organization during youth.
 
 **Team**
 
@@ -16,7 +16,7 @@ Sex differences in human functional connectivity remain debated, and it is uncle
 | **Project Lead** | Audrey C. Luo |
 | **Faculty Lead** | Theodore D. Satterthwaite |
 | **Analytic Replicator** | Meike Hettwer |
-| **Collaborators** | Audrey Luo, Meike Hettwer, Aaron Alexander-Bloch, Joëlle Bagautdinova, Deanna Barch, Andrew Chen, Matthew Cieslak, Elizabeth Flook, Alexandre Franco, Raquel Gur, Ruben Gur, Arielle Keller, Gregory Kiar, Michael Milham, Laura Pritschet, Armin Raznahan, Taylor Salo, Giovanni Salum, Golia Shafiei, Russell Shinohara, Leah Somerville, Valerie Sydnor, Simon Vandekar, Xinyu Zhang, Sheila Shanmugan*, Theodore Satterthwaite* |
+| **Collaborators** | Audrey C. Luo, Meike D. Hettwer, Aaron F. Alexander-Bloch, Joëlle Bagautdinova, Deanna M. Barch, Matthew Cieslak, Elizabeth A. Flook, Alexandre R. Franco, Raquel E. Gur, Ruben C. Gur, Arielle S. Keller, Gregory Kiar, Michael P. Milham, Laura Pritschet, Armin Raznahan, Taylor Salo, Giovanni A. Salum, Golia Shafiei, Russell T. Shinohara, Leah H. Somerville, Valerie J. Sydnor, Simon N. Vandekar, Xinyu Zhang, Sheila Shanmugan, Theodore D. Satterthwaite |
 
 **Project Timeline**
 
