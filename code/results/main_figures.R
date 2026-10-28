@@ -47,7 +47,7 @@ map_network17 <- function(x) {
  
 # function for calculating number of significant regions (FDR corrected)
 # @param df A dataframe with GAM results
-# @param fc_measure, A string for FC measure (i.e. "GBC")
+# @param fc_measure, A string for FC measure (i.e. "FC_strength")
 # @param covariate, A string for covariate of interest (i.e. "sex_diff")
 sig.effects <- function(df, fc_measure, covariate, dataset){
   df$cov.pvalue.fdr <- p.adjust(df$GAM.cov.pvalue, method = c("fdr")) 
