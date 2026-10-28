@@ -446,7 +446,7 @@ bash submit_spin_test_SA_edges.sh
 
 ### 11. Visualize results!
 - Main figures: `~/code/results/main_figures.Rmd`
-    - This Rmd uses functions from `~/code/results/main_figures_functions.R`
+    - This Rmd uses functions from `~/code/results/main_figures.R`
 - Supp figures: `~/code/results/supp_figures.Rmd`
-    - This Rmd uses functions from `~/code/results/supp_figures_functions.R`
+    - This Rmd uses functions from `~/code/results/supp_figures.R`
  
