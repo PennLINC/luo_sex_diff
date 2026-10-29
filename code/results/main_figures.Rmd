@@ -277,6 +277,10 @@ FC_strength_plots_final <- plot_grid(
 FC_strength_plots_final
 #ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig1.tiff", plot = FC_strength_plots_final, width = 140, height = 224, units = "mm", dpi = 500,bg = "white")
 ```
+### FC_strength count
+```{r FC_strength count}
+count_replication("FC_strength", "male")
+```
 
 ### Regions showing significantly greater FC strength in females than males in one or more datasets.
 ```{r check-FC_strength-female-greater, echo=FALSE, message=FALSE, warning=FALSE}
@@ -534,6 +538,11 @@ BNC_plots_final <- plot_grid(
 ```{r BNC_plots_final, fig.width = 5.51, fig.height = 8.82} 
 BNC_plots_final
 #ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig2.tiff", plot = BNC_plots_final, width = 140, height = 224, units = "mm", dpi = 500,bg = "white")
+```
+
+### BNC count
+```{r BNC count}
+count_replication("BNC", "male")
 ```
 
 ### Regions showing significantly greater BNC in females than males in more than one dataset.
@@ -794,6 +803,10 @@ WNC_plots_final
 #ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig3.tiff", plot = WNC_plots_final, width = 140, height = 224, units = "mm", dpi = 500,bg = "white")
 ```
 
+### WNC count
+```{r WNC count}
+count_replication("WNC", "female")
+```
 ### Regions showing significantly greater WNC in males than females in two or more datasets.
 ```{r check-WNC-male-greater, echo=FALSE, message=FALSE, warning=FALSE}
 df_list_WNC <- list(

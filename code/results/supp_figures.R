@@ -259,7 +259,6 @@ plot_pc1_dataset <- function(dataset, title, horizontal = FALSE) {
 ################
 # Supp Fig. 6
 ################
-
 plot_global_dispersion <- function(dataset, title) {
   
   outputs_root <- sprintf("%s/%s/gradient_dispersion", output_root, dataset)
@@ -272,13 +271,12 @@ plot_global_dispersion <- function(dataset, title) {
   gam_df$sex <- factor(gam_df$sex, levels = c("Female", "Male"))
   
   p_val <- global_result$p
-  p_lab <- case_when(
-    p_val < 0.0001 ~ " < 0.0001",
-    p_val < 0.001  ~ " < 0.001",
-    p_val < 0.01   ~ " < 0.01",
-    p_val < 0.05   ~ " < 0.05",
-    TRUE           ~ " > 0.05"
-  )
+  p_lab <- if (p_val < 0.0001) {
+    " < 0.0001"
+  } else {
+    paste0(" = ", format(signif(p_val, 2), scientific = FALSE))
+  }
+  message(sprintf("%s: RESI = %.3f, p = %.3g", dataset, global_result$RESI_Xinyu, p_val))  # exact values for the text
   resi_lab <- sprintf("%.2f", global_result$RESI_Xinyu)
   subtitle_expr <- bquote("RESI = " * .(resi_lab) * ", " * italic(p) * .(p_lab))
   

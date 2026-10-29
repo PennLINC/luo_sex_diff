@@ -163,6 +163,27 @@ plot_cortex_overlap <- function(df, hemi, atlas, horizontal_layout = NULL) {
   
 }
  
+# count regions with significant, direction-specific sex effects in >= k datasets
+count_replication <- function(measure, direction = c("male", "female"), n_regions = 200) {
+  direction <- match.arg(direction)
+  ds <- c("PNC", "HCPD", "NKI", "HBN")
+  
+  sig_mat <- sapply(ds, function(d) {
+    df <- get(sprintf("sex.main.%s.%s", d, measure))
+    df <- df[order(df$region), ]                      # align rows across datasets
+    sig <- df$cov.pvalue.fdr < 0.05
+    if (direction == "male") sig & df$RESI < 0 else sig & df$RESI > 0
+  })
+  
+  n_sig <- rowSums(sig_mat, na.rm = TRUE)
+  tibble(
+    measure   = measure,
+    direction = direction,
+    k         = c("2+", "3+", "4"),
+    n         = c(sum(n_sig >= 2), sum(n_sig >= 3), sum(n_sig == 4)),
+    pct       = round(100 * n / n_regions, 2)
+  )
+}
 
 
 # make df for plotting: need to switch network 1 and 2 ordering for salience-dorsalattn and limbic-dorsal for visualization purposes
