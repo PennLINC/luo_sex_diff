@@ -219,7 +219,7 @@ prep_networkpair_df <- function(df, fc_measure, covariate, dataset) {
 
 
 # make network pair plot 
-make_networkpair17_plot <- function(df, dataset, ylim1, ylim2, fontsize, fontsize_label, measure) {
+make_networkpair17_plot <- function(df, dataset, ylim1, ylim2, fontsize, fontsize_label, measure, highlight_pairs = NULL) {
   
   if (dataset == "All Datasets") {
     # pretty labels
@@ -282,19 +282,27 @@ make_networkpair17_plot <- function(df, dataset, ylim1, ylim2, fontsize, fontsiz
     dplyr::mutate(
       n1_index = match(network1_label, net_levels),
       n2_index = match(network2_label, net_levels),
-      # flip orientation so the filled cells appear bottom-right of diagonal
       plot_x = ifelse(n1_index < n2_index, network2_label, network1_label),
       plot_y = ifelse(n1_index < n2_index, network1_label, network2_label)
     ) |>
     dplyr::ungroup() |>
     dplyr::mutate(
       x = factor(plot_x, levels = net_levels),
-      y = factor(plot_y, levels = net_levels)
+      y = factor(plot_y, levels = net_levels),
+      pair_key = paste(pmin(network1, network2), pmax(network1, network2), sep = "__")
     )
+  
+  # outline pairs significant in all four datasets (individual datasets only)
+  outline_layer <- NULL
+  if (!is.null(highlight_pairs) && dataset != "All Datasets") {
+    outline_layer <- geom_tile(data = dplyr::filter(dfp, pair_key %in% highlight_pairs),
+                               fill = NA, colour = "black", linewidth = 0.4)
+  }
   
   # ---- plot ----
   ggplot(dfp, aes(x = x, y = y, fill = get(measure))) +
     geom_tile() +
+    outline_layer +
     geom_text(aes(label = dplyr::case_when(
       cov.pvalue.fdr < 1e-4 ~ "***",
       cov.pvalue.fdr < 1e-3 ~ "**",

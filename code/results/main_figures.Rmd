@@ -113,25 +113,25 @@ sex.main.all_datasets.FC_strength <- merge(sex.main.all_datasets.FC_strength, re
 ```
 
 ```{r make FC_strength plots across datasets with resi, message = FALSE, warning = FALSE, fig.width = 5, fig.height = 6}
-sex.main.PNC.FC_strength_lh_resi <- plot_cortex(sex.main.PNC.FC_strength, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
-sex.main.PNC.FC_strength_rh_resi <- plot_cortex(sex.main.PNC.FC_strength, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
+sex.main.PNC.FC_strength_lh_resi <- plot_cortex(sex.main.PNC.FC_strength, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.PNC.FC_strength_rh_resi <- plot_cortex(sex.main.PNC.FC_strength, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200") 
 
-sex.main.HCPD.FC_strength_lh_resi <- plot_cortex(sex.main.HCPD.FC_strength, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
-sex.main.HCPD.FC_strength_rh_resi <- plot_cortex(sex.main.HCPD.FC_strength, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
+sex.main.HCPD.FC_strength_lh_resi <- plot_cortex(sex.main.HCPD.FC_strength, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.HCPD.FC_strength_rh_resi <- plot_cortex(sex.main.HCPD.FC_strength, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200") 
 
-sex.main.NKI.FC_strength_lh_resi <- plot_cortex(sex.main.NKI.FC_strength, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
-sex.main.NKI.FC_strength_rh_resi <- plot_cortex(sex.main.NKI.FC_strength, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
+sex.main.NKI.FC_strength_lh_resi <- plot_cortex(sex.main.NKI.FC_strength, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.NKI.FC_strength_rh_resi <- plot_cortex(sex.main.NKI.FC_strength, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200") 
 
-sex.main.HBN.FC_strength_lh_resi <- plot_cortex(sex.main.HBN.FC_strength, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
-sex.main.HBN.FC_strength_rh_resi <- plot_cortex(sex.main.HBN.FC_strength, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
+sex.main.HBN.FC_strength_lh_resi <- plot_cortex(sex.main.HBN.FC_strength, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.HBN.FC_strength_rh_resi <- plot_cortex(sex.main.HBN.FC_strength, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200") 
  
-sex.main.all_datasets.FC_strength_lh_resi <- plot_cortex(sex.main.all_datasets.FC_strength, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200", horizontal_layout = TRUE) 
-sex.main.all_datasets.FC_strength_rh_resi <- plot_cortex(sex.main.all_datasets.FC_strength, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200", horizontal_layout = TRUE) 
+sex.main.all_datasets.FC_strength_lh_resi <- plot_cortex(sex.main.all_datasets.FC_strength, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200", horizontal_layout = TRUE) 
+sex.main.all_datasets.FC_strength_rh_resi <- plot_cortex(sex.main.all_datasets.FC_strength, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200", horizontal_layout = TRUE) 
 
   
 # legend
 ylim1 = -0.26
-ylim2 = 0.1
+ylim2 = 0.26
 p <- ggplot() + 
   geom_brain(data = sex.main.HBN.FC_strength, atlas = schaefer17_200, mapping = aes(fill = RESI), show.legend = TRUE) +
   scale_fill_gradientn(colours = red_teal_white(256), values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
@@ -275,7 +275,7 @@ FC_strength_plots_final <- plot_grid(
 
 ```{r FC_strength_plots_final, fig.width = 5.51, fig.height = 8.82} 
 FC_strength_plots_final
-#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig1.tiff", plot = FC_strength_plots_final, width = 140, height = 224, units = "mm", dpi = 500,bg = "white", compression = "lzw")
+#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig1.tiff", plot = FC_strength_plots_final, width = 140, height = 224, units = "mm", dpi = 500,bg = "white" , compression = "lzw")
 ```
 ### FC_strength count
 ```{r FC_strength count}
@@ -375,25 +375,25 @@ sex.main.all_datasets.BNC <- merge(sex.main.all_datasets.BNC, resi.all_datasets.
 ```
 
 ```{r make BNC plots across datasets with resi, message = FALSE, warning = FALSE, fig.width = 5, fig.height = 6}
-sex.main.PNC.BNC_lh_resi <- plot_cortex(sex.main.PNC.BNC, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
-sex.main.PNC.BNC_rh_resi <- plot_cortex(sex.main.PNC.BNC, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
+sex.main.PNC.BNC_lh_resi <- plot_cortex(sex.main.PNC.BNC, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.PNC.BNC_rh_resi <- plot_cortex(sex.main.PNC.BNC, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200") 
 
-sex.main.HCPD.BNC_lh_resi <- plot_cortex(sex.main.HCPD.BNC, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
-sex.main.HCPD.BNC_rh_resi <- plot_cortex(sex.main.HCPD.BNC, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
+sex.main.HCPD.BNC_lh_resi <- plot_cortex(sex.main.HCPD.BNC, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.HCPD.BNC_rh_resi <- plot_cortex(sex.main.HCPD.BNC, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200") 
 
-sex.main.NKI.BNC_lh_resi <- plot_cortex(sex.main.NKI.BNC, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
-sex.main.NKI.BNC_rh_resi <- plot_cortex(sex.main.NKI.BNC, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
+sex.main.NKI.BNC_lh_resi <- plot_cortex(sex.main.NKI.BNC, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.NKI.BNC_rh_resi <- plot_cortex(sex.main.NKI.BNC, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200") 
 
-sex.main.HBN.BNC_lh_resi <- plot_cortex(sex.main.HBN.BNC, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
-sex.main.HBN.BNC_rh_resi <- plot_cortex(sex.main.HBN.BNC, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200") 
+sex.main.HBN.BNC_lh_resi <- plot_cortex(sex.main.HBN.BNC, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200") 
+sex.main.HBN.BNC_rh_resi <- plot_cortex(sex.main.HBN.BNC, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200") 
  
-sex.main.all_datasets.BNC_lh_resi <- plot_cortex(sex.main.all_datasets.BNC, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200", horizontal_layout = TRUE) 
-sex.main.all_datasets.BNC_rh_resi <- plot_cortex(sex.main.all_datasets.BNC, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.1, atlas = "schaefer17_200", horizontal_layout = TRUE) 
+sex.main.all_datasets.BNC_lh_resi <- plot_cortex(sex.main.all_datasets.BNC, hemi = "left", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200", horizontal_layout = TRUE) 
+sex.main.all_datasets.BNC_rh_resi <- plot_cortex(sex.main.all_datasets.BNC, hemi = "right", measure = "RESI", ylim1 = -0.26, ylim2 = 0.26, atlas = "schaefer17_200", horizontal_layout = TRUE) 
 
   
 # legend
 ylim1 = -0.26
-ylim2 = 0.1
+ylim2 = 0.26
 p <- ggplot() + 
   geom_brain(data = sex.main.HBN.BNC, atlas = schaefer17_200, mapping = aes(fill = RESI), show.legend = TRUE) +
   scale_fill_gradientn(colours = red_teal_white(256), values = scales::rescale(c(ylim1, 0, ylim2)), limits = c(ylim1, ylim2), oob = squish, na.value = "white") + 
@@ -537,7 +537,7 @@ BNC_plots_final <- plot_grid(
 
 ```{r BNC_plots_final, fig.width = 5.51, fig.height = 8.82} 
 BNC_plots_final
-#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig2.tiff", plot = BNC_plots_final, width = 140, height = 224, units = "mm", dpi = 500,bg = "white", compression = "lzw")
+#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig2.tiff", plot = BNC_plots_final, width = 140, height = 224, units = "mm", dpi = 500,bg = "white" , compression = "lzw")
 ```
 
 ### BNC count
@@ -800,7 +800,7 @@ WNC_plots_final <- plot_grid(
 
 ```{r WNC_plots_final, fig.width = 5.51, fig.height = 8.82} 
 WNC_plots_final
-#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig3.tiff", plot = WNC_plots_final, width = 140, height = 224, units = "mm", dpi = 500,bg = "white", compression = "lzw")
+#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig3.tiff", plot = WNC_plots_final, width = 140, height = 224, units = "mm", dpi = 500,bg = "white" , compression = "lzw")
 ```
 
 ### WNC count
@@ -845,7 +845,6 @@ male_greater_WNC %>%
   column_spec(2, width = "8em", bold = TRUE) %>%
   row_spec(0, bold = TRUE) 
 ```
-
  
 # 4. Sex differences in network-level connectivity
 
@@ -892,18 +891,32 @@ sex.main.all_datasets.networkpair.17 <- merge(sex.main.all_datasets.networkpair.
  
  
 ```{r plot networkpair sex for 17 networks with resi}
+# identify replicated network pairs 
+pair_key <- function(n1, n2) paste(pmin(n1, n2), pmax(n1, n2), sep = "__")
+
+rep4_pairs <- lapply(c("PNC", "NKI", "HCPD", "HBN"), function(d) {
+  get(sprintf("sex.main.%s.networkpair.17", d)) |>
+    dplyr::transmute(key = pair_key(network1, network2),
+                     sig = cov.pvalue.fdr < 0.05, sgn = sign(RESI))
+}) |>
+  dplyr::bind_rows() |>
+  dplyr::group_by(key) |>
+  dplyr::summarise(rep4 = all(sig) && dplyr::n_distinct(sgn) == 1, .groups = "drop") |>
+  dplyr::filter(rep4) |>
+  dplyr::pull(key)
+
 # plot each dataset
 networkpair_resi_PNC <- annotate_figure(
-  make_networkpair17_plot(sex.main.PNC.networkpair.17, dataset = "PNC", ylim1 = -0.3, ylim2 = 0.3, fontsize = 7, fontsize_label = 2.6, measure = "RESI"))
+  make_networkpair17_plot(sex.main.PNC.networkpair.17, dataset = "PNC", ylim1 = -0.3, ylim2 = 0.3, fontsize = 7, fontsize_label = 2.6, measure = "RESI", highlight_pairs = rep4_pairs))
  
 networkpair_resi_HCPD <- annotate_figure(
-  make_networkpair17_plot(sex.main.HCPD.networkpair.17, dataset = "HCP-D", ylim1 = -0.3, ylim2 = 0.3, fontsize = 7, fontsize_label = 2.6, measure = "RESI"))
+  make_networkpair17_plot(sex.main.HCPD.networkpair.17, dataset = "HCP-D", ylim1 = -0.3, ylim2 = 0.3, fontsize = 7, fontsize_label = 2.6, measure = "RESI", highlight_pairs = rep4_pairs))
 
 networkpair_resi_NKI <- annotate_figure(
-  make_networkpair17_plot(sex.main.NKI.networkpair.17, dataset = "NKI", ylim1 = -0.3, ylim2 = 0.3, fontsize = 7, fontsize_label = 2.6, measure = "RESI"))
+  make_networkpair17_plot(sex.main.NKI.networkpair.17, dataset = "NKI", ylim1 = -0.3, ylim2 = 0.3, fontsize = 7, fontsize_label = 2.6, measure = "RESI", highlight_pairs = rep4_pairs))
 
 networkpair_resi_HBN <- annotate_figure(
-  make_networkpair17_plot(sex.main.HBN.networkpair.17, dataset = "HBN", ylim1 = -0.3, ylim2 = 0.3, fontsize = 7, fontsize_label = 2.6, measure = "RESI"))
+  make_networkpair17_plot(sex.main.HBN.networkpair.17, dataset = "HBN", ylim1 = -0.3, ylim2 = 0.3, fontsize = 7, fontsize_label = 2.6, measure = "RESI", highlight_pairs = rep4_pairs))
 
 networkpair_resi_all_datasets_plot_tmp <- annotate_figure(
   make_networkpair17_plot(sex.main.all_datasets.networkpair.17, dataset = "Pooled Dataset", ylim1 = -0.3, ylim2 = 0.3, fontsize = 7, fontsize_label = 2.6, measure = "RESI"))
@@ -1024,7 +1037,7 @@ networkpair_plot_final <- ggdraw(networkpair_plot_final) +
   draw_label("B", x = 0.53, y = 0.364, fontface = "bold", size = 10)
 
 networkpair_plot_final
-#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig4.tiff", plot = networkpair_plot_final, width = 184, height = 198, units = "mm", dpi = 500, bg = "white", compression = "lzw")
+#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig4.tiff", plot = networkpair_plot_final, width = 184, height = 198, units = "mm", dpi = 500, bg = "white" , compression = "lzw")
 ```
  
  
@@ -1255,7 +1268,10 @@ legend_formatted <- plot_grid(NULL, legend, ncol = 2, rel_widths = c(0.07, 1))
 # combine plots
 combined_surf_plots <- annotate_figure(ggdraw() +
   draw_plot(all_datasets_surf_plot, x = 0.5, y = 0, width = 0.5, height = 1) +
-  draw_plot(datasets_surf_plots, x = 0, y = 0, width = 0.5, height = 1), 
+  draw_plot(datasets_surf_plots, x = 0, y = 0, width = 0.5, height = 1) +
+  draw_plot_label(label = c("A", "B"),
+                  x = c(0, 0.5), y = c(1, 1), vjust = 1.05,
+                  size = 9, fontface = "bold"),
                                        left = text_grob("Sensorimotor-Association Axis Rank", size = 9, x = 0.5, rot = 90), 
                                        bottom = text_grob("Sensorimotor-Association Axis Rank", size = 9, x = 0.52, y = 0))
 
@@ -1265,7 +1281,7 @@ final_surf_plots <- annotate_figure(final_surf_plots,
 
 final_surf_plots
 
-#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig5.tiff", plot = final_surf_plots, width = 140, height = 96.9, units = "mm", dpi = 500, bg = "white", compression = "lzw")
+#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig5.tiff", plot = final_surf_plots, width = 140, height = 96.9, units = "mm", dpi = 500, bg = "white" , compression = "lzw")
 ```
 
 # 6. Females exhibit greater differentiation between association networks and lower-order networks along the principal gradient. 
@@ -1356,7 +1372,7 @@ between_plot_final <- ggdraw(between_plot_final) +
 
 between_plot_final
 
-#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig6.tiff", plot = between_plot_final, width = 184, height = 198, units = "mm", dpi = 500, bg = "white", compression = "lzw")
+#ggsave("/Users/audluo/Library/CloudStorage/Box-Box/Box_PhD_Land/PennLINC/sex_diff/sex_diff_manuscript/drafts/figures/fig6.tiff", plot = between_plot_final, width = 184, height = 198, units = "mm", dpi = 500, bg = "white" , compression = "lzw")
 ```
  
 
